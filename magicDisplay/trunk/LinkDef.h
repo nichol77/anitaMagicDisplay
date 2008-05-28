@@ -8,5 +8,9 @@
 #pragma link C++ class WaveformGraph+;
 #pragma link C++ class MagicDisplay+;
 
+#pragma link C++ namespace     MagicDisplayOption;
+#pragma link C++ enum          MagicDisplayOption::EMagicDisplayOption;
+#pragma link C++ nestedtypedef MagicDisplayOption::MagicDisplayOption_t;
+
 #endif
 

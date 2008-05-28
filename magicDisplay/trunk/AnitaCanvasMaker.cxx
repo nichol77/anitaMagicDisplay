@@ -25,11 +25,31 @@
 #include "TGraph.h"
 #include "WaveformGraph.h"
 #include "TStyle.h"
+#include "TCanvas.h"
+#include "TAxis.h"
+#include "TH1.h"
+#include "TList.h"
+#include "TObject.h"
 
 
 AnitaCanvasMaker*  AnitaCanvasMaker::fgInstance = 0;
 AnitaGeomTool *fACMGeomTool=0;
 
+
+int phiMap[5][8]={{0,2,4,6,8,10,12,14},
+		  {1,3,5,7,9,11,13,15},
+		  {0,2,4,6,8,10,12,14},
+		  {1,3,5,7,9,11,13,15},
+		  {0,2,4,6,8,10,12,14}};
+		    
+AnitaRing::AnitaRing_t ringMap[5]={AnitaRing::kUpperRing,
+				   AnitaRing::kUpperRing,
+				   AnitaRing::kLowerRing,
+				   AnitaRing::kLowerRing,
+				   AnitaRing::kNadirRing};
+
+
+WaveformGraph *grSeavey[NUM_SEAVEYS][2]={0};
 
 AnitaCanvasMaker::AnitaCanvasMaker()
 {
@@ -38,6 +58,8 @@ AnitaCanvasMaker::AnitaCanvasMaker()
   fSetVoltLimits=1;
   fMinVoltLimit=-60;
   fMaxVoltLimit=60;
+  fMinTimeLimit=0;
+  fMaxTimeLimit=250;
   
 }
 
@@ -57,8 +79,8 @@ AnitaCanvasMaker*  AnitaCanvasMaker::Instance()
 
 
 TPad *AnitaCanvasMaker::getHorizontalCanvas(UsefulAnitaEvent *evPtr,
-					       RawAnitaHeader *hdPtr,
-					       TPad *useCan)
+					    RawAnitaHeader *hdPtr,
+					    TPad *useCan)
 {
 
    //  gStyle->SetTitleH(0.1);
@@ -90,7 +112,60 @@ TPad *AnitaCanvasMaker::getHorizontalCanvas(UsefulAnitaEvent *evPtr,
     plotPad=useCan;
   }
   plotPad->cd();
- 
+  setupPhiPadWithFrames(plotPad);
+
+  for(int ind=0;ind<NUM_SEAVEYS;ind++) {
+    for(int pol=0;pol<2;pol++) {
+      if(grSeavey[ind][pol]) delete grSeavey[ind][pol];
+      grSeavey[ind][pol]=0;
+    }
+  }
+
+  // Upper
+  // 1 3 5 7 9 11 13 15
+  // 2 4 6 8 10 12 14 16
+  // Lower
+  // 1 3 5 7 9 11 13 15
+  // 2 4 6 8 10 12 14 16
+
+  int count=0;
+
+
+  //  std::cout << hdPtr->eventNumber << "\t" << hdPtr->l3TrigPattern << std::endl;
+  for(int column=0;column<8;column++) {
+    for(int row=0;row<5;row++) {
+      plotPad->cd();
+      int phi=phiMap[row][column];
+      sprintf(padName,"phiChanPad%d",count);
+      TPad *paddy1 = (TPad*) plotPad->FindObject(padName);
+      paddy1->SetEditable(kTRUE);
+      deleteTGraphsFromPad(paddy1);
+      paddy1->cd();
+      TGraph *grTemp=evPtr->getGraph(ringMap[row],phi,AnitaPol::kHorizontal);
+      grSeavey[count][1] = new WaveformGraph(grTemp->GetN(),grTemp->GetX(),grTemp->GetY());
+      if(ringMap[row]==AnitaRing::kUpperRing) {
+	if(hdPtr->upperL1TrigPattern & (1<<phi))
+	  grSeavey[count][1]->SetLineColor(kBlue-2);
+	if(hdPtr->upperL2TrigPattern & (1<<phi))
+	  grSeavey[count][1]->SetLineColor(kGreen-2);
+      }
+      else if(ringMap[row]==AnitaRing::kLowerRing) {
+      	if(hdPtr->lowerL1TrigPattern & (1<<phi))
+	  grSeavey[count][1]->SetLineColor(kBlue-2);
+	if(hdPtr->lowerL2TrigPattern & (1<<phi))
+	  grSeavey[count][1]->SetLineColor(kGreen-2);
+      }
+      
+      if(hdPtr->l3TrigPattern & (1<<phi))
+	grSeavey[count][1]->SetLineColor(kRed-3);
+
+      grSeavey[count][1]->Draw("l");
+      delete grTemp;
+      count++;      
+      paddy1->SetEditable(kFALSE);
+    }
+  }
+
   if(!useCan)
     return canHoriz;
   else 
@@ -102,6 +177,7 @@ TPad *AnitaCanvasMaker::getVerticalCanvas(UsefulAnitaEvent *evPtr,
 					  RawAnitaHeader *hdPtr,
 					  TPad *useCan)
 {
+  //  std::cout << "AnitaCanvasMaker::getVerticalCanvas: " << evPtr << "\t" << hdPtr << "\t" << useCan << std::endl;
   //  gStyle->SetTitleH(0.1);
   gStyle->SetOptTitle(0); 
 
@@ -131,36 +207,15 @@ TPad *AnitaCanvasMaker::getVerticalCanvas(UsefulAnitaEvent *evPtr,
     plotPad=useCan;
   }
   plotPad->cd();
-  static WaveformGraph *gr[NUM_SEAVEYS]={0};
+  setupPhiPadWithFrames(plotPad);
 
-  
 
-  //Try 5 rows with, 8 ants
   for(int ind=0;ind<NUM_SEAVEYS;ind++) {
-    if(gr[ind]) delete gr[ind];
+    for(int pol=0;pol<2;pol++) {
+      if(grSeavey[ind][pol]) delete grSeavey[ind][pol];
+      grSeavey[ind][pol]=0;
+    }
   }
- 
-  Double_t left[8]={0.04,0.165,0.28,0.395,0.51,0.625,0.74,0.855};
-  Double_t right[8]={0.165,0.28,0.395,0.51,0.625,0.74,0.855,0.97};
-  Double_t top[5]={0.95,0.77,0.59,0.41,0.23};
-  Double_t bottom[5]={0.77,0.59,0.41,0.23,0.03};
-
-  //Now add some labels around the plot
-  TLatex texy;
-  texy.SetTextSize(0.03); 
-  texy.SetTextAlign(12);  
-  for(int column=0;column<8;column++) {
-    sprintf(textLabel,"Phi %d/%d",1+(2*column),2+(2*column));
-    if(column==7)
-      texy.DrawTextNDC(right[column]-0.1,0.88,textLabel);
-    else
-      texy.DrawTextNDC(right[column]-0.09,0.88,textLabel);
-  }
-  texy.SetTextAlign(21);  
-  texy.SetTextAngle(90);
-  texy.DrawTextNDC(left[0]-0.01,bottom[0],"Upper Ring");
-  texy.DrawTextNDC(left[0]-0.01,bottom[2],"Lower Ring");
-  texy.DrawTextNDC(left[0]-0.01,bottom[4]+0.09,"Nadir Ring");
 
   // Upper
   // 1 3 5 7 9 11 13 15
@@ -171,72 +226,40 @@ TPad *AnitaCanvasMaker::getVerticalCanvas(UsefulAnitaEvent *evPtr,
 
   int count=0;
 
-  int phiMap[5][8]={{0,2,4,6,8,10,12,14},
-		    {1,3,5,7,9,11,13,15},
-		    {0,2,4,6,8,10,12,14},
-		    {1,3,5,7,9,11,13,15},
-		    {0,2,4,6,8,10,12,14}};
-		    
-  AnitaRing::AnitaRing_t ringMap[5]={AnitaRing::kUpperRing,
-				     AnitaRing::kUpperRing,
-				     AnitaRing::kLowerRing,
-				     AnitaRing::kLowerRing,
-				     AnitaRing::kNadirRing};
 
+  //  std::cout << hdPtr->eventNumber << "\t" << hdPtr->l3TrigPattern << std::endl;
   for(int column=0;column<8;column++) {
     for(int row=0;row<5;row++) {
-      canVert->cd();
+      plotPad->cd();
       int phi=phiMap[row][column];
-      sprintf(padName,"chanPad%d",count);
-      TPad *paddy1 = new TPad(padName,padName,left[column],bottom[row],right[column],top[row]);   
-      paddy1->SetTopMargin(0);
-      paddy1->SetBottomMargin(0);
-      paddy1->SetLeftMargin(0);
-      paddy1->SetRightMargin(0);
-      if(column==7)
-	paddy1->SetRightMargin(0.01);
-      if(column==0)
-	paddy1->SetLeftMargin(0.1);
-      if(row==4)
-	paddy1->SetBottomMargin(0.1);
-      paddy1->Draw();
+      sprintf(padName,"phiChanPad%d",count);
+      TPad *paddy1 = (TPad*) plotPad->FindObject(padName);
+      paddy1->SetEditable(kTRUE);
+      deleteTGraphsFromPad(paddy1);
       paddy1->cd();
       TGraph *grTemp=evPtr->getGraph(ringMap[row],phi,AnitaPol::kVertical);
-      gr[count] = new WaveformGraph(grTemp->GetN(),grTemp->GetX(),grTemp->GetY());
+      grSeavey[count][0] = new WaveformGraph(grTemp->GetN(),grTemp->GetX(),grTemp->GetY());
       if(ringMap[row]==AnitaRing::kUpperRing) {
 	if(hdPtr->upperL1TrigPattern & (1<<phi))
-	  gr[count]->SetLineColor(kBlue-2);
+	  grSeavey[count][0]->SetLineColor(kBlue-2);
 	if(hdPtr->upperL2TrigPattern & (1<<phi))
-	  gr[count]->SetLineColor(kGreen-2);
+	  grSeavey[count][0]->SetLineColor(kGreen-2);
       }
       else if(ringMap[row]==AnitaRing::kLowerRing) {
       	if(hdPtr->lowerL1TrigPattern & (1<<phi))
-	  gr[count]->SetLineColor(kBlue-2);
+	  grSeavey[count][0]->SetLineColor(kBlue-2);
 	if(hdPtr->lowerL2TrigPattern & (1<<phi))
-	  gr[count]->SetLineColor(kGreen-2);
+	  grSeavey[count][0]->SetLineColor(kGreen-2);
       }
       
       if(hdPtr->l3TrigPattern & (1<<phi))
-	gr[count]->SetLineColor(kRed-3);
+	grSeavey[count][0]->SetLineColor(kRed-3);
 
-      if(fSetVoltLimits) 
-	gr[count]->GetYaxis()->SetRangeUser(fMinVoltLimit,fMaxVoltLimit);
 
-    //   gr[count]->GetXaxis()->SetRangeUser(-5,gr[count]->GetXaxis()->GetXmax());
-//       std::cout << gr[count]->GetXaxis()->GetXmin() << "\t"
-// 		<< gr[count]->GetXaxis()->GetXmax() << std::endl;
-      gr[count]->Draw("al");
-      gr[count]->GetYaxis()->SetLabelSize(0.1);
-      gr[count]->GetYaxis()->SetTitleSize(0.1);
-      gr[count]->GetYaxis()->SetTitleOffset(0.5);
-      if(row==4) {
-	gr[count]->GetXaxis()->SetLabelSize(0.09);
-	gr[count]->GetXaxis()->SetTitleSize(0.09);
-	gr[count]->GetYaxis()->SetLabelSize(0.09);
-	gr[count]->GetYaxis()->SetTitleSize(0.09);
-      }
+      grSeavey[count][0]->Draw("l");
       delete grTemp;
       count++;
+      paddy1->SetEditable(kFALSE);
     }
   }
   if(!useCan)
@@ -258,7 +281,209 @@ TPad *AnitaCanvasMaker::getCombinedCanvas(UsefulAnitaEvent *evPtr,
 					  RawAnitaHeader *hdPtr,
 					  TPad *useCan)
 {
-  return NULL;
+  gStyle->SetOptTitle(0); 
+
+  if(!fACMGeomTool)
+    fACMGeomTool=AnitaGeomTool::Instance();
+  char textLabel[180];
+  char padName[180];
+  TPad *canBoth;
+  TPad *plotPad;
+  if(!useCan) {
+    canBoth = (TPad*) gROOT->FindObject("canBoth");
+    if(!canBoth) {
+      canBoth = new TCanvas("canBoth","canBoth",1000,600);
+    }
+    canBoth->Clear();
+    canBoth->SetTopMargin(0);
+    TPaveText *topPave = new TPaveText(0.05,0.92,0.95,0.98);
+    topPave->SetBorderSize(0);  //Try 5 rows with, 8 ants
+    sprintf(textLabel,"Run %d, Event %d",hdPtr->run,hdPtr->eventNumber);
+    TText *eventText = topPave->AddText(textLabel);
+    eventText->SetTextColor(50);
+    topPave->Draw();
+    plotPad = new TPad("canBothMain","canBothMain",0,0,1,0.9);
+    plotPad->Draw();
+  }
+  else {
+    plotPad=useCan;
+  }
+  plotPad->cd();
+  setupPhiPadWithFrames(plotPad);
+    
+  for(int ind=0;ind<NUM_SEAVEYS;ind++) {
+    for(int pol=0;pol<2;pol++) {
+      if(grSeavey[ind][pol]) delete grSeavey[ind][pol];
+      grSeavey[ind][pol]=0;
+    }
+  }
+  
+ 
+
+  // Upper
+  // 1 3 5 7 9 11 13 15
+  // 2 4 6 8 10 12 14 16
+  // Lower
+  // 1 3 5 7 9 11 13 15
+  // 2 4 6 8 10 12 14 16
+
+  int count=0;
+
+
+  //  std::cout << hdPtr->eventNumber << "\t" << hdPtr->l3TrigPattern << std::endl;
+  for(int column=0;column<8;column++) {
+    for(int row=0;row<5;row++) {
+      plotPad->cd();
+      int phi=phiMap[row][column];
+      sprintf(padName,"phiChanPad%d",count);
+      
+      TPad *paddy1 = (TPad*) plotPad->FindObject(padName);
+      paddy1->SetEditable(kTRUE);
+      deleteTGraphsFromPad(paddy1);
+      paddy1->cd();
+
+      TGraph *grTemp=evPtr->getGraph(ringMap[row],phi,AnitaPol::kVertical);
+      grSeavey[count][0] = new WaveformGraph(grTemp->GetN(),grTemp->GetX(),grTemp->GetY());
+      TGraph *grTemp2=evPtr->getGraph(ringMap[row],phi,AnitaPol::kHorizontal);
+      grSeavey[count][1] = new WaveformGraph(grTemp2->GetN(),grTemp2->GetX(),grTemp2->GetY());
+      grSeavey[count][1]->SetLineColor(kBlue);
+
+      
+      grSeavey[count][0]->Draw("l");
+      grSeavey[count][1]->Draw("l");
+      delete grTemp;
+      delete grTemp2;
+      count++;
+      paddy1->SetEditable(kFALSE);
+    }
+  }
+  if(!useCan)
+    return canBoth;
+  else
+    return plotPad;
+  
+}
+
+void AnitaCanvasMaker::setupPhiPadWithFrames(TPad *plotPad)
+{
+  static int phiPadsDone=0;
+  char textLabel[180];
+  char padName[180];
+  plotPad->cd();
+  if(phiPadsDone) {
+    int errors=0;
+    for(int i=0;i<32;i++) {
+      sprintf(padName,"phiChanPad%d",i);
+      TPad *paddy = (TPad*) plotPad->FindObject(padName);
+      if(!paddy)
+	errors++;
+    }
+    if(!errors)
+      return;
+  }
+  phiPadsDone=1;
+      
+
+  Double_t left[8]={0.04,0.165,0.28,0.395,0.51,0.625,0.74,0.855};
+  Double_t right[8]={0.165,0.28,0.395,0.51,0.625,0.74,0.855,0.97};
+  Double_t top[5]={0.95,0.77,0.59,0.41,0.23};
+  Double_t bottom[5]={0.77,0.59,0.41,0.23,0.03};
+  
+  //Now add some labels around the plot
+  TLatex texy;
+  texy.SetTextSize(0.03); 
+  texy.SetTextAlign(12);  
+  for(int column=0;column<8;column++) {
+    sprintf(textLabel,"Phi %d/%d",1+(2*column),2+(2*column));
+    if(column==7)
+      texy.DrawTextNDC(right[column]-0.1,0.97,textLabel);
+    else
+      texy.DrawTextNDC(right[column]-0.09,0.97,textLabel);
+  }
+  texy.SetTextAlign(21);  
+  texy.SetTextAngle(90);
+  texy.DrawTextNDC(left[0]-0.01,bottom[0],"Upper Ring");
+  texy.DrawTextNDC(left[0]-0.01,bottom[2],"Lower Ring");
+  texy.DrawTextNDC(left[0]-0.01,bottom[4]+0.09,"Nadir Ring");
+
+  // Upper
+  // 1 3 5 7 9 11 13 15
+  // 2 4 6 8 10 12 14 16
+  // Lower
+  // 1 3 5 7 9 11 13 15
+  // 2 4 6 8 10 12 14 16
+
+  int count=0;
+
+
+  //  std::cout << hdPtr->eventNumber << "\t" << hdPtr->l3TrigPattern << std::endl;
+
+
+  for(int column=0;column<8;column++) {
+    for(int row=0;row<5;row++) {
+      plotPad->cd();
+      //      int phi=phiMap[row][column];
+      sprintf(padName,"phiChanPad%d",count);
+      TPad *paddy1 = new TPad(padName,padName,left[column],bottom[row],right[column],top[row]);   
+      paddy1->SetTopMargin(0);
+      paddy1->SetBottomMargin(0);
+      paddy1->SetLeftMargin(0);
+      paddy1->SetRightMargin(0);
+      if(column==7)
+	paddy1->SetRightMargin(0.01);
+      if(column==0)
+	paddy1->SetLeftMargin(0.1);
+      if(row==4)
+	paddy1->SetBottomMargin(0.1);
+      paddy1->Draw();
+      paddy1->cd();
+
+
+      
+      
+      TH1F *framey = (TH1F*) paddy1->DrawFrame(fMinTimeLimit,fMinVoltLimit,fMaxTimeLimit,fMaxVoltLimit);
+
+      framey->GetYaxis()->SetLabelSize(0.1);
+      framey->GetYaxis()->SetTitleSize(0.1);
+      framey->GetYaxis()->SetTitleOffset(0.5);
+      if(row==4) {
+	framey->GetXaxis()->SetLabelSize(0.09);
+	framey->GetXaxis()->SetTitleSize(0.09);
+	framey->GetYaxis()->SetLabelSize(0.09);
+	framey->GetYaxis()->SetTitleSize(0.09);
+      }
+      count++;
+    }
+  }
+
 }
 
 
+void AnitaCanvasMaker::deleteTGraphsFromPad(TPad *paddy)
+{
+  paddy->cd();
+  //  paddy->Update();
+  //  std::cout << "deleteTGraphsFromPad: " << paddy->GetName() << std::endl;
+  TList *listy = paddy->GetListOfPrimitives();
+  for(int i=0;i<listy->GetSize();i++) {
+    TObject *fred = listy->At(i);
+    if(fred->InheritsFrom("TGraph")) {
+      std::cout << fred->ClassName() << "\t" << fred << std::endl;
+      for(int ant=0;ant<NUM_SEAVEYS;ant++) {
+	for(int pol=0;pol<2;pol++) {
+	  if(fred == grSeavey[ant][pol]) {
+	    delete grSeavey[ant][pol];
+	    //	    grSeavey[ant][pol]=0;
+	    std::cout << "Yes" << std::endl;
+	  }
+	  else {
+	    fred->Delete("");
+	  }
+	}
+      }
+
+    }
+  }
+  
+  //  paddy->Update();
+}

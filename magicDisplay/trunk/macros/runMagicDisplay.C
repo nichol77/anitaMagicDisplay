@@ -5,7 +5,7 @@ void runMagicDisplay() {
   gSystem->AddIncludePath("-I${ANITA_UTIL_INSTALL_DIR}/includes");
   //  cout << gSystem->GetIncludePath() <<endl;
 		
-  gSystem->Load("/sw/lib/libfftw3.so");
+  gSystem->Load("/usr/lib64/libfftw3.so");
 
   gSystem->Load("libMathMore.so");
   gSystem->Load("libPhysics.so");  
@@ -15,6 +15,6 @@ void runMagicDisplay() {
 
   TChain *fred=0; //Will this work?
 
-  MagicDisplay *magicPtr = new MagicDisplay("/home/rjn/anita/data/testing",2254);
+  MagicDisplay *magicPtr = new MagicDisplay("/unix/anita2/testing/rootFiles",2282);
 
 }
