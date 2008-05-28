@@ -44,6 +44,7 @@ WaveformGraph::WaveformGraph(int N, const Double_t *x, const Double_t *y)
 
 WaveformGraph::~WaveformGraph()
 {
+   //   std::cout << "~WaveformGraph" << std::endl;
 }
 
 void WaveformGraph::ExecuteEvent(Int_t event, Int_t px, Int_t py)

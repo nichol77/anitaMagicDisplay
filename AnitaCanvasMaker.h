@@ -25,12 +25,15 @@ class AnitaCanvasMaker
   Int_t fSetVoltLimits;
   Double_t fMinVoltLimit;
   Double_t fMaxVoltLimit;
+  Double_t fMinTimeLimit;
+  Double_t fMaxTimeLimit;
 
   TPad *getHorizontalCanvas(UsefulAnitaEvent *evPtr,RawAnitaHeader *hdPtr, TPad *useCan=0);
   TPad *getVerticalCanvas(UsefulAnitaEvent *evPtr,RawAnitaHeader *hdPtr, TPad *useCan=0);
   TPad *getSurfChanCanvas(UsefulAnitaEvent *evPtr,RawAnitaHeader *hdPtr, TPad *useCan=0);
   TPad *getCombinedCanvas(UsefulAnitaEvent *evPtr,RawAnitaHeader *hdPtr, TPad *useCan=0);
-
+  void setupPhiPadWithFrames(TPad *plotPad);
+  void deleteTGraphsFromPad(TPad *paddy);
 
   AnitaCanvasMaker();
   ~AnitaCanvasMaker();
