@@ -32,6 +32,8 @@ class AnitaCanvasMaker
   TPad *getVerticalCanvas(UsefulAnitaEvent *evPtr,RawAnitaHeader *hdPtr, TPad *useCan=0);
   TPad *getSurfChanCanvas(UsefulAnitaEvent *evPtr,RawAnitaHeader *hdPtr, TPad *useCan=0);
   TPad *getCombinedCanvas(UsefulAnitaEvent *evPtr,RawAnitaHeader *hdPtr, TPad *useCan=0);
+  TPad *getEventInfoCanvas(RawAnitaHeader *hdPtr, TPad *useCan=0);
+  
   void setupPhiPadWithFrames(TPad *plotPad);
   void deleteTGraphsFromPad(TPad *paddy);
 

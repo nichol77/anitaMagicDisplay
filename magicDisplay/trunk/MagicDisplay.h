@@ -23,6 +23,8 @@ class RawAnitaHeader;
 class PrettyAnitaHk;
 class RawAnitaEvent;
 class UsefulAnitaEvent;
+class TurfRate;
+class SurfHk;
 class TButton;
 
 
@@ -34,15 +36,30 @@ class MagicDisplay
   MagicDisplay();
   ~MagicDisplay();
 
-  void startDisplay();
-  int displayNext();
-  int displayPrevious();
-  void refreshDisplay();
-  int getEntry();
-  void drawButtons();
+  void startEventDisplay();
+  int displayNextEvent();
+  int displayPreviousEvent();
+  void refreshEventDisplay();
+  int getEventEntry();
+  void drawEventButtons();
   void setMainCanvasOption(MagicDisplayOption::MagicDisplayOption_t option); 
 
+  void startTurfDisplay();
+  int displayNextTurf();
+  int displayPreviousTurf();
+  void refreshTurfDisplay();
+  int getTurfEntry();
+  void drawTurfButtons();
   
+
+  void startSurfDisplay();
+  int displayNextSurf();
+  int displayPreviousSurf();
+  void refreshSurfDisplay();
+  int getSurfEntry();
+  void drawSurfButtons();
+
+
   //Instance generator
   static MagicDisplay*  Instance();
   
@@ -51,9 +68,14 @@ class MagicDisplay
   TTree *fHeadTree;
   TChain *fEventTree;
   TTree *fPrettyHkTree;
+  TTree *fTurfRateTree;
+  TTree *fSurfHkTree;
   
   //And some useful info to keep track of what is where
-  Long64_t fEntry;
+  Long64_t fEventEntry;
+  Long64_t fPrettyHkEntry;
+  Long64_t fTurfRateEntry;
+  Long64_t fSurfHkEntry;
   
 
  protected:
@@ -64,10 +86,19 @@ class MagicDisplay
    MagicDisplayOption::MagicDisplayOption_t fMainOption;
    TCanvas *fMagicCanvas; //The main canvas
    TPad *fMagicMainPad;
+   TPad *fMagicEventInfoPad;
+   TCanvas *fTurfCanvas;
+   TPad *fTurfMainPad;
+   TPad *fTurfInfoPad;
+   TCanvas *fSurfCanvas;
+   TPad *fSurfMainPad;
+   TPad *fSurfInfoPad;
    RawAnitaHeader *fHeadPtr;
    PrettyAnitaHk *fHkPtr;
    RawAnitaEvent *fRawEventPtr;
    UsefulAnitaEvent *fUsefulEventPtr;
+   TurfRate *fTurfPtr;
+   SurfHk *fSurfPtr;
    TButton *fVertButton;
    TButton *fHorizButton;
    TButton *fBothButton;
