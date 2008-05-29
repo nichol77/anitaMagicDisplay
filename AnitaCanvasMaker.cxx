@@ -30,6 +30,7 @@
 #include "TH1.h"
 #include "TList.h"
 #include "TObject.h"
+#include "TTimeStamp.h"
 
 
 AnitaCanvasMaker*  AnitaCanvasMaker::fgInstance = 0;
@@ -60,6 +61,7 @@ AnitaCanvasMaker::AnitaCanvasMaker()
   fMaxVoltLimit=60;
   fMinTimeLimit=0;
   fMaxTimeLimit=250;
+  fgInstance=this;
   
 }
 
@@ -75,6 +77,66 @@ AnitaCanvasMaker*  AnitaCanvasMaker::Instance()
 {
    //static function
    return (fgInstance) ? (AnitaCanvasMaker*) fgInstance : new AnitaCanvasMaker();
+}
+
+
+TPad *AnitaCanvasMaker::getEventInfoCanvas(RawAnitaHeader *hdPtr,TPad *useCan)
+{
+   static UInt_t lastEventNumber=0;
+   if(!fACMGeomTool)
+      fACMGeomTool=AnitaGeomTool::Instance();
+   char textLabel[180];
+   TPad *topPad;
+   if(!useCan) {
+      topPad = new TPad("padEventInfo","padEventInfo",0.2,0.9,0.8,1);
+      topPad->Draw();
+   }
+   else {
+      topPad=useCan;
+   } 
+   if(hdPtr->eventNumber != lastEventNumber) {
+      topPad->Clear();
+      topPad->SetTopMargin(0.05);
+      topPad->cd();
+      TPaveText *leftPave = new TPaveText(0,0,0.28,0.9);
+      leftPave->SetBorderSize(0);
+      leftPave->SetFillColor(0);
+      leftPave->SetTextAlign(13);
+      sprintf(textLabel,"Run:    %d",hdPtr->run);
+      TText *runText = leftPave->AddText(textLabel);
+      runText->SetTextColor(50);
+      sprintf(textLabel,"Event: %d",hdPtr->eventNumber);
+      TText *eventText = leftPave->AddText(textLabel);
+      eventText->SetTextColor(50);
+      leftPave->Draw();
+
+      TPaveText *rightPave = new TPaveText(0.32,0,0.58,0.95);
+      rightPave->SetBorderSize(0);
+      rightPave->SetTextAlign(13);
+      TTimeStamp trigTime((time_t)hdPtr->triggerTime,(Int_t)hdPtr->triggerTimeNs);
+      sprintf(textLabel,"Time: %s",trigTime.AsString("s"));
+      TText *timeText = rightPave->AddText(textLabel);
+      timeText->SetTextColor(1);
+      sprintf(textLabel,"Trigger: %8.6f ms",1e-6*hdPtr->triggerTimeNs);
+      TText *timeText2 = rightPave->AddText(textLabel);
+      timeText2->SetTextColor(1);
+      sprintf(textLabel,"Priority: %d -- Queue: %d",(hdPtr->priority&0xf0)/16,hdPtr->priority&0xf);
+      rightPave->AddText(textLabel);
+      //      sprintf(textLabel,"Lab Chip %d",labChip);
+      //      rightPave->AddText(textLabel);
+      sprintf(textLabel,"Trig Num: %d -- Trig Type: %s",hdPtr->trigNum,hdPtr->trigTypeAsString());
+      rightPave->AddText(textLabel);
+      if(hdPtr->errorFlag&0x1) {
+	 TText *slipText = rightPave->AddText("Possible Sync Slip");
+	 slipText->SetTextColor(6);   
+      }
+      rightPave->Draw();
+      
+
+      lastEventNumber=hdPtr->eventNumber;
+   }
+      
+   return topPad;
 }
 
 
@@ -99,12 +161,12 @@ TPad *AnitaCanvasMaker::getHorizontalCanvas(UsefulAnitaEvent *evPtr,
     }
     canHoriz->Clear();
     canHoriz->SetTopMargin(0);
-    TPaveText *topPave = new TPaveText(0.05,0.92,0.95,0.98);
-    topPave->SetBorderSize(0);
+    TPaveText *leftPave = new TPaveText(0.05,0.92,0.95,0.98);
+    leftPave->SetBorderSize(0);
     sprintf(textLabel,"Event %d",hdPtr->eventNumber);
-    TText *eventText = topPave->AddText(textLabel);
+    TText *eventText = leftPave->AddText(textLabel);
     eventText->SetTextColor(50);
-    topPave->Draw();
+    leftPave->Draw();
     plotPad = new TPad("canHorizMain","canHorizMain",0,0,1,0.9);
     plotPad->Draw();
   }
@@ -194,12 +256,12 @@ TPad *AnitaCanvasMaker::getVerticalCanvas(UsefulAnitaEvent *evPtr,
     }
     canVert->Clear();
     canVert->SetTopMargin(0);
-    TPaveText *topPave = new TPaveText(0.05,0.92,0.95,0.98);
-    topPave->SetBorderSize(0);
+    TPaveText *leftPave = new TPaveText(0.05,0.92,0.95,0.98);
+    leftPave->SetBorderSize(0);
     sprintf(textLabel,"Run %d, Event %d",hdPtr->run,hdPtr->eventNumber);
-    TText *eventText = topPave->AddText(textLabel);
+    TText *eventText = leftPave->AddText(textLabel);
     eventText->SetTextColor(50);
-    topPave->Draw();
+    leftPave->Draw();
     plotPad = new TPad("canVertMain","canVertMain",0,0,1,0.9);
     plotPad->Draw();
   }
@@ -296,12 +358,12 @@ TPad *AnitaCanvasMaker::getCombinedCanvas(UsefulAnitaEvent *evPtr,
     }
     canBoth->Clear();
     canBoth->SetTopMargin(0);
-    TPaveText *topPave = new TPaveText(0.05,0.92,0.95,0.98);
-    topPave->SetBorderSize(0);  //Try 5 rows with, 8 ants
+    TPaveText *leftPave = new TPaveText(0.05,0.92,0.95,0.98);
+    leftPave->SetBorderSize(0);  //Try 5 rows with, 8 ants
     sprintf(textLabel,"Run %d, Event %d",hdPtr->run,hdPtr->eventNumber);
-    TText *eventText = topPave->AddText(textLabel);
+    TText *eventText = leftPave->AddText(textLabel);
     eventText->SetTextColor(50);
-    topPave->Draw();
+    leftPave->Draw();
     plotPad = new TPad("canBothMain","canBothMain",0,0,1,0.9);
     plotPad->Draw();
   }

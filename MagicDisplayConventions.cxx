@@ -8,29 +8,13 @@
 //////////////////////////////////////////////////////////////////////////////
 
 
-#ifndef MAGICDISPLAYCONVENTIONS_H
-#define MAGICDISPLAYCONVENTIONS_H
-
-#ifndef ROOT_Rtypes
-#if !defined(__CINT__) || defined(__MAKECINT__)
-#include "Rtypes.h"
-#endif
-#endif
+#include "MagicDisplayConventions.h"
 
 
-
-
-namespace MagicDisplayOption {
-   typedef enum EMagicDisplayOption {
-      kWavePhiVerticalOnly = 0,
-      kWavePhiHorizontalOnly,
-      kWavePhiCombined,
-      kPowerPhiVerticalOnly,
-      kPowerPhiHorizontalOnly,
-      kPowerPhiCombined    
-   } MagicDisplayOption_t;
-};
-
-int getNiceColour(int ind);
-
-#endif //MAGICDISPLAYCONVENTIONS_H
+int getNiceColour(int index)
+{
+    if(index>10) return index;
+    Int_t niceColours[11]={kAzure-2,kSpring-1,kRed+1,kMagenta+1,kCyan+1,kOrange+2
+,kGreen-2,12,40,20,41};
+    return niceColours[index];
+}
