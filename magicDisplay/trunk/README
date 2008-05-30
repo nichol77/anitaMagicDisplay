@@ -22,3 +22,8 @@ Q. How do I get it?
 A. Read on, you can also visit the website at:
 http://www.hep.ucl.ac.uk/~rjn/anita/magicDisplay
 
+Prerequisites
+=============
+There are, unfortunately, several pre requisites for installing and running Magic Display.
+i) ROOT -- If you don't have it installed get the latest version from http://root.cern.ch
+ii) FFTW3 -- The Fastest Fourier Transform in the west
