@@ -2,7 +2,7 @@
 
 void runMagicDisplay() {
   //  gSystem->AddIncludePath(gSystem->ExpandPathName("-I${EVENT_READER_DIR}"));
-  gSystem->AddIncludePath("-I${ANITA_UTIL_INSTALL_DIR}/includes");
+  gSystem->AddIncludePath("-I${ANITA_UTIL_INSTALL_DIR}/include");
   //  cout << gSystem->GetIncludePath() <<endl;
 		
   gSystem->Load("/usr/lib64/libfftw3.so");

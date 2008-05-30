@@ -1,0 +1,24 @@
+################################################################################
+#### Magic Display   
+####	   Marvellous Anita Graphical Interface & Classy Display
+####
+####  May 2008 -- Ryan Nichol <rjn@hep.ucl.ac.uk>
+################################################################################
+
+Introduction
+============
+Okay so it's a somewhat stupid name, but what can you do I only have some many hours in the day to come up with names. 
+
+Q. What is it?
+A. It is an event display and plotting program for use with ANITA-II data in ROOT format. (In theory it could be used with ANITA-I data but it would need a quote a few mods to deal with the change in antenna number etc.
+
+Q. Why should I use it?
+A. That's a very good question, maybe you shouldn't. I find it is a useful way to look at the rootified data. I know there a people who don't like the rootified data and that's fine an updated AnitaViewer will do everything this does and a whole lot more.
+
+Q. So what's the point?
+A. My preferred way to look at the data is using the ROOT trees rather than the binary files. I find it easier to implement calibrations and unpacking in one place rather than everyone having to do it themselves. This provides people, well right now me, with a (hopefully) really simple way to look at the ROOT data files.
+
+Q. How do I get it?
+A. Read on, you can also visit the website at:
+http://www.hep.ucl.ac.uk/~rjn/anita/magicDisplay
+
