@@ -5,7 +5,7 @@ void runMagicDisplay() {
   gSystem->AddIncludePath("-I${ANITA_UTIL_INSTALL_DIR}/include");
   //  cout << gSystem->GetIncludePath() <<endl;
 		
-  gSystem->Load("/usr/lib64/libfftw3.so");
+  gSystem->Load("libfftw3.so");
 
   gSystem->Load("libMathMore.so");
   gSystem->Load("libPhysics.so");  
