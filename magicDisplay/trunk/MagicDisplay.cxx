@@ -52,7 +52,8 @@ MagicDisplay::MagicDisplay()
    fMagicCanvas=0;
    fMagicEventInfoPad=0;
    fMagicMainPad=0;
-  
+   fCurrentRun=0;
+   
 }
 
 MagicDisplay::~MagicDisplay()
@@ -80,63 +81,16 @@ MagicDisplay::MagicDisplay(char *baseDir, int run)
    fMagicMainPad=0;
    cout << "MagicDisplay::MagicDisplay(" << baseDir << " , " << run
        << ")" << endl;
-  char eventName[FILENAME_MAX];
-  char headerName[FILENAME_MAX];
-  char turfName[FILENAME_MAX];
-  char surfName[FILENAME_MAX];
+   fCurrentRun=run;
+   strncpy(fCurrentBaseDir,baseDir,179);
+
+
+
+
+
   //  char hkName[FILENAME_MAX];
-  sprintf(eventName,"%s/run%d/eventFile%d*.root",baseDir,run,run);
-  sprintf(headerName,"%s/run%d/headFile%d.root",baseDir,run,run);
-  sprintf(turfName,"%s/run%d/turfRateFile%d.root",baseDir,run,run);
-  sprintf(surfName,"%s/run%d/surfHkFile%d.root",baseDir,run,run);
+
   //  sprintf(hkName,"/unix/anita2/testing/rootFiles/run%d/prettyHkFile%d.root",run,run);
-  //  cout << eventName << endl << headerName << endl;
-  //  PrettyAnitaHk *hk = 0;
-  
-  fEventTree = new TChain("eventTree");
-  fEventTree->Add(eventName);
-  fEventTree->SetBranchAddress("event",&fRawEventPtr);
-
-  TFile *fpHead = new TFile(headerName);
-  if(!fpHead) {
-    cout << "Couldn't open: " << headerName << "\n";
-    return;
-  }
-  fHeadTree = (TTree*) fpHead->Get("headTree");
-  if(!fHeadTree) {
-    cout << "Couldn't get headTree from " << headerName << endl;
-    return;
-  }
-  fHeadTree->SetBranchAddress("header",&fHeadPtr);
-  fEventEntry=0;
-
-  TFile *fpTurf = new TFile(turfName);
-  if(!fpTurf) {
-     cout << "Couldn't open: " << turfName << "\n";
-     return;
-  }
-  fTurfRateTree = (TTree*) fpTurf->Get("turfRateTree");
-  if(!fTurfRateTree) {
-     cout << "Couldn't get turfRateTree from " << turfName << endl;
-     return;
-  }
-  fTurfRateTree->SetBranchAddress("turf",&fTurfPtr);
-  fTurfRateEntry=0;
-
-
-  TFile *fpSurf = new TFile(surfName);
-  if(!fpSurf) {
-     cout << "Couldn't open: " << surfName << "\n";
-     return;
-  }
-  fSurfHkTree = (TTree*) fpSurf->Get("surfHkTree");
-  if(!fSurfHkTree) {
-     cout << "Couldn't get surfRateTree from " << surfName << endl;
-     return;
-  }
-  fSurfHkTree->SetBranchAddress("surf",&fSurfPtr);
-  fSurfHkEntry=0;
-
   //  TFile *fpHk = new TFile(hkName);
   //  TTree *prettyHkTree = (TTree*) fpHk->Get("prettyHkTree");
   //  prettyHkTree->SetBranchAddress("hk",&hk);  
@@ -153,10 +107,32 @@ MagicDisplay*  MagicDisplay::Instance()
 
 void MagicDisplay::startEventDisplay()
 {
-  fEventCanMaker=AnitaCanvasMaker::Instance();
-  int retVal=getEventEntry();
-  if(retVal==0)
-     refreshEventDisplay();   
+   if(!fEventTree) {      
+      char eventName[FILENAME_MAX];
+      char headerName[FILENAME_MAX];
+      sprintf(eventName,"%s/run%d/eventFile%d*.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);
+      sprintf(headerName,"%s/run%d/headFile%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);
+      fEventTree = new TChain("eventTree");
+      fEventTree->Add(eventName);
+      fEventTree->SetBranchAddress("event",&fRawEventPtr);
+      
+      TFile *fpHead = new TFile(headerName);
+      if(!fpHead) {
+	 cout << "Couldn't open: " << headerName << "\n";
+	 return;
+      }
+      fHeadTree = (TTree*) fpHead->Get("headTree");
+      if(!fHeadTree) {
+	 cout << "Couldn't get headTree from " << headerName << endl;
+	 return;
+      }
+      fHeadTree->SetBranchAddress("header",&fHeadPtr);
+      fEventEntry=0;
+   }
+   fEventCanMaker=AnitaCanvasMaker::Instance();
+   int retVal=getEventEntry();
+   if(retVal==0)
+      refreshEventDisplay();   
 }
 
 int MagicDisplay::getEventEntry()
@@ -309,6 +285,25 @@ void MagicDisplay::setMainCanvasOption(MagicDisplayOption::MagicDisplayOption_t 
 
 void MagicDisplay::startTurfDisplay()
 {
+   if(!fTurfRateTree) {
+      char turfName[FILENAME_MAX];
+      sprintf(turfName,"%s/run%d/turfRateFile%d.root",fCurrentBaseDir,
+	      fCurrentRun,fCurrentRun);
+      TFile *fpTurf = new TFile(turfName);
+      if(!fpTurf) {
+	 cout << "Couldn't open: " << turfName << "\n";
+	 return;
+      }
+      fTurfRateTree = (TTree*) fpTurf->Get("turfRateTree");
+      if(!fTurfRateTree) {
+	 cout << "Couldn't get turfRateTree from " << turfName << endl;
+	 return;
+      }
+      fTurfRateTree->SetBranchAddress("turf",&fTurfPtr);
+      fTurfRateEntry=0;
+   }
+   
+
    fRFCanMaker=AnitaRFCanvasMaker::Instance();
    int retVal=getTurfEntry();
    if(retVal==0)
@@ -387,12 +382,53 @@ void MagicDisplay::drawTurfButtons()
    butPrev->SetTextSize(0.5);
    butPrev->SetFillColor(kBlue-10);
    butPrev->Draw();
+   
+   fTurfYScaleButton = new TButton("Fix Scale","MagicDisplay::Instance()->toggleTurfYScale(); MagicDisplay::Instance()->refreshTurfDisplay();",0,0.96,0.1,1);
+   fTurfYScaleButton->SetTextSize(0.4);
+   fTurfYScaleButton->SetFillColor(kGray);
+   fTurfYScaleButton->Draw();
+}
 
+void MagicDisplay::toggleTurfYScale()
+{
+   if(fTurfYScaleButton->GetFillColor()==kGray) {
+      //Turn on fixed y scale
+      fRFCanMaker->fFixTurfYScale=1;
+      fTurfYScaleButton->SetFillColor(kGray+3);
+      fTurfYScaleButton->Modified();
+   }
+   else {
+      //Turn off fixed y scale
+      fRFCanMaker->fFixTurfYScale=0;
+      fTurfYScaleButton->SetFillColor(kGray);
+      fTurfYScaleButton->Modified();
+   }
+      
 }
 
 
 void MagicDisplay::startSurfDisplay()
 {
+   if(!fSurfHkTree) {
+
+      char surfName[FILENAME_MAX];
+      sprintf(surfName,"%s/run%d/surfHkFile%d.root",fCurrentBaseDir,
+	      fCurrentRun,fCurrentRun);
+      TFile *fpSurf = new TFile(surfName);
+      if(!fpSurf) {
+	 cout << "Couldn't open: " << surfName << "\n";
+	 return;
+      }
+      fSurfHkTree = (TTree*) fpSurf->Get("surfHkTree");
+      if(!fSurfHkTree) {
+     cout << "Couldn't get surfRateTree from " << surfName << endl;
+     return;
+      }
+      fSurfHkTree->SetBranchAddress("surf",&fSurfPtr);
+      fSurfHkEntry=0;
+   }
+
+
    if(!fRFCanMaker)
       fRFCanMaker=AnitaRFCanvasMaker::Instance();
    int retVal=getSurfEntry();
@@ -474,4 +510,40 @@ void MagicDisplay::drawSurfButtons()
    butPrev->SetFillColor(kBlue-10);
    butPrev->Draw();
 
+
+ 
+   fSurfSurfViewButton = new TButton("SURF View","MagicDisplay::Instance()->toggleSurfSurfView(1); MagicDisplay::Instance()->refreshSurfDisplay();",0,0.96,0.1,1);
+   fSurfSurfViewButton->SetTextSize(0.4);
+   fSurfSurfViewButton->SetFillColor(kGray+3);
+   fSurfSurfViewButton->Draw();
+
+
+   fSurfPhiViewButton = new TButton("PHI View","MagicDisplay::Instance()->toggleSurfSurfView(0); MagicDisplay::Instance()->refreshSurfDisplay();",0,0.92,0.1,0.96);
+   fSurfPhiViewButton->SetTextSize(0.4);
+   fSurfPhiViewButton->SetFillColor(kGray);
+   fSurfPhiViewButton->Draw();
+
+}
+
+
+void MagicDisplay::toggleSurfSurfView(Int_t surfView)
+{
+   
+   if(surfView) {
+      //Turn on phi view off
+      fRFCanMaker->fSurfPhiView=0;
+      fSurfSurfViewButton->SetFillColor(kGray+3);
+      fSurfPhiViewButton->SetFillColor(kGray);
+      fSurfSurfViewButton->Modified();
+      fSurfPhiViewButton->Modified();
+   }
+   else {
+      //Turn phi view on
+      fRFCanMaker->fSurfPhiView=1;
+      fSurfSurfViewButton->SetFillColor(kGray);
+      fSurfPhiViewButton->SetFillColor(kGray+3);
+      fSurfSurfViewButton->Modified();
+      fSurfPhiViewButton->Modified();
+   }
+      
 }

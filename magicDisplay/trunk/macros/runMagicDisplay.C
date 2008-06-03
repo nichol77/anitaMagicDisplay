@@ -15,9 +15,9 @@ void runMagicDisplay() {
 
   TChain *fred=0; //Will this work?
 
-  MagicDisplay *magicPtr = new MagicDisplay("/unix/anita2/testing/rootFiles",2297);
+  MagicDisplay *magicPtr = new MagicDisplay("/unix/anita2/testing/rootFiles",2370);
   magicPtr->startSurfDisplay();
   magicPtr->startTurfDisplay();
-  magicPtr->startEventDisplay();
+  //  magicPtr->startEventDisplay();
 
 }
