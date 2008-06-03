@@ -31,6 +31,7 @@ class AnitaRFCanvasMaker
   TPad *getTurfInfoCanvas(TurfRate *turfPtr,TPad *useCan);
   TPad *getSurfHkCanvas(SurfHk *surfPtr, TPad *useCan=0);
   TPad *getSurfInfoCanvas(SurfHk *surfPtr,TPad *useCan);
+
   void setLogFlag(Int_t logFlag)
      {fUseLog=logFlag;}
 
@@ -41,11 +42,16 @@ class AnitaRFCanvasMaker
   Int_t fL3Max;
   Int_t fL3Min;
   Int_t fUseLog;
+  Int_t fFixTurfYScale;
+  Int_t fFixSurfYScale;
+  Int_t fSurfPhiView;
   
   
 
  protected:
    static AnitaRFCanvasMaker *fgInstance;  
+   void getSurfHkSurfCanvas(SurfHk *surfPtr,TPad *plotPad);
+   void getSurfHkPhiCanvas(SurfHk *surfPtr,TPad *plotPad);
    // protect against multiple instances
 
 

@@ -50,7 +50,7 @@ class MagicDisplay
   void refreshTurfDisplay();
   int getTurfEntry();
   void drawTurfButtons();
-  
+  void toggleTurfYScale();
 
   void startSurfDisplay();
   int displayNextSurf();
@@ -58,7 +58,7 @@ class MagicDisplay
   void refreshSurfDisplay();
   int getSurfEntry();
   void drawSurfButtons();
-
+  void toggleSurfSurfView(Int_t surfView);
 
   //Instance generator
   static MagicDisplay*  Instance();
@@ -77,6 +77,9 @@ class MagicDisplay
   Long64_t fTurfRateEntry;
   Long64_t fSurfHkEntry;
   
+  Int_t fCurrentRun;
+  Char_t fCurrentBaseDir[180];
+
 
  protected:
    static MagicDisplay *fgInstance;  
@@ -102,6 +105,9 @@ class MagicDisplay
    TButton *fVertButton;
    TButton *fHorizButton;
    TButton *fBothButton;
+   TButton *fTurfYScaleButton;
+   TButton *fSurfSurfViewButton;
+   TButton *fSurfPhiViewButton;
 
 };
 
