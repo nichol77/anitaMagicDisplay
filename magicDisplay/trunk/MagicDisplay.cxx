@@ -53,6 +53,9 @@ MagicDisplay::MagicDisplay()
    fMagicEventInfoPad=0;
    fMagicMainPad=0;
    fCurrentRun=0;
+   fEventTree=0;
+   fSurfHkTree=0;
+   fTurfRateTree=0;
    
 }
 
@@ -83,7 +86,9 @@ MagicDisplay::MagicDisplay(char *baseDir, int run)
        << ")" << endl;
    fCurrentRun=run;
    strncpy(fCurrentBaseDir,baseDir,179);
-
+   fEventTree=0;
+   fSurfHkTree=0;
+   fTurfRateTree=0;
 
 
 
@@ -128,6 +133,9 @@ void MagicDisplay::startEventDisplay()
       }
       fHeadTree->SetBranchAddress("header",&fHeadPtr);
       fEventEntry=0;
+      std::cerr << fEventTree << "\t" << fHeadTree << "\n";
+      std::cerr << fHeadTree->GetEntries() << "\t"
+		<< fEventTree->GetEntries() << "\n";
    }
    fEventCanMaker=AnitaCanvasMaker::Instance();
    int retVal=getEventEntry();

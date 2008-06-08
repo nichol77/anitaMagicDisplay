@@ -708,7 +708,9 @@ TPad *AnitaRFCanvasMaker::getSurfInfoCanvas(SurfHk *surfPtr,TPad *useCan)
   sprintf(textLabel,"Global: %d",surfPtr->globalThreshold);
   TText *globalText = rightPave->AddText(textLabel);
   globalText->SetTextColor(1);
-  sprintf(textLabel,"Goal Rate: %d kHz",surfPtr->scalerGoal);
+  sprintf(textLabel,"Goal Rates: (%d %d %d %d) kHz",
+	  surfPtr->scalerGoals[0],surfPtr->scalerGoals[1],
+	  surfPtr->scalerGoals[2],surfPtr->scalerGoals[2]);
   TText *goalText = rightPave->AddText(textLabel);
   goalText->SetTextColor(1);
   sprintf(textLabel,"Error Flag: %#x",surfPtr->errorFlag);
