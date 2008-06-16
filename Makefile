@@ -33,7 +33,7 @@ else
 FFTLIBS =
 FFTFLAG =
 endif
-ROOTLIBS   = -L/home/anita/root_v5.19.04/lib -lCore -lCint -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -pthread -lm -ldl -rdynamic
+
 #Generic and Site Specific Flags
 CXXFLAGS     += $(ROOTCFLAGS) $(FFTFLAG) $(SYSINCLUDES) $(INC_ANITA_UTIL)
 LDFLAGS      += -g $(ROOTLDFLAGS) 
@@ -84,9 +84,9 @@ install: $(ROOT_LIBRARY)
 ifeq ($(PLATFORM),macosx)
 	cp $(ROOT_LIBRARY) $(subst .$(DLLSUF),.so,$(ROOT_LIBRARY)) $(ANITA_UTIL_LIB_DIR)
 else
-	sudo cp $(ROOT_LIBRARY) $(ANITA_UTIL_LIB_DIR)
+	cp $(ROOT_LIBRARY) $(ANITA_UTIL_LIB_DIR)
 endif
-	sudo cp  $(CLASS_HEADERS) $(ANITA_UTIL_INC_DIR)
+	cp  $(CLASS_HEADERS) $(ANITA_UTIL_INC_DIR)
 
 clean:
 	@rm -f *Dict*
