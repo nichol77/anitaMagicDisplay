@@ -1,4 +1,4 @@
-
+gSystem->Reset();
 
 void runMagicDisplay() {
   //  gSystem->AddIncludePath(gSystem->ExpandPathName("-I${EVENT_READER_DIR}"));
@@ -15,7 +15,7 @@ void runMagicDisplay() {
 
   TChain *fred=0; //Will this work?
 
-  MagicDisplay *magicPtr = new MagicDisplay("/unix/anita2/testing/rootFiles",2485);
+  MagicDisplay *magicPtr = new MagicDisplay("/home/anita/Desktop",2297);
   magicPtr->startSurfDisplay();
   magicPtr->startTurfDisplay();
   magicPtr->startEventDisplay();

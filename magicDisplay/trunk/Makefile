@@ -15,8 +15,8 @@ ANITA_UTIL_INC_DIR=${ANITA_UTIL_INSTALL_DIR}/include
 LD_ANITA_UTIL=-L$(ANITA_UTIL_LIB_DIR)
 INC_ANITA_UTIL=-I$(ANITA_UTIL_INC_DIR)
 else
-ANITA_UTIL_LIB_DIR=
-ANITA_UTIL_INC_DIR=
+ANITA_UTIL_LIB_DIR=/usr/local/lib
+ANITA_UTIL_INC_DIR=/usr/local/include
 ifdef EVENT_READER_DIR
 LD_ANITA_UTIL=-L$(EVENT_READER_DIR)
 INC_ANITA_UTIL=-I$(EVENT_READER_DIR)
@@ -33,7 +33,7 @@ else
 FFTLIBS =
 FFTFLAG =
 endif
-
+ROOTLIBS   = -L/home/anita/root_v5.19.04/lib -lCore -lCint -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -pthread -lm -ldl -rdynamic
 #Generic and Site Specific Flags
 CXXFLAGS     += $(ROOTCFLAGS) $(FFTFLAG) $(SYSINCLUDES) $(INC_ANITA_UTIL)
 LDFLAGS      += -g $(ROOTLDFLAGS) 
@@ -63,7 +63,7 @@ else
 	 $(OutPutOpt) $(subst .$(DLLSUF),.so,$@)
 endif
 else
-	$(LD) $(SOFLAGS) $(LDFLAGS) $(LIB_OBJS) -o $@
+	$(LD) $(SOFLAGS) $(LDFLAGS) $(LIB_OBJS) $(LIBS) -o $@
 endif
 
 %.$(OBJSUF) : %.$(SRCSUF)
@@ -84,9 +84,9 @@ install: $(ROOT_LIBRARY)
 ifeq ($(PLATFORM),macosx)
 	cp $(ROOT_LIBRARY) $(subst .$(DLLSUF),.so,$(ROOT_LIBRARY)) $(ANITA_UTIL_LIB_DIR)
 else
-	cp $(ROOT_LIBRARY) $(ANITA_UTIL_LIB_DIR)
+	sudo cp $(ROOT_LIBRARY) $(ANITA_UTIL_LIB_DIR)
 endif
-	cp  $(CLASS_HEADERS) $(ANITA_UTIL_INC_DIR)
+	sudo cp  $(CLASS_HEADERS) $(ANITA_UTIL_INC_DIR)
 
 clean:
 	@rm -f *Dict*
