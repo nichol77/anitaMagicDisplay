@@ -15,7 +15,7 @@ void runMagicDisplay() {
 
   TChain *fred=0; //Will this work?
 
-  MagicDisplay *magicPtr = new MagicDisplay("/home/anita/Desktop",2297);
+  MagicDisplay *magicPtr = new MagicDisplay("/home/rjn/anita/data/testing/",2297);
   magicPtr->startSurfDisplay();
   magicPtr->startTurfDisplay();
   magicPtr->startEventDisplay();
