@@ -7,6 +7,7 @@
 #pragma link C++ class AnitaCanvasMaker+;
 #pragma link C++ class WaveformGraph+;
 #pragma link C++ class MagicDisplay+;
+#pragma link C++ class MagicControlPanel+;
 
 #pragma link C++ namespace     MagicDisplayOption;
 #pragma link C++ enum          MagicDisplayOption::EMagicDisplayOption;
