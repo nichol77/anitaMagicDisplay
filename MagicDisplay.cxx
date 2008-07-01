@@ -14,6 +14,7 @@
 #include "WaveformGraph.h"
 #include "AnitaCanvasMaker.h"
 #include "AnitaRFCanvasMaker.h"
+#include "MagicControlPanel.h"
 
 //Event Reader Includes
 #include "AnitaConventions.h"
@@ -22,6 +23,8 @@
 #include "PrettyAnitaHk.h"
 #include "TurfRate.h"
 #include "SurfHk.h"
+#include "SummedTurfRate.h"
+#include "AveragedSurfHk.h"
 
 //ROOT Includes
 #include "TROOT.h"
@@ -30,12 +33,14 @@
 #include "TFile.h"
 #include "TButton.h"
 #include "TGroupButton.h"
+#include <TGClient.h>
 
 using namespace std;
 
 MagicDisplay*  MagicDisplay::fgInstance = 0;
 AnitaCanvasMaker *fEventCanMaker=0;
 AnitaRFCanvasMaker *fRFCanMaker=0;
+MagicControlPanel *fControlPanel=0;
 //Leave these as global variables for now
 
 MagicDisplay::MagicDisplay()
@@ -47,6 +52,8 @@ MagicDisplay::MagicDisplay()
    fUsefulEventPtr=0;
    fSurfPtr=0;
    fTurfPtr=0;
+   fAvgSurfPtr=0;
+   fSumTurfPtr=0;
    fgInstance=this;
    fMainOption=MagicDisplayOption::kWavePhiVerticalOnly;
    fMagicCanvas=0;
@@ -56,7 +63,8 @@ MagicDisplay::MagicDisplay()
    fEventTree=0;
    fSurfHkTree=0;
    fTurfRateTree=0;
-   
+   fAvgSurfHkTree=0;
+   fSumTurfRateTree=0;
 }
 
 MagicDisplay::~MagicDisplay()
@@ -71,6 +79,8 @@ MagicDisplay::MagicDisplay(char *baseDir, int run)
    fRawEventPtr=0;
    fHeadPtr=0;
    fHkPtr=0;
+   fAvgSurfPtr=0;
+   fSumTurfPtr=0;
    fUsefulEventPtr=0;
    fTurfRateTree=0;
    fTurfPtr=0;
@@ -89,6 +99,8 @@ MagicDisplay::MagicDisplay(char *baseDir, int run)
    fEventTree=0;
    fSurfHkTree=0;
    fTurfRateTree=0;
+   fAvgSurfHkTree=0;
+   fSumTurfRateTree=0;
 
 
 
@@ -110,33 +122,17 @@ MagicDisplay*  MagicDisplay::Instance()
    return (fgInstance) ? (MagicDisplay*) fgInstance : new MagicDisplay();
 }
 
+void MagicDisplay::startControlPanel() 
+{
+  //  fControlPanel=MagicControlPanel::Instance();
+  //  fControlPanel->DrawControlPanel();
+  new MagicControlPanel(gClient->GetRoot(), 400, 200);
+}
+
+
 void MagicDisplay::startEventDisplay()
 {
-   if(!fEventTree) {      
-      char eventName[FILENAME_MAX];
-      char headerName[FILENAME_MAX];
-      sprintf(eventName,"%s/run%d/eventFile%d*.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);
-      sprintf(headerName,"%s/run%d/headFile%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);
-      fEventTree = new TChain("eventTree");
-      fEventTree->Add(eventName);
-      fEventTree->SetBranchAddress("event",&fRawEventPtr);
-      
-      TFile *fpHead = new TFile(headerName);
-      if(!fpHead) {
-	 cout << "Couldn't open: " << headerName << "\n";
-	 return;
-      }
-      fHeadTree = (TTree*) fpHead->Get("headTree");
-      if(!fHeadTree) {
-	 cout << "Couldn't get headTree from " << headerName << endl;
-	 return;
-      }
-      fHeadTree->SetBranchAddress("header",&fHeadPtr);
-      fEventEntry=0;
-      std::cerr << fEventTree << "\t" << fHeadTree << "\n";
-      std::cerr << fHeadTree->GetEntries() << "\t"
-		<< fEventTree->GetEntries() << "\n";
-   }
+  if(!fEventTree) loadEventTree(); 
    fEventCanMaker=AnitaCanvasMaker::Instance();
    int retVal=getEventEntry();
    if(retVal==0)
@@ -165,6 +161,35 @@ int MagicDisplay::getEventEntry()
   //Need to make configurable at some point
   //This will also need to be modifed to make realEvent accessible outside here
    return 0;
+}
+
+void MagicDisplay::loadEventTree()
+{       
+  char eventName[FILENAME_MAX];
+  char headerName[FILENAME_MAX];
+  sprintf(eventName,"%s/run%d/eventFile%d*.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);
+  sprintf(headerName,"%s/run%d/headFile%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);
+  fEventTree = new TChain("eventTree");
+  fEventTree->Add(eventName);
+  fEventTree->SetBranchAddress("event",&fRawEventPtr);
+      
+  TFile *fpHead = new TFile(headerName);
+  if(!fpHead) {
+    cout << "Couldn't open: " << headerName << "\n";
+    return;
+  }
+  fHeadTree = (TTree*) fpHead->Get("headTree");
+  if(!fHeadTree) {
+    cout << "Couldn't get headTree from " << headerName << endl;
+    return;
+  }
+  fHeadTree->SetBranchAddress("header",&fHeadPtr);
+  fEventEntry=0;
+  fHeadTree->BuildIndex("eventNumber");
+  //      fHeadIndex = (TTreeIndex*) fHeadTree->GetTreeIndex();
+  std::cerr << fEventTree << "\t" << fHeadTree << "\n";
+  std::cerr << fHeadTree->GetEntries() << "\t"
+	    << fEventTree->GetEntries() << "\n";
 }
 
 void MagicDisplay::refreshEventDisplay()
@@ -233,6 +258,24 @@ int MagicDisplay::displayPreviousEvent()
    return retVal;  
 }
 
+
+int MagicDisplay::displayThisEvent(UInt_t eventNumber)
+{
+  if(!fHeadTree) startEventDisplay();
+  if(eventNumber==0) {
+    fEventEntry=0;
+  }
+  else {
+    fEventEntry=fHeadTree->GetEntryWithIndex(eventNumber);
+    if(fEventEntry<0) 
+      return -1;      
+  }
+  int retVal=getEventEntry();
+  if(retVal==0) 
+    refreshEventDisplay(); 
+  else fEventEntry--;
+  return retVal;  
+}
 
 void MagicDisplay::drawEventButtons() {
    TButton *butNext = new TButton("Next Event","MagicDisplay::Instance()->displayNextEvent();",0.9,0.95,1,1);
@@ -429,7 +472,7 @@ void MagicDisplay::startSurfDisplay()
       }
       fSurfHkTree = (TTree*) fpSurf->Get("surfHkTree");
       if(!fSurfHkTree) {
-     cout << "Couldn't get surfRateTree from " << surfName << endl;
+     cout << "Couldn't get surfHkTree from " << surfName << endl;
      return;
       }
       fSurfHkTree->SetBranchAddress("surf",&fSurfPtr);
@@ -450,7 +493,7 @@ int MagicDisplay::getSurfEntry()
    if(fSurfHkEntry<fSurfHkTree->GetEntries())
       fSurfHkTree->GetEntry(fSurfHkEntry);
    else {
-      std::cout << "No more entries in surf rate tree" << endl;
+      std::cout << "No more entries in surfHkTree" << endl;
       return -1;
    }
    //   std::cout << fSurfHkEntry << "\t" << fSurfPtr->realTime 
@@ -518,8 +561,6 @@ void MagicDisplay::drawSurfButtons()
    butPrev->SetFillColor(kBlue-10);
    butPrev->Draw();
 
-
- 
    fSurfSurfViewButton = new TButton("SURF View","MagicDisplay::Instance()->toggleSurfSurfView(1); MagicDisplay::Instance()->refreshSurfDisplay();",0,0.96,0.1,1);
    fSurfSurfViewButton->SetTextSize(0.4);
    fSurfSurfViewButton->SetFillColor(kGray+3);
@@ -554,4 +595,276 @@ void MagicDisplay::toggleSurfSurfView(Int_t surfView)
       fSurfPhiViewButton->Modified();
    }
       
+}
+
+
+
+void MagicDisplay::startAvgSurfDisplay()
+{
+   if(!fAvgSurfHkTree) {
+
+      char surfName[FILENAME_MAX];
+      sprintf(surfName,"%s/run%d/avgSurfHkFile%d.root",fCurrentBaseDir,
+	      fCurrentRun,fCurrentRun);
+      TFile *fpAvgSurf = new TFile(surfName);
+      if(!fpAvgSurf) {
+	 cout << "Couldn't open: " << surfName << "\n";
+	 return;
+      }
+      fAvgSurfHkTree = (TTree*) fpAvgSurf->Get("avgSurfHkTree");
+      if(!fAvgSurfHkTree) {
+     cout << "Couldn't get avgSurfHkTree from " << surfName << endl;
+     return;
+      }
+      fAvgSurfHkTree->SetBranchAddress("avgsurf",&fAvgSurfPtr);
+      fAvgSurfHkEntry=0;
+   }
+
+
+   if(!fRFCanMaker)
+      fRFCanMaker=AnitaRFCanvasMaker::Instance();
+   int retVal=getAvgSurfEntry();
+   if(retVal==0)
+      refreshAvgSurfDisplay();   
+}
+
+int MagicDisplay::getAvgSurfEntry() 
+{
+   //   std::cerr << 
+   if(fAvgSurfHkEntry<fAvgSurfHkTree->GetEntries())
+      fAvgSurfHkTree->GetEntry(fAvgSurfHkEntry);
+   else {
+      std::cout << "No more entries in avgSurfHkTree" << endl;
+      return -1;
+   }
+   //   std::cout << fAvgSurfHkEntry << "\t" << fAvgSurfPtr->realTime 
+   //	     << "\t" << fAvgSurfPtr->ppsNum << std::endl;
+
+   return 0;
+}
+
+int MagicDisplay::displayNextAvgSurf()
+{
+   fAvgSurfHkEntry++;
+   int retVal=getAvgSurfEntry();
+   if(retVal==0) 
+      refreshAvgSurfDisplay();  
+   else fAvgSurfHkEntry--;
+   return retVal;  
+}
+
+
+int MagicDisplay::displayPreviousAvgSurf()
+{
+   if(fAvgSurfHkEntry>0)
+      fAvgSurfHkEntry--;
+   else 
+      return -1;
+   int retVal=getAvgSurfEntry();
+   if(retVal==0) 
+      refreshAvgSurfDisplay();   
+   return retVal;     
+}
+
+void MagicDisplay::refreshAvgSurfDisplay()
+{
+   if(!fAvgSurfCanvas) {
+      fAvgSurfCanvas = new TCanvas("canMagicAvgSurf","canMagicAvgSurf",800,800);
+      fAvgSurfCanvas->cd();
+      drawAvgSurfButtons();
+   }
+   if(!fAvgSurfMainPad) {
+      fAvgSurfCanvas->cd();
+      fAvgSurfMainPad= new TPad("canMagicAvgSurfMain","canMagicAvgSurfMain",0,0,1,0.9);
+      fAvgSurfMainPad->Draw();
+      fAvgSurfCanvas->Update();
+   }
+   if(!fAvgSurfInfoPad) {
+      fAvgSurfCanvas->cd();
+      fAvgSurfInfoPad= new TPad("canMagicAvgSurfInfo","canMagicAvgSurfInfo",0.2,0.91,0.8,0.99);
+      fAvgSurfInfoPad->Draw();
+      fAvgSurfCanvas->Update();
+   }  
+  //This will need to change
+   fRFCanMaker->getAvgSurfInfoCanvas(fAvgSurfPtr,fAvgSurfInfoPad);
+   fRFCanMaker->getAvgSurfHkCanvas(fAvgSurfPtr,fAvgSurfMainPad);
+
+}
+
+void MagicDisplay::drawAvgSurfButtons()
+{
+   TButton *butNext = new TButton("Next AvgSurfHk","MagicDisplay::Instance()->displayNextAvgSurf();",0.85,0.95,1,1);
+   butNext->SetTextSize(0.4);
+   butNext->SetFillColor(kGreen-10);
+   butNext->Draw();
+   TButton *butPrev = new TButton("Prev. AvgSurfHk","MagicDisplay::Instance()->displayPreviousAvgSurf();",0.85,0.90,1,0.95);
+   butPrev->SetTextSize(0.4);
+   butPrev->SetFillColor(kBlue-10);
+   butPrev->Draw();
+
+   fAvgSurfSurfViewButton = new TButton("SURF View","MagicDisplay::Instance()->toggleAvgSurfSurfView(1); MagicDisplay::Instance()->refreshAvgSurfDisplay();",0,0.96,0.1,1);
+   fAvgSurfSurfViewButton->SetTextSize(0.4);
+   fAvgSurfSurfViewButton->SetFillColor(kGray+3);
+   fAvgSurfSurfViewButton->Draw();
+
+
+   fAvgSurfPhiViewButton = new TButton("PHI View","MagicDisplay::Instance()->toggleAvgSurfSurfView(0); MagicDisplay::Instance()->refreshAvgSurfDisplay();",0,0.92,0.1,0.96);
+   fAvgSurfPhiViewButton->SetTextSize(0.4);
+   fAvgSurfPhiViewButton->SetFillColor(kGray);
+   fAvgSurfPhiViewButton->Draw();
+
+}
+
+
+void MagicDisplay::toggleAvgSurfSurfView(Int_t surfView)
+{
+   
+   if(surfView) {
+      //Turn on phi view off
+      fRFCanMaker->fAvgSurfPhiView=0;
+      fAvgSurfSurfViewButton->SetFillColor(kGray+3);
+      fAvgSurfPhiViewButton->SetFillColor(kGray);
+      fAvgSurfSurfViewButton->Modified();
+      fAvgSurfPhiViewButton->Modified();
+   }
+   else {
+      //Turn phi view on
+      fRFCanMaker->fAvgSurfPhiView=1;
+      fAvgSurfSurfViewButton->SetFillColor(kGray);
+      fAvgSurfPhiViewButton->SetFillColor(kGray+3);
+      fAvgSurfSurfViewButton->Modified();
+      fAvgSurfPhiViewButton->Modified();
+   }
+      
+}
+
+
+
+void MagicDisplay::startSumTurfDisplay()
+{
+   if(!fSumTurfRateTree) {
+      char sumTurfName[FILENAME_MAX];
+      sprintf(sumTurfName,"%s/run%d/sumTurfRateFile%d.root",fCurrentBaseDir,
+	      fCurrentRun,fCurrentRun);
+      TFile *fpSumTurf = new TFile(sumTurfName);
+      if(!fpSumTurf) {
+	 cout << "Couldn't open: " << sumTurfName << "\n";
+	 return;
+      }
+      fSumTurfRateTree = (TTree*) fpSumTurf->Get("sumTurfRateTree");
+      if(!fSumTurfRateTree) {
+	 cout << "Couldn't get sumTurfRateTree from " << sumTurfName << endl;
+	 return;
+      }
+      fSumTurfRateTree->SetBranchAddress("sumturf",&fSumTurfPtr);
+      fSumTurfRateEntry=0;
+   }
+   
+
+   fRFCanMaker=AnitaRFCanvasMaker::Instance();
+   int retVal=getSumTurfEntry();
+   if(retVal==0)
+      refreshSumTurfDisplay();   
+}
+
+int MagicDisplay::getSumTurfEntry() 
+{
+   if(fSumTurfRateEntry<fSumTurfRateTree->GetEntries())
+      fSumTurfRateTree->GetEntry(fSumTurfRateEntry);
+   else {
+      std::cout << "No more entries in sumTurf rate tree" << endl;
+      return -1;
+   }
+   //   std::cout << fSumTurfRateEntry << "\t" << fSumTurfPtr->realTime 
+   //	     << "\t" << fSumTurfPtr->ppsNum << std::endl;
+
+   return 0;
+}
+
+int MagicDisplay::displayNextSumTurf()
+{
+   fSumTurfRateEntry++;
+   int retVal=getSumTurfEntry();
+   if(retVal==0) 
+      refreshSumTurfDisplay();  
+   else fSumTurfRateEntry--;
+   return retVal;  
+}
+
+
+int MagicDisplay::displayPreviousSumTurf()
+{
+   if(fSumTurfRateEntry>0)
+      fSumTurfRateEntry--;
+   else 
+      return -1;
+   int retVal=getSumTurfEntry();
+   if(retVal==0) 
+      refreshSumTurfDisplay();   
+   return retVal;     
+}
+
+void MagicDisplay::refreshSumTurfDisplay()
+{
+   if(!fSumTurfCanvas) {
+      fSumTurfCanvas = new TCanvas("canMagicSumTurf","canMagicSumTurf",800,800);
+      fSumTurfCanvas->cd();
+      drawSumTurfButtons();
+   }
+   if(!fSumTurfMainPad) {
+      fSumTurfCanvas->cd();
+      fSumTurfMainPad= new TPad("canMagicSumTurfMain","canMagicSumTurfMain",0,0,1,0.9);
+      fSumTurfMainPad->Draw();
+      fSumTurfCanvas->Update();
+   }
+   if(!fSumTurfInfoPad) {
+      fSumTurfCanvas->cd();
+      fSumTurfInfoPad= new TPad("canMagicSumTurfInfo","canMagicSumTurfInfo",0.2,0.91,0.8,0.99);
+      fSumTurfInfoPad->Draw();
+      fSumTurfCanvas->Update();
+   }  
+  //This will need to change
+   fRFCanMaker->getSumTurfInfoCanvas(fSumTurfPtr,fSumTurfInfoPad);
+   fRFCanMaker->getSumTurfRateCanvas(fSumTurfPtr,fSumTurfMainPad);
+
+}
+
+void MagicDisplay::drawSumTurfButtons()
+{
+   TButton *butNext = new TButton("Next SumTurf","MagicDisplay::Instance()->displayNextSumTurf();",0.85,0.95,1,1);
+   butNext->SetTextSize(0.5);
+   butNext->SetFillColor(kGreen-10);
+   butNext->Draw();
+   TButton *butPrev = new TButton("Prev. SumTurf","MagicDisplay::Instance()->displayPreviousSumTurf();",0.85,0.90,1,0.95);
+   butPrev->SetTextSize(0.5);
+   butPrev->SetFillColor(kBlue-10);
+   butPrev->Draw();
+   
+   fSumTurfYScaleButton = new TButton("Fix Scale","MagicDisplay::Instance()->toggleSumTurfYScale(); MagicDisplay::Instance()->refreshSumTurfDisplay();",0,0.96,0.1,1);
+   fSumTurfYScaleButton->SetTextSize(0.4);
+   fSumTurfYScaleButton->SetFillColor(kGray);
+   fSumTurfYScaleButton->Draw();
+}
+
+void MagicDisplay::toggleSumTurfYScale()
+{
+   if(fSumTurfYScaleButton->GetFillColor()==kGray) {
+      //Turn on fixed y scale
+      fRFCanMaker->fFixSumTurfYScale=1;
+      fSumTurfYScaleButton->SetFillColor(kGray+3);
+      fSumTurfYScaleButton->Modified();
+   }
+   else {
+      //Turn off fixed y scale
+      fRFCanMaker->fFixSumTurfYScale=0;
+      fSumTurfYScaleButton->SetFillColor(kGray);
+      fSumTurfYScaleButton->Modified();
+   }
+      
+}
+
+UInt_t MagicDisplay::getCurrentEvent()
+{
+  if(fHeadPtr) return fHeadPtr->eventNumber; 
+  return 0;
 }
