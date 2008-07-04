@@ -154,6 +154,7 @@ class MagicDisplay
    TButton *fVertButton;
    TButton *fHorizButton;
    TButton *fBothButton;
+   TButton *fSurfButton;
 
    TButton *fTurfYScaleButton;
    TButton *fSurfSurfViewButton;

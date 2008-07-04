@@ -157,7 +157,7 @@ int MagicDisplay::getEventEntry()
    }
    if(fUsefulEventPtr)
       delete fUsefulEventPtr;
-   fUsefulEventPtr = new UsefulAnitaEvent(fRawEventPtr,WaveCalType::kJustUnwrap);  
+   fUsefulEventPtr = new UsefulAnitaEvent(fRawEventPtr,WaveCalType::kVoltageTime);  
   //Need to make configurable at some point
   //This will also need to be modifed to make realEvent accessible outside here
    return 0;
@@ -227,6 +227,9 @@ void MagicDisplay::refreshEventDisplay()
       fEventCanMaker->getCombinedCanvas(fUsefulEventPtr,fHeadPtr,fMagicMainPad);
       //      fEventCanMaker->setupPhiPadWithFrames(fMagicMainPad);
       break;
+   case MagicDisplayOption::kWaveSurfOnly:
+     fEventCanMaker->getSurfChanCanvas(fUsefulEventPtr,fHeadPtr,fMagicMainPad);
+     break;
    default:
       fEventCanMaker->getVerticalCanvas(fUsefulEventPtr,fHeadPtr,fMagicMainPad);
       break;
@@ -287,18 +290,22 @@ void MagicDisplay::drawEventButtons() {
    butPrev->SetFillColor(kBlue-10);
    butPrev->Draw();
 
-   fVertButton = new TButton("Vertical","MagicDisplay::Instance()->setMainCanvasOption(MagicDisplayOption::kWavePhiVerticalOnly); MagicDisplay::Instance()->refreshEventDisplay();",0,0.97,0.05,1);
+   fVertButton = new TButton("Vertical","MagicDisplay::Instance()->setMainCanvasOption(MagicDisplayOption::kWavePhiVerticalOnly); MagicDisplay::Instance()->refreshEventDisplay();",0,0.975,0.05,1);
    fVertButton->SetTextSize(0.4);
    fVertButton->SetFillColor(kGray+3);
    fVertButton->Draw();
-   fHorizButton = new TButton("Horizontal","MagicDisplay::Instance()->setMainCanvasOption(MagicDisplayOption::kWavePhiHorizontalOnly); MagicDisplay::Instance()->refreshEventDisplay();",0,0.94,0.05,0.97);
+   fHorizButton = new TButton("Horizontal","MagicDisplay::Instance()->setMainCanvasOption(MagicDisplayOption::kWavePhiHorizontalOnly); MagicDisplay::Instance()->refreshEventDisplay();",0,0.95,0.05,0.975);
    fHorizButton->SetTextSize(0.4);
    fHorizButton->SetFillColor(kGray);
    fHorizButton->Draw();
-   fBothButton = new TButton("Both","MagicDisplay::Instance()->setMainCanvasOption(MagicDisplayOption::kWavePhiCombined); MagicDisplay::Instance()->refreshEventDisplay();",0,0.91,0.05,0.94);
+   fBothButton = new TButton("Both","MagicDisplay::Instance()->setMainCanvasOption(MagicDisplayOption::kWavePhiCombined); MagicDisplay::Instance()->refreshEventDisplay();",0,0.925,0.05,0.95);
    fBothButton->SetTextSize(0.4);
    fBothButton->SetFillColor(kGray);
    fBothButton->Draw();
+   fSurfButton = new TButton("Surf","MagicDisplay::Instance()->setMainCanvasOption(MagicDisplayOption::kWaveSurfOnly); MagicDisplay::Instance()->refreshEventDisplay();",0,0.9,0.05,0.925);
+   fSurfButton->SetTextSize(0.4);
+   fSurfButton->SetFillColor(kGray);
+   fSurfButton->Draw();
    
 }
 
@@ -306,30 +313,40 @@ void MagicDisplay::setMainCanvasOption(MagicDisplayOption::MagicDisplayOption_t 
 {
    fMainOption=option;
    switch(option) {
+   case MagicDisplayOption::kWaveSurfOnly:
+      fVertButton->SetFillColor(kGray);
+      fHorizButton->SetFillColor(kGray);
+      fBothButton->SetFillColor(kGray);
+      fSurfButton->SetFillColor(kGray+3);
+      break;
    case MagicDisplayOption::kWavePhiVerticalOnly:
    case MagicDisplayOption::kPowerPhiVerticalOnly:
       fVertButton->SetFillColor(kGray+3);
       fHorizButton->SetFillColor(kGray);
       fBothButton->SetFillColor(kGray);
+      fSurfButton->SetFillColor(kGray);
       break;
    case MagicDisplayOption::kWavePhiHorizontalOnly:
    case MagicDisplayOption::kPowerPhiHorizontalOnly:
       fHorizButton->SetFillColor(kGray+3);
       fVertButton->SetFillColor(kGray);
       fBothButton->SetFillColor(kGray);
+      fSurfButton->SetFillColor(kGray);
       break;
    case MagicDisplayOption::kWavePhiCombined:
    case MagicDisplayOption::kPowerPhiCombined:
       fHorizButton->SetFillColor(kGray);
       fVertButton->SetFillColor(kGray);
       fBothButton->SetFillColor(kGray+3);
+      fSurfButton->SetFillColor(kGray);
       break;
    default:
       break;
    }   
    fVertButton->Modified();
    fHorizButton->Modified();  
-   fBothButton->Modified();  
+   fBothButton->Modified(); 
+   fSurfButton->Modified();
 }
 
 
