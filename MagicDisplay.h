@@ -56,6 +56,7 @@ class MagicDisplay
   int getEventEntry();
   void drawEventButtons();
   void setMainCanvasOption(MagicDisplayOption::MagicDisplayOption_t option); 
+  void toggleWaveformView(Int_t waveformView);
 
   void startTurfDisplay();
   int displayNextTurf();
@@ -154,6 +155,8 @@ class MagicDisplay
    TButton *fVertButton;
    TButton *fHorizButton;
    TButton *fBothButton;
+   TButton *fWaveformButton;
+   TButton *fPowerButton;
    TButton *fSurfButton;
 
    TButton *fTurfYScaleButton;

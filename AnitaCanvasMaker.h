@@ -29,9 +29,17 @@ class AnitaCanvasMaker
   Double_t fMaxClockVoltLimit;
   Double_t fMinTimeLimit;
   Double_t fMaxTimeLimit;
+  Double_t fMinPowerLimit;
+  Double_t fMaxPowerLimit;
+  Double_t fMinFreqLimit;
+  Double_t fMaxFreqLimit;
+  Int_t fPolView;
+  Int_t fPowerSpecView;
+  Int_t fRedoEventCanvas;
   Int_t fLastView;
   
 
+  TPad *getEventViewerCanvas(UsefulAnitaEvent *evPtr,RawAnitaHeader *hdPtr, TPad *useCan=0);
   TPad *getHorizontalCanvas(UsefulAnitaEvent *evPtr,RawAnitaHeader *hdPtr, TPad *useCan=0);
   TPad *getVerticalCanvas(UsefulAnitaEvent *evPtr,RawAnitaHeader *hdPtr, TPad *useCan=0);
   TPad *getCombinedCanvas(UsefulAnitaEvent *evPtr,RawAnitaHeader *hdPtr, TPad *useCan=0);
