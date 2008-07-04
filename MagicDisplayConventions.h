@@ -25,9 +25,11 @@ namespace MagicDisplayOption {
       kWavePhiVerticalOnly = 0,
       kWavePhiHorizontalOnly,
       kWavePhiCombined,
+      kWaveSurfOnly,
       kPowerPhiVerticalOnly,
       kPowerPhiHorizontalOnly,
-      kPowerPhiCombined    
+      kPowerPhiCombined,
+      kPowerSurfOnly
    } MagicDisplayOption_t;
 };
 
