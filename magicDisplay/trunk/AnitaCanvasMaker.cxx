@@ -32,6 +32,8 @@
 #include "TObject.h"
 #include "TTimeStamp.h"
 
+#include "FFTtools.h"
+
 
 AnitaCanvasMaker*  AnitaCanvasMaker::fgInstance = 0;
 AnitaGeomTool *fACMGeomTool=0;
@@ -52,6 +54,8 @@ AnitaRing::AnitaRing_t ringMap[5]={AnitaRing::kUpperRing,
 
 WaveformGraph *grSeavey[NUM_SEAVEYS][2];
 WaveformGraph *grSurf[ACTIVE_SURFS][CHANNELS_PER_SURF];
+WaveformGraph *grSeavey2[NUM_SEAVEYS][2]={0};
+WaveformGraph *grSurf2[ACTIVE_SURFS][CHANNELS_PER_SURF];
 
 AnitaCanvasMaker::AnitaCanvasMaker()
 {
@@ -64,10 +68,19 @@ AnitaCanvasMaker::AnitaCanvasMaker()
   fMaxClockVoltLimit=200;
   fMinTimeLimit=0;
   fMaxTimeLimit=100;
+  fMinPowerLimit=-90;
+  fMaxPowerLimit=10;
+  fMinFreqLimit=0;
+  fMaxFreqLimit=1200;
+  fPolView=0;
+  fPowerSpecView=0;
+  fRedoEventCanvas=0;
   fLastView=0;
   fgInstance=this;
   memset(grSeavey,0,sizeof(WaveformGraph*)*NUM_SEAVEYS*2);
   memset(grSurf,0,sizeof(WaveformGraph*)*ACTIVE_SURFS*CHANNELS_PER_SURF);
+  memset(grSeavey2,0,sizeof(WaveformGraph*)*NUM_SEAVEYS*2);
+  memset(grSurf2,0,sizeof(WaveformGraph*)*ACTIVE_SURFS*CHANNELS_PER_SURF);
   
 }
 
@@ -146,6 +159,30 @@ TPad *AnitaCanvasMaker::getEventInfoCanvas(RawAnitaHeader *hdPtr,TPad *useCan)
 }
 
 
+TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr,
+					     RawAnitaHeader *hdPtr,
+					     TPad *useCan)
+{
+  TPad *retCan;
+
+  static Int_t lastEventView=0;
+
+  if(lastEventView==fPowerSpecView) fRedoEventCanvas=0;
+  else fRedoEventCanvas=1;
+
+  if(fPolView==0) retCan=AnitaCanvasMaker::getVerticalCanvas(evPtr,hdPtr,useCan);
+  else if(fPolView==1) retCan=AnitaCanvasMaker::getHorizontalCanvas(evPtr,hdPtr,useCan);
+  if(fPolView==2) retCan=AnitaCanvasMaker::getCombinedCanvas(evPtr,hdPtr,useCan);
+
+
+  lastEventView=fPowerSpecView;
+
+  return retCan;
+
+}
+
+
+
 TPad *AnitaCanvasMaker::getHorizontalCanvas(UsefulAnitaEvent *evPtr,
 					    RawAnitaHeader *hdPtr,
 					    TPad *useCan)
@@ -186,6 +223,8 @@ TPad *AnitaCanvasMaker::getHorizontalCanvas(UsefulAnitaEvent *evPtr,
     for(int pol=0;pol<2;pol++) {
       if(grSeavey[ind][pol]) delete grSeavey[ind][pol];
       grSeavey[ind][pol]=0;
+      if(grSeavey2[ind][pol]) delete grSeavey2[ind][pol];
+      grSeavey2[ind][pol]=0;
     }
   }
 
@@ -227,7 +266,15 @@ TPad *AnitaCanvasMaker::getHorizontalCanvas(UsefulAnitaEvent *evPtr,
       if(hdPtr->l3TrigPattern & (1<<phi))
 	grSeavey[count][1]->SetLineColor(kRed-3);
 
-      grSeavey[count][1]->Draw("l");
+
+      if(fPowerSpecView){
+	TGraph *grTemp2 = grSeavey[count][1]->DrawFFT();
+	grSeavey2[count][1] = new WaveformGraph(grTemp2->GetN(),grTemp2->GetX(),grTemp2->GetY());
+	grSeavey2[count][1]->Draw("l");
+	delete grTemp2;
+      }
+      else grSeavey[count][1]->Draw("l");
+
       delete grTemp;
       count++;      
       paddy1->SetEditable(kFALSE);
@@ -282,6 +329,8 @@ TPad *AnitaCanvasMaker::getVerticalCanvas(UsefulAnitaEvent *evPtr,
     for(int pol=0;pol<2;pol++) {
       if(grSeavey[ind][pol]) delete grSeavey[ind][pol];
       grSeavey[ind][pol]=0;
+      if(grSeavey2[ind][pol]) delete grSeavey2[ind][pol];
+      grSeavey2[ind][pol]=0;
     }
   }
 
@@ -324,8 +373,16 @@ TPad *AnitaCanvasMaker::getVerticalCanvas(UsefulAnitaEvent *evPtr,
 	grSeavey[count][0]->SetLineColor(kRed-3);
 
 
-      grSeavey[count][0]->Draw("l");
+      if(fPowerSpecView){
+        TGraph *grTemp2 = grSeavey[count][0]->DrawFFT();
+        grSeavey2[count][0] = new WaveformGraph(grTemp2->GetN(),grTemp2->GetX(),grTemp2->GetY());
+	grSeavey2[count][0]->Draw("l");
+	delete grTemp2;
+      }
+      else grSeavey[count][0]->Draw("l");
+
       delete grTemp;
+
       count++;
       paddy1->SetEditable(kFALSE);
     }
@@ -377,6 +434,8 @@ TPad *AnitaCanvasMaker::getSurfChanCanvas(UsefulAnitaEvent *evPtr,
     for(int chan=0;chan<CHANNELS_PER_SURF;chan++) {
       if(grSurf[surf][chan]) delete grSurf[surf][chan];
       grSurf[surf][chan]=0;
+      if(grSurf2[surf][chan]) delete grSurf2[surf][chan];
+      grSurf2[surf][chan]=0;
     }
   }
 
@@ -407,7 +466,16 @@ TPad *AnitaCanvasMaker::getSurfChanCanvas(UsefulAnitaEvent *evPtr,
 //      if(hdPtr->l3TrigPattern & (1<<phi))
 //	grSurf[count][1]->SetLineColor(kRed-3);
 
-      grSurf[surf][chan]->Draw("l");
+      if(fPowerSpecView && chan<(CHANNELS_PER_SURF-1)){
+	TGraph *grTemp2 = grSurf[surf][chan]->DrawFFT();
+	grSurf2[surf][chan] = new WaveformGraph(grTemp2->GetN(),grTemp2->GetX(),grTemp2->GetY());
+	grSurf2[surf][chan]->Draw("l");
+	delete grTemp2;
+      }
+      else{
+	grSurf[surf][chan]->Draw("l");
+      }
+
       delete grTemp;
       paddy1->SetEditable(kFALSE);
     }
@@ -459,7 +527,9 @@ TPad *AnitaCanvasMaker::getCombinedCanvas(UsefulAnitaEvent *evPtr,
   for(int ind=0;ind<NUM_SEAVEYS;ind++) {
     for(int pol=0;pol<2;pol++) {
       if(grSeavey[ind][pol]) delete grSeavey[ind][pol];
+      if(grSeavey2[ind][pol]) delete grSeavey2[ind][pol];
       grSeavey[ind][pol]=0;
+      grSeavey2[ind][pol]=0;
     }
   }
   
@@ -493,11 +563,26 @@ TPad *AnitaCanvasMaker::getCombinedCanvas(UsefulAnitaEvent *evPtr,
       grSeavey[count][1] = new WaveformGraph(grTemp2->GetN(),grTemp2->GetX(),grTemp2->GetY());
       grSeavey[count][1]->SetLineColor(kBlue);
 
-      
-      grSeavey[count][0]->Draw("l");
-      grSeavey[count][1]->Draw("l");
+
+      if(fPowerSpecView){
+	TGraph *grTemp3 = grSeavey[count][0]->DrawFFT();
+	grSeavey2[count][0] = new WaveformGraph(grTemp3->GetN(),grTemp3->GetX(),grTemp3->GetY());
+	TGraph *grTemp4 = grSeavey[count][1]->DrawFFT();
+	grSeavey2[count][1] = new WaveformGraph(grTemp4->GetN(),grTemp4->GetX(),grTemp4->GetY());
+	grSeavey2[count][1]->SetLineColor(kBlue);
+	grSeavey2[count][0]->Draw("l");
+	grSeavey2[count][1]->Draw("l");
+	delete grTemp3;
+	delete grTemp4;
+      }
+      else{
+	grSeavey[count][0]->Draw("l");
+	grSeavey[count][1]->Draw("l");
+      }
+
       delete grTemp;
       delete grTemp2;
+
       count++;
       paddy1->SetEditable(kFALSE);
     }
@@ -518,9 +603,9 @@ void AnitaCanvasMaker::setupPhiPadWithFrames(TPad *plotPad)
   char textLabel[180];
   char padName[180];
   plotPad->cd();
-  if(phiPadsDone) {
+  if(phiPadsDone && !fRedoEventCanvas) {
     int errors=0;
-    for(int i=0;i<32;i++) {
+    for(int i=0;i<40;i++) {
       sprintf(padName,"phiChanPad%d",i);
       TPad *paddy = (TPad*) plotPad->FindObject(padName);
       if(!paddy)
@@ -531,6 +616,12 @@ void AnitaCanvasMaker::setupPhiPadWithFrames(TPad *plotPad)
   }
   phiPadsDone=1;
       
+  if(fRedoEventCanvas){
+    for(int i=0;i<40;i++){
+      sprintf(padName,"phiChanPad%d",i);
+      plotPad->FindObject(padName)->Delete();
+    }
+  }
 
   Double_t left[8]={0.04,0.165,0.28,0.395,0.51,0.625,0.74,0.855};
   Double_t right[8]={0.165,0.28,0.395,0.51,0.625,0.74,0.855,0.97};
@@ -586,10 +677,10 @@ void AnitaCanvasMaker::setupPhiPadWithFrames(TPad *plotPad)
       paddy1->Draw();
       paddy1->cd();
 
-
+      TH1F *framey;
       
-      
-      TH1F *framey = (TH1F*) paddy1->DrawFrame(fMinTimeLimit,fMinVoltLimit,fMaxTimeLimit,fMaxVoltLimit);
+      if(!fPowerSpecView) framey = (TH1F*) paddy1->DrawFrame(fMinTimeLimit,fMinVoltLimit,fMaxTimeLimit,fMaxVoltLimit);
+      else framey = (TH1F*) paddy1->DrawFrame(fMinFreqLimit,fMinPowerLimit,fMaxFreqLimit,fMaxPowerLimit); 
 
       framey->GetYaxis()->SetLabelSize(0.1);
       framey->GetYaxis()->SetTitleSize(0.1);
@@ -681,11 +772,22 @@ void AnitaCanvasMaker::setupSurfPadWithFrames(TPad *plotPad)
       paddy1->Draw();
       paddy1->cd();
       TH1F *framey;
-      if(row<8) {
-       framey = (TH1F*) paddy1->DrawFrame(fMinTimeLimit,fMinVoltLimit,fMaxTimeLimit,fMaxVoltLimit);
+      if(fPowerSpecView){
+	if(row<8) {
+	  framey = (TH1F*) paddy1->DrawFrame(fMinFreqLimit,fMinPowerLimit,fMaxFreqLimit,fMaxPowerLimit);
+	}
+	else{
+	  framey = (TH1F*) paddy1->DrawFrame(fMinTimeLimit,fMinClockVoltLimit,fMaxTimeLimit,fMaxClockVoltLimit);
+	}
       }
-      else
-	framey = (TH1F*) paddy1->DrawFrame(fMinTimeLimit,fMinClockVoltLimit,fMaxTimeLimit,fMaxClockVoltLimit);
+      else{
+	if(row<8) {
+	  framey = (TH1F*) paddy1->DrawFrame(fMinTimeLimit,fMinVoltLimit,fMaxTimeLimit,fMaxVoltLimit);
+	}
+	else{
+	  framey = (TH1F*) paddy1->DrawFrame(fMinTimeLimit,fMinClockVoltLimit,fMaxTimeLimit,fMaxClockVoltLimit);
+	}
+      }
 
       framey->GetYaxis()->SetLabelSize(0.1);
       framey->GetYaxis()->SetTitleSize(0.1);

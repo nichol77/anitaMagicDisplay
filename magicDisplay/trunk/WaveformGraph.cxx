@@ -98,28 +98,10 @@ void WaveformGraph::drawInNewCanvas()
 }
 
 //______________________________________________________________________________
-void WaveformGraph::DrawFFT()
+TGraph *WaveformGraph::DrawFFT()
 {
-  gStyle->SetTitleH(0.1);
-  gStyle->SetLabelSize(0.1,"xy");
-  gStyle->SetTitleSize(0.1,"xy");
-  gStyle->SetTitleOffset(0.5,"y");
-  gStyle->SetOptTitle(0);
-  gStyle->SetCanvasDefW(600);
-  gStyle->SetCanvasDefH(400);
-  //   gROOT->ForceStyle();
   
-  TCanvas *can = new TCanvas();
-  can->SetLeftMargin(0.15);
-  can->SetBottomMargin(0.15);
-  can->SetTopMargin(0.1);
-  can->SetRightMargin(0.1);
   TGraph *grFFT = FFTtools::makePowerSpectrumMilliVoltsNanoSecondsdB(this);
-  grFFT->GetXaxis()->SetLabelSize(0.06);
-  grFFT->GetXaxis()->SetTitleSize(0.06);
-  grFFT->GetYaxis()->SetLabelSize(0.06);
-  grFFT->GetYaxis()->SetTitleSize(0.06);
-  grFFT->Draw("al");
-  
+  return grFFT;
   //   printf("WaveformGraph::DrawFFT: not yet implemented\n");
 }

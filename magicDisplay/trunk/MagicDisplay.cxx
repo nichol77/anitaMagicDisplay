@@ -218,13 +218,16 @@ void MagicDisplay::refreshEventDisplay()
    fEventCanMaker->getEventInfoCanvas(fHeadPtr,fMagicEventInfoPad);
    switch(fMainOption) {
    case MagicDisplayOption::kWavePhiVerticalOnly:
-      fEventCanMaker->getVerticalCanvas(fUsefulEventPtr,fHeadPtr,fMagicMainPad);
+     fEventCanMaker->fPolView=0;
+      fEventCanMaker->getEventViewerCanvas(fUsefulEventPtr,fHeadPtr,fMagicMainPad);
       break;
    case MagicDisplayOption::kWavePhiHorizontalOnly:
-      fEventCanMaker->getHorizontalCanvas(fUsefulEventPtr,fHeadPtr,fMagicMainPad);
+     fEventCanMaker->fPolView=1;
+      fEventCanMaker->getEventViewerCanvas(fUsefulEventPtr,fHeadPtr,fMagicMainPad);
       break;
    case MagicDisplayOption::kWavePhiCombined:
-      fEventCanMaker->getCombinedCanvas(fUsefulEventPtr,fHeadPtr,fMagicMainPad);
+     fEventCanMaker->fPolView=2;
+      fEventCanMaker->getEventViewerCanvas(fUsefulEventPtr,fHeadPtr,fMagicMainPad);
       //      fEventCanMaker->setupPhiPadWithFrames(fMagicMainPad);
       break;
    case MagicDisplayOption::kWaveSurfOnly:
@@ -302,6 +305,17 @@ void MagicDisplay::drawEventButtons() {
    fBothButton->SetTextSize(0.4);
    fBothButton->SetFillColor(kGray);
    fBothButton->Draw();
+
+   //NEW BUTTONS
+   fWaveformButton = new TButton("Waveform View","MagicDisplay::Instance()->toggleWaveformView(1); MagicDisplay::Instance()->refreshEventDisplay();",0.05,0.95,0.14,1);
+   fWaveformButton->SetTextSize(0.4);
+   fWaveformButton->SetFillColor(kGray+3);
+   fWaveformButton->Draw();
+   fPowerButton = new TButton("FFT View","MagicDisplay::Instance()->toggleWaveformView(0); MagicDisplay::Instance()->refreshEventDisplay();",0.05,0.9,0.14,0.95);
+   fPowerButton->SetTextSize(0.4);
+   fPowerButton->SetFillColor(kGray);
+   fPowerButton->Draw();
+
    fSurfButton = new TButton("Surf","MagicDisplay::Instance()->setMainCanvasOption(MagicDisplayOption::kWaveSurfOnly); MagicDisplay::Instance()->refreshEventDisplay();",0,0.9,0.05,0.925);
    fSurfButton->SetTextSize(0.4);
    fSurfButton->SetFillColor(kGray);
@@ -347,6 +361,29 @@ void MagicDisplay::setMainCanvasOption(MagicDisplayOption::MagicDisplayOption_t 
    fHorizButton->Modified();  
    fBothButton->Modified(); 
    fSurfButton->Modified();
+}
+
+
+void MagicDisplay::toggleWaveformView(Int_t surfView)
+{
+   
+   if(surfView) {
+      //Turn on phi view off
+      fEventCanMaker->fPowerSpecView=0;
+      fWaveformButton->SetFillColor(kGray+3);
+      fPowerButton->SetFillColor(kGray);
+      fWaveformButton->Modified();
+      fPowerButton->Modified();
+   }
+   else {
+      //Turn phi view on
+      fEventCanMaker->fPowerSpecView=1;
+      fWaveformButton->SetFillColor(kGray);
+      fPowerButton->SetFillColor(kGray+3);
+      fWaveformButton->Modified();
+      fPowerButton->Modified();
+   }
+      
 }
 
 
@@ -613,6 +650,8 @@ void MagicDisplay::toggleSurfSurfView(Int_t surfView)
    }
       
 }
+
+
 
 
 
@@ -885,3 +924,35 @@ UInt_t MagicDisplay::getCurrentEvent()
   if(fHeadPtr) return fHeadPtr->eventNumber; 
   return 0;
 }
+
+
+
+/*
+void MagicDisplay::startSummaryDisplay()
+{
+  char headerName[FILENAME_MAX];
+  char eventName[FILENAME_MAX];
+  sprintf(headerName,"%s/run%d/headFile%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);
+  sprintf(eventName,"%s/run%d/eventFile%d*.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);
+
+  fEventTree = new TChain("eventTree");
+  fEventTree->Add(eventName);
+  fEventTree->SetBranchAddress("event",&fSummaryEventPtr);
+
+  TFile *fpHead = new TFile(headerName);
+  if(!fpHead) {
+     cout << "Couldn't open: " << headerName << "\n";
+     return;
+  }
+  fHeadTree = (TTree*) fpHead->Get("headTree");
+  if(!fHeadTree) {
+     cout << "Couldn't get headTree from " << headerName << endl;
+     return;
+  }
+
+  fHeadTree->SetBranchAddress("header",&fSummaryHeadPtr);
+
+
+
+  }
+*/
