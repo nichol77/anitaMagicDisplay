@@ -15,7 +15,8 @@ class WaveformGraph : public TGraph
   WaveformGraph(int n, const Double_t *x, const Double_t *y);
   virtual ~WaveformGraph();
   
-  TGraph *DrawFFT(); // *MENU*
+  void DrawFFT(); // *MENU*
+  TGraph *getFFT();
 
  private:
   
