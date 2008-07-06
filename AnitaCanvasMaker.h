@@ -36,26 +36,30 @@ class AnitaCanvasMaker
   Int_t fPolView;
   Int_t fPowerSpecView;
   Int_t fRedoEventCanvas;
+  //Int_t fRedoSurfCanvas;
   Int_t fLastView;
+  Int_t fNewEvent;
   
 
   TPad *getEventViewerCanvas(UsefulAnitaEvent *evPtr,RawAnitaHeader *hdPtr, TPad *useCan=0);
-  TPad *getHorizontalCanvas(UsefulAnitaEvent *evPtr,RawAnitaHeader *hdPtr, TPad *useCan=0);
-  TPad *getVerticalCanvas(UsefulAnitaEvent *evPtr,RawAnitaHeader *hdPtr, TPad *useCan=0);
-  TPad *getCombinedCanvas(UsefulAnitaEvent *evPtr,RawAnitaHeader *hdPtr, TPad *useCan=0);
-  TPad *getSurfChanCanvas(UsefulAnitaEvent *evPtr,RawAnitaHeader *hdPtr, TPad *useCan=0);
+  TPad *getHorizontalCanvas(RawAnitaHeader *hdPtr, TPad *useCan=0);
+  TPad *getVerticalCanvas(RawAnitaHeader *hdPtr, TPad *useCan=0);
+  TPad *getCombinedCanvas(RawAnitaHeader *hdPtr, TPad *useCan=0);
+  TPad *getSurfChanCanvas(RawAnitaHeader *hdPtr, TPad *useCan=0);
   
-   TPad *getHorizontalPhiCanvas(UsefulAnitaEvent *evPtr,RawAnitaHeader *hdPtr, TPad *useCan=0);
-  TPad *getVerticalPhiCanvas(UsefulAnitaEvent *evPtr,RawAnitaHeader *hdPtr, TPad *useCan=0);
-  TPad *getSurfChanPhiCanvas(UsefulAnitaEvent *evPtr,RawAnitaHeader *hdPtr, TPad *useCan=0);
-  TPad *getCombinedPhiCanvas(UsefulAnitaEvent *evPtr,RawAnitaHeader *hdPtr, TPad *useCan=0);
+   TPad *getHorizontalPhiCanvas(RawAnitaHeader *hdPtr, TPad *useCan=0);
+  TPad *getVerticalPhiCanvas(RawAnitaHeader *hdPtr, TPad *useCan=0);
+  TPad *getSurfChanPhiCanvas(RawAnitaHeader *hdPtr, TPad *useCan=0);
+  TPad *getCombinedPhiCanvas(RawAnitaHeader *hdPtr, TPad *useCan=0);
 
 
   TPad *getEventInfoCanvas(RawAnitaHeader *hdPtr, TPad *useCan=0);
   
   void setupPhiPadWithFrames(TPad *plotPad);
   void setupSurfPadWithFrames(TPad *plotPad);
-  void deleteTGraphsFromPad(TPad *paddy);
+  //void deleteTGraphsFromPad(TPad *paddy);
+  void deleteTGraphsFromPad(TPad *paddy,int surf,int chan);
+  void deleteTGraphsFromPad(TPad *paddy,int surf,int chan,int chan2);
 
   AnitaCanvasMaker();
   ~AnitaCanvasMaker();
