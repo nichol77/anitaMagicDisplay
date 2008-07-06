@@ -268,7 +268,7 @@ TPad *AnitaCanvasMaker::getHorizontalCanvas(UsefulAnitaEvent *evPtr,
 
 
       if(fPowerSpecView){
-	TGraph *grTemp2 = grSeavey[count][1]->DrawFFT();
+	TGraph *grTemp2 = grSeavey[count][1]->getFFT();
 	grSeavey2[count][1] = new WaveformGraph(grTemp2->GetN(),grTemp2->GetX(),grTemp2->GetY());
 	grSeavey2[count][1]->Draw("l");
 	delete grTemp2;
@@ -374,7 +374,7 @@ TPad *AnitaCanvasMaker::getVerticalCanvas(UsefulAnitaEvent *evPtr,
 
 
       if(fPowerSpecView){
-        TGraph *grTemp2 = grSeavey[count][0]->DrawFFT();
+        TGraph *grTemp2 = grSeavey[count][0]->getFFT();
         grSeavey2[count][0] = new WaveformGraph(grTemp2->GetN(),grTemp2->GetX(),grTemp2->GetY());
 	grSeavey2[count][0]->Draw("l");
 	delete grTemp2;
@@ -467,7 +467,7 @@ TPad *AnitaCanvasMaker::getSurfChanCanvas(UsefulAnitaEvent *evPtr,
 //	grSurf[count][1]->SetLineColor(kRed-3);
 
       if(fPowerSpecView && chan<(CHANNELS_PER_SURF-1)){
-	TGraph *grTemp2 = grSurf[surf][chan]->DrawFFT();
+	TGraph *grTemp2 = grSurf[surf][chan]->getFFT();
 	grSurf2[surf][chan] = new WaveformGraph(grTemp2->GetN(),grTemp2->GetX(),grTemp2->GetY());
 	grSurf2[surf][chan]->Draw("l");
 	delete grTemp2;
@@ -565,9 +565,9 @@ TPad *AnitaCanvasMaker::getCombinedCanvas(UsefulAnitaEvent *evPtr,
 
 
       if(fPowerSpecView){
-	TGraph *grTemp3 = grSeavey[count][0]->DrawFFT();
+	TGraph *grTemp3 = grSeavey[count][0]->getFFT();
 	grSeavey2[count][0] = new WaveformGraph(grTemp3->GetN(),grTemp3->GetX(),grTemp3->GetY());
-	TGraph *grTemp4 = grSeavey[count][1]->DrawFFT();
+	TGraph *grTemp4 = grSeavey[count][1]->getFFT();
 	grSeavey2[count][1] = new WaveformGraph(grTemp4->GetN(),grTemp4->GetX(),grTemp4->GetY());
 	grSeavey2[count][1]->SetLineColor(kBlue);
 	grSeavey2[count][0]->Draw("l");

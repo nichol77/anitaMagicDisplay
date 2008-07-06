@@ -815,6 +815,8 @@ TPad *AnitaRFCanvasMaker::getSumTurfRateCanvas(SummedTurfRate *sumTurfPtr, TPad 
 
   l1Max*=1.1e-3;
   l2Max*=1.1;
+  l1Max*=scale;
+  l2Max*=scale;
   plotPad->SetRightMargin(0.0);
   plotPad->SetLeftMargin(0.1);
   plotPad->SetTopMargin(0.05);
@@ -1026,8 +1028,8 @@ void AnitaRFCanvasMaker::getAvgSurfHkSurfCanvas(AveragedSurfHk *avgSurfPtr,TPad 
       Float_t error1=0;
       Float_t error2=0;
       if(avgSurfPtr->numHks>0) {
-	error1=avgSurfPtr->rmsScaler[surf][scl]/sqrt(avgSurfPtr->numHks);
-	error2=avgSurfPtr->rmsThresh[surf][scl]/sqrt(avgSurfPtr->numHks);
+	error1=avgSurfPtr->rmsScaler[surf][scl];///sqrt(avgSurfPtr->numHks);
+	error2=avgSurfPtr->rmsThresh[surf][scl];///sqrt(avgSurfPtr->numHks);
       }
       histAvgSurfHk[0][surf]->SetBinError(1+scl+surf*SCALERS_PER_SURF,
 					     error1);
@@ -1046,7 +1048,7 @@ void AnitaRFCanvasMaker::getAvgSurfHkSurfCanvas(AveragedSurfHk *avgSurfPtr,TPad 
     for(int chan=0;chan<RFCHAN_PER_SURF;chan++) {
       Float_t error=0;
       if(avgSurfPtr->numHks>0) {
-	error=avgSurfPtr->rmsRFPower[surf][chan]/sqrt(avgSurfPtr->numHks);
+	error=avgSurfPtr->rmsRFPower[surf][chan];///sqrt(avgSurfPtr->numHks);
       }
       histAvgSurfHk[2][surf]->Fill(chan+surf*RFCHAN_PER_SURF,
 				      avgSurfPtr->avgRFPower[surf][chan]);

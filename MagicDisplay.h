@@ -29,7 +29,7 @@ class AveragedSurfHk;
 class SurfHk;
 class TButton;
 class TTreeIndex;
-
+class TFile;
 
 class MagicDisplay 
 {
@@ -46,10 +46,11 @@ class MagicDisplay
   UInt_t getCurrentEvent();
 
 
+  void closeCurrentRun();
 
   void loadEventTree();
   void startEventDisplay();
-  int displayThisEvent(UInt_t eventNumber);
+  int displayThisEvent(UInt_t eventNumber, UInt_t runNumber);
   int displayNextEvent();
   int displayPreviousEvent();
   void refreshEventDisplay();
@@ -58,6 +59,7 @@ class MagicDisplay
   void setMainCanvasOption(MagicDisplayOption::MagicDisplayOption_t option); 
   void toggleWaveformView(Int_t waveformView);
 
+  void loadTurfTree();
   void startTurfDisplay();
   int displayNextTurf();
   int displayPreviousTurf();
@@ -66,6 +68,7 @@ class MagicDisplay
   void drawTurfButtons();
   void toggleTurfYScale();
 
+  void loadSurfTree();
   void startSurfDisplay();
   int displayNextSurf();
   int displayPreviousSurf();
@@ -74,6 +77,7 @@ class MagicDisplay
   void drawSurfButtons();
   void toggleSurfSurfView(Int_t surfView);
 
+  void loadAvgSurfTree();
   void startAvgSurfDisplay();
   int displayNextAvgSurf();
   int displayPreviousAvgSurf();
@@ -82,6 +86,7 @@ class MagicDisplay
   void drawAvgSurfButtons();
   void toggleAvgSurfSurfView(Int_t surfView);
 
+  void loadSumTurfTree();
   void startSumTurfDisplay();
   int displayNextSumTurf();
   int displayPreviousSumTurf();
@@ -93,6 +98,13 @@ class MagicDisplay
   //Instance generator
   static MagicDisplay*  Instance();
   
+
+  TFile *fHeadFile;
+  TFile *fEventFile;
+  TFile *fTurfRateFile;
+  TFile *fSumTurfRateFile;
+  TFile *fSurfHkFile;
+  TFile *fAvgSurfHkFile;
 
   //Here are the data managers
   TTree *fHeadTree;
@@ -114,7 +126,7 @@ class MagicDisplay
   //And something to help with the indexing
   TTreeIndex *fHeadIndex;
 
-  Int_t fCurrentRun;
+  UInt_t fCurrentRun;
   Char_t fCurrentBaseDir[180];
   
 
