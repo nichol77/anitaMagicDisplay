@@ -276,10 +276,12 @@ void MagicDisplay::refreshEventDisplay()
       //      fEventCanMaker->setupPhiPadWithFrames(fMagicMainPad);
       break;
    case MagicDisplayOption::kWaveSurfOnly:
-     fEventCanMaker->getSurfChanCanvas(fUsefulEventPtr,fHeadPtr,fMagicMainPad);
+     fEventCanMaker->fPolView=3;
+     fEventCanMaker->getEventViewerCanvas(fUsefulEventPtr,fHeadPtr,fMagicMainPad);
      break;
    default:
-      fEventCanMaker->getVerticalCanvas(fUsefulEventPtr,fHeadPtr,fMagicMainPad);
+     fEventCanMaker->getEventViewerCanvas(fUsefulEventPtr,fHeadPtr,fMagicMainPad);
+     //fEventCanMaker->getVerticalCanvas(fUsefulEventPtr,fHeadPtr,fMagicMainPad);
       break;
    }
 
@@ -290,8 +292,10 @@ int MagicDisplay::displayNextEvent()
 {
    fEventEntry++;
    int retVal=getEventEntry();
-   if(retVal==0) 
+     fEventCanMaker->fNewEvent=1;
+   if(retVal==0) {
       refreshEventDisplay(); 
+   }
    else fEventEntry--;
    return retVal;  
 }
@@ -304,8 +308,10 @@ int MagicDisplay::displayPreviousEvent()
    else 
       return -1;
    int retVal=getEventEntry();
-   if(retVal==0) 
-      refreshEventDisplay();   
+     fEventCanMaker->fNewEvent=1;
+   if(retVal==0) {
+      refreshEventDisplay(); 
+   }  
    return retVal;  
 }
 
@@ -423,7 +429,7 @@ void MagicDisplay::toggleWaveformView(Int_t surfView)
 {
    
    if(surfView) {
-      //Turn on phi view off
+      //Turn on fft view off
       fEventCanMaker->fPowerSpecView=0;
       fWaveformButton->SetFillColor(kGray+3);
       fPowerButton->SetFillColor(kGray);
@@ -431,7 +437,7 @@ void MagicDisplay::toggleWaveformView(Int_t surfView)
       fPowerButton->Modified();
    }
    else {
-      //Turn phi view on
+      //Turn fft view on
       fEventCanMaker->fPowerSpecView=1;
       fWaveformButton->SetFillColor(kGray);
       fPowerButton->SetFillColor(kGray+3);

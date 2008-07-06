@@ -44,7 +44,17 @@ int phiMap[5][8]={{0,2,4,6,8,10,12,14},
 		  {0,2,4,6,8,10,12,14},
 		  {1,3,5,7,9,11,13,15},
 		  {0,2,4,6,8,10,12,14}};
-		    
+
+int antMap[3][16]={{8,0,9,1,10,2,11,3,12,4,13,5,14,6,15,7},
+		   {16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31},
+		   {32,100,33,100,34,100,35,100,36,100,37,100,38,100,39,100}};
+
+int surfMap[40]={5,7,6,1,5,7,6,1,0,2,3,4,0,2,3,4,0,5,2,7,3,6,4,1,0,5,2,7,3,6,4,1,8,9,8,9,8,9,8,9};
+
+int chanMap[40]={0,0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,0,0,1,1,2,2,3,3};
+
+int rowMap[5]={0,0,1,1,2};
+
 AnitaRing::AnitaRing_t ringMap[5]={AnitaRing::kUpperRing,
 				   AnitaRing::kUpperRing,
 				   AnitaRing::kLowerRing,
@@ -52,10 +62,8 @@ AnitaRing::AnitaRing_t ringMap[5]={AnitaRing::kUpperRing,
 				   AnitaRing::kNadirRing};
 
 
-WaveformGraph *grSeavey[NUM_SEAVEYS][2];
-WaveformGraph *grSurf[ACTIVE_SURFS][CHANNELS_PER_SURF];
-WaveformGraph *grSeavey2[NUM_SEAVEYS][2]={0};
-WaveformGraph *grSurf2[ACTIVE_SURFS][CHANNELS_PER_SURF];
+WaveformGraph *grSurf[ACTIVE_SURFS][CHANNELS_PER_SURF]={0};
+WaveformGraph *grSurfFFT[ACTIVE_SURFS][CHANNELS_PER_SURF]={0};
 
 AnitaCanvasMaker::AnitaCanvasMaker()
 {
@@ -75,12 +83,12 @@ AnitaCanvasMaker::AnitaCanvasMaker()
   fPolView=0;
   fPowerSpecView=0;
   fRedoEventCanvas=0;
+  //fRedoSurfCanvas=0;
   fLastView=0;
+  fNewEvent=1;
   fgInstance=this;
-  memset(grSeavey,0,sizeof(WaveformGraph*)*NUM_SEAVEYS*2);
   memset(grSurf,0,sizeof(WaveformGraph*)*ACTIVE_SURFS*CHANNELS_PER_SURF);
-  memset(grSeavey2,0,sizeof(WaveformGraph*)*NUM_SEAVEYS*2);
-  memset(grSurf2,0,sizeof(WaveformGraph*)*ACTIVE_SURFS*CHANNELS_PER_SURF);
+  memset(grSurfFFT,0,sizeof(WaveformGraph*)*ACTIVE_SURFS*CHANNELS_PER_SURF);
   
 }
 
@@ -167,13 +175,42 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr,
 
   static Int_t lastEventView=0;
 
+
+  
+  if(fNewEvent==1){
+
+    for(int surf=0;surf<ACTIVE_SURFS;surf++){
+      for(int chan=0;chan<CHANNELS_PER_SURF;chan++){
+
+	if(grSurf[surf][chan]){
+	  delete grSurf[surf][chan];
+	  //grSurf[surf][chan]=0;
+	}
+	if(grSurfFFT[surf][chan]){
+	  delete grSurfFFT[surf][chan];
+	  //grSurfFFT[surf][chan]=0;
+	}
+
+	TGraph *grTemp = evPtr->getGraphFromSurfAndChan(surf,chan);
+	grSurf[surf][chan] = new WaveformGraph(grTemp->GetN(),grTemp->GetX(),grTemp->GetY());
+	TGraph *grTempFFT = grSurf[surf][chan]->getFFT();
+	grSurfFFT[surf][chan] = new WaveformGraph(grTempFFT->GetN(),grTempFFT->GetX(),grTempFFT->GetY());
+	delete grTemp;
+	delete grTempFFT;
+
+      }
+    }
+  }
+
+  fNewEvent=0;
+
   if(lastEventView==fPowerSpecView) fRedoEventCanvas=0;
   else fRedoEventCanvas=1;
 
-  if(fPolView==0) retCan=AnitaCanvasMaker::getVerticalCanvas(evPtr,hdPtr,useCan);
-  else if(fPolView==1) retCan=AnitaCanvasMaker::getHorizontalCanvas(evPtr,hdPtr,useCan);
-  if(fPolView==2) retCan=AnitaCanvasMaker::getCombinedCanvas(evPtr,hdPtr,useCan);
-
+  if(fPolView==0) retCan=AnitaCanvasMaker::getVerticalCanvas(hdPtr,useCan);
+  else if(fPolView==1) retCan=AnitaCanvasMaker::getHorizontalCanvas(hdPtr,useCan);
+  else if(fPolView==2) retCan=AnitaCanvasMaker::getCombinedCanvas(hdPtr,useCan);
+  else if(fPolView==3) retCan=AnitaCanvasMaker::getSurfChanCanvas(hdPtr,useCan);
 
   lastEventView=fPowerSpecView;
 
@@ -183,8 +220,7 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr,
 
 
 
-TPad *AnitaCanvasMaker::getHorizontalCanvas(UsefulAnitaEvent *evPtr,
-					    RawAnitaHeader *hdPtr,
+TPad *AnitaCanvasMaker::getHorizontalCanvas(RawAnitaHeader *hdPtr,
 					    TPad *useCan)
 
 {
@@ -219,14 +255,6 @@ TPad *AnitaCanvasMaker::getHorizontalCanvas(UsefulAnitaEvent *evPtr,
   plotPad->cd();
   setupPhiPadWithFrames(plotPad);
 
-  for(int ind=0;ind<NUM_SEAVEYS;ind++) {
-    for(int pol=0;pol<2;pol++) {
-      if(grSeavey[ind][pol]) delete grSeavey[ind][pol];
-      grSeavey[ind][pol]=0;
-      if(grSeavey2[ind][pol]) delete grSeavey2[ind][pol];
-      grSeavey2[ind][pol]=0;
-    }
-  }
 
   // Upper
   // 1 3 5 7 9 11 13 15
@@ -243,39 +271,49 @@ TPad *AnitaCanvasMaker::getHorizontalCanvas(UsefulAnitaEvent *evPtr,
     for(int row=0;row<5;row++) {
       plotPad->cd();
       int phi=phiMap[row][column];
+      int ring=rowMap[row];
+      int ant=antMap[ring][phi];
+      int surf=surfMap[ant];
+      int chan=chanMap[ant]+4;
       sprintf(padName,"phiChanPad%d",count);
       TPad *paddy1 = (TPad*) plotPad->FindObject(padName);
       paddy1->SetEditable(kTRUE);
-      deleteTGraphsFromPad(paddy1);
+      deleteTGraphsFromPad(paddy1,surf,chan,chan-4);
       paddy1->cd();
-      TGraph *grTemp=evPtr->getGraph(ringMap[row],phi,AnitaPol::kHorizontal);
-      grSeavey[count][1] = new WaveformGraph(grTemp->GetN(),grTemp->GetX(),grTemp->GetY());
+
+
+      if(hdPtr->l3TrigPattern & (1<<phi)){
+	  grSurf[surf][chan]->SetLineColor(kRed-2);
+      }
+      else{
+	grSurf[surf][chan]->SetLineColor(kBlack);
+      }
+
       if(ringMap[row]==AnitaRing::kUpperRing) {
 	if(hdPtr->upperL1TrigPattern & (1<<phi))
-	  grSeavey[count][1]->SetLineColor(kBlue-2);
+	  grSurf[surf][chan]->SetLineColor(kBlue-2);
 	if(hdPtr->upperL2TrigPattern & (1<<phi))
-	  grSeavey[count][1]->SetLineColor(kGreen-2);
+	  grSurf[surf][chan]->SetLineColor(kGreen-2);
       }
       else if(ringMap[row]==AnitaRing::kLowerRing) {
       	if(hdPtr->lowerL1TrigPattern & (1<<phi))
-	  grSeavey[count][1]->SetLineColor(kBlue-2);
+	  grSurf[surf][chan]->SetLineColor(kBlue-2);
 	if(hdPtr->lowerL2TrigPattern & (1<<phi))
-	  grSeavey[count][1]->SetLineColor(kGreen-2);
+	  grSurf[surf][chan]->SetLineColor(kGreen-2);
+      }
+      else{
+	grSurf[surf][chan]->SetLineColor(kBlack);
       }
       
-      if(hdPtr->l3TrigPattern & (1<<phi))
-	grSeavey[count][1]->SetLineColor(kRed-3);
-
 
       if(fPowerSpecView){
-	TGraph *grTemp2 = grSeavey[count][1]->getFFT();
-	grSeavey2[count][1] = new WaveformGraph(grTemp2->GetN(),grTemp2->GetX(),grTemp2->GetY());
-	grSeavey2[count][1]->Draw("l");
-	delete grTemp2;
+	grSurfFFT[surf][chan]->Draw("l");
       }
-      else grSeavey[count][1]->Draw("l");
+      else{
+	grSurf[surf][chan]->Draw("l");
+      }
 
-      delete grTemp;
+
       count++;      
       paddy1->SetEditable(kFALSE);
     }
@@ -288,11 +326,9 @@ TPad *AnitaCanvasMaker::getHorizontalCanvas(UsefulAnitaEvent *evPtr,
   
 }
 
-TPad *AnitaCanvasMaker::getVerticalCanvas(UsefulAnitaEvent *evPtr,
-					  RawAnitaHeader *hdPtr,
+TPad *AnitaCanvasMaker::getVerticalCanvas(RawAnitaHeader *hdPtr,
 					  TPad *useCan)
 {
-  //  std::cout << "AnitaCanvasMaker::getVerticalCanvas: " << evPtr << "\t" << hdPtr << "\t" << useCan << std::endl;
   //  gStyle->SetTitleH(0.1);
   gStyle->SetOptTitle(0); 
 
@@ -325,15 +361,6 @@ TPad *AnitaCanvasMaker::getVerticalCanvas(UsefulAnitaEvent *evPtr,
   setupPhiPadWithFrames(plotPad);
 
 
-  for(int ind=0;ind<NUM_SEAVEYS;ind++) {
-    for(int pol=0;pol<2;pol++) {
-      if(grSeavey[ind][pol]) delete grSeavey[ind][pol];
-      grSeavey[ind][pol]=0;
-      if(grSeavey2[ind][pol]) delete grSeavey2[ind][pol];
-      grSeavey2[ind][pol]=0;
-    }
-  }
-
   // Upper
   // 1 3 5 7 9 11 13 15
   // 2 4 6 8 10 12 14 16
@@ -349,44 +376,46 @@ TPad *AnitaCanvasMaker::getVerticalCanvas(UsefulAnitaEvent *evPtr,
     for(int row=0;row<5;row++) {
       plotPad->cd();
       int phi=phiMap[row][column];
+      int ring=rowMap[row];
+      int ant=antMap[ring][phi];
+      int surf=surfMap[ant];
+      int chan=chanMap[ant];
       sprintf(padName,"phiChanPad%d",count);
       TPad *paddy1 = (TPad*) plotPad->FindObject(padName);
       paddy1->SetEditable(kTRUE);
-      deleteTGraphsFromPad(paddy1);
+      deleteTGraphsFromPad(paddy1,surf,chan,chan+4);
       paddy1->cd();
-      TGraph *grTemp=evPtr->getGraph(ringMap[row],phi,AnitaPol::kVertical);
-      grSeavey[count][0] = new WaveformGraph(grTemp->GetN(),grTemp->GetX(),grTemp->GetY());
+
       if(ringMap[row]==AnitaRing::kUpperRing) {
 	if(hdPtr->upperL1TrigPattern & (1<<phi))
-	  grSeavey[count][0]->SetLineColor(kBlue-2);
+	  grSurf[surf][chan]->SetLineColor(kBlue-2);
 	if(hdPtr->upperL2TrigPattern & (1<<phi))
-	  grSeavey[count][0]->SetLineColor(kGreen-2);
+	  grSurf[surf][chan]->SetLineColor(kGreen-2);
       }
       else if(ringMap[row]==AnitaRing::kLowerRing) {
       	if(hdPtr->lowerL1TrigPattern & (1<<phi))
-	  grSeavey[count][0]->SetLineColor(kBlue-2);
+	  grSurf[surf][chan]->SetLineColor(kBlue-2);
 	if(hdPtr->lowerL2TrigPattern & (1<<phi))
-	  grSeavey[count][0]->SetLineColor(kGreen-2);
+	  grSurf[surf][chan]->SetLineColor(kGreen-2);
       }
       
       if(hdPtr->l3TrigPattern & (1<<phi))
-	grSeavey[count][0]->SetLineColor(kRed-3);
+	grSurf[surf][chan]->SetLineColor(kRed-3);
 
 
       if(fPowerSpecView){
-        TGraph *grTemp2 = grSeavey[count][0]->getFFT();
-        grSeavey2[count][0] = new WaveformGraph(grTemp2->GetN(),grTemp2->GetX(),grTemp2->GetY());
-	grSeavey2[count][0]->Draw("l");
-	delete grTemp2;
+	grSurfFFT[surf][chan]->Draw("l");
       }
-      else grSeavey[count][0]->Draw("l");
+      else{
+	grSurf[surf][chan]->Draw("l");
+      }
 
-      delete grTemp;
 
       count++;
       paddy1->SetEditable(kFALSE);
     }
   }
+
   if(!useCan)
     return canVert;
   else
@@ -395,12 +424,19 @@ TPad *AnitaCanvasMaker::getVerticalCanvas(UsefulAnitaEvent *evPtr,
 
 }
 
-TPad *AnitaCanvasMaker::getSurfChanCanvas(UsefulAnitaEvent *evPtr,
-					  RawAnitaHeader *hdPtr,
+TPad *AnitaCanvasMaker::getSurfChanCanvas(RawAnitaHeader *hdPtr,
 					  TPad *useCan)
 {
    //  gStyle->SetTitleH(0.1);
   gStyle->SetOptTitle(0); 
+
+
+  static Int_t lastSurfView=0;
+
+  if(lastSurfView==fPowerSpecView) fRedoEventCanvas=0;
+  else fRedoEventCanvas=1;
+
+  lastSurfView=fPowerSpecView;
 
   if(!fACMGeomTool)
     fACMGeomTool=AnitaGeomTool::Instance();
@@ -428,16 +464,8 @@ TPad *AnitaCanvasMaker::getSurfChanCanvas(UsefulAnitaEvent *evPtr,
     plotPad=useCan;
   }
   plotPad->cd();
-
   setupSurfPadWithFrames(plotPad);
-  for(int surf=0;surf<ACTIVE_SURFS;surf++) {
-    for(int chan=0;chan<CHANNELS_PER_SURF;chan++) {
-      if(grSurf[surf][chan]) delete grSurf[surf][chan];
-      grSurf[surf][chan]=0;
-      if(grSurf2[surf][chan]) delete grSurf2[surf][chan];
-      grSurf2[surf][chan]=0;
-    }
-  }
+
 
   for(int surf=0;surf<ACTIVE_SURFS;surf++) {
     for(int chan=0;chan<CHANNELS_PER_SURF;chan++) {
@@ -445,10 +473,12 @@ TPad *AnitaCanvasMaker::getSurfChanCanvas(UsefulAnitaEvent *evPtr,
       sprintf(padName,"surfChanPad%d_%d",surf,chan);
       TPad *paddy1 = (TPad*) plotPad->FindObject(padName);
       paddy1->SetEditable(kTRUE);
-      deleteTGraphsFromPad(paddy1);
+      deleteTGraphsFromPad(paddy1,surf,chan);
       paddy1->cd();
-      TGraph *grTemp=evPtr->getGraphFromSurfAndChan(surf,chan);
-      grSurf[surf][chan] = new WaveformGraph(grTemp->GetN(),grTemp->GetX(),grTemp->GetY());
+
+
+      //grDraw[surf][chan]=grSurf[surf][chan];
+      //grDrawFFT[surf][chan]=grSurfFFT[surf][chan];
 
 //       if(ringMap[row]==AnitaRing::kUpperRing) {
 // 	if(hdPtr->upperL1TrigPattern & (1<<phi))
@@ -467,16 +497,12 @@ TPad *AnitaCanvasMaker::getSurfChanCanvas(UsefulAnitaEvent *evPtr,
 //	grSurf[count][1]->SetLineColor(kRed-3);
 
       if(fPowerSpecView && chan<(CHANNELS_PER_SURF-1)){
-	TGraph *grTemp2 = grSurf[surf][chan]->getFFT();
-	grSurf2[surf][chan] = new WaveformGraph(grTemp2->GetN(),grTemp2->GetX(),grTemp2->GetY());
-	grSurf2[surf][chan]->Draw("l");
-	delete grTemp2;
+	grSurfFFT[surf][chan]->Draw("l");
       }
       else{
 	grSurf[surf][chan]->Draw("l");
       }
 
-      delete grTemp;
       paddy1->SetEditable(kFALSE);
     }
   }
@@ -490,8 +516,7 @@ TPad *AnitaCanvasMaker::getSurfChanCanvas(UsefulAnitaEvent *evPtr,
 
 }
 
-TPad *AnitaCanvasMaker::getCombinedCanvas(UsefulAnitaEvent *evPtr,
-					  RawAnitaHeader *hdPtr,
+TPad *AnitaCanvasMaker::getCombinedCanvas(RawAnitaHeader *hdPtr,
 					  TPad *useCan)
 {
   gStyle->SetOptTitle(0); 
@@ -524,14 +549,6 @@ TPad *AnitaCanvasMaker::getCombinedCanvas(UsefulAnitaEvent *evPtr,
   plotPad->cd();
   setupPhiPadWithFrames(plotPad);
     
-  for(int ind=0;ind<NUM_SEAVEYS;ind++) {
-    for(int pol=0;pol<2;pol++) {
-      if(grSeavey[ind][pol]) delete grSeavey[ind][pol];
-      if(grSeavey2[ind][pol]) delete grSeavey2[ind][pol];
-      grSeavey[ind][pol]=0;
-      grSeavey2[ind][pol]=0;
-    }
-  }
   
  
 
@@ -544,44 +561,34 @@ TPad *AnitaCanvasMaker::getCombinedCanvas(UsefulAnitaEvent *evPtr,
 
   int count=0;
 
-
   //  std::cout << hdPtr->eventNumber << "\t" << hdPtr->l3TrigPattern << std::endl;
   for(int column=0;column<8;column++) {
     for(int row=0;row<5;row++) {
       plotPad->cd();
       int phi=phiMap[row][column];
+      int ring=rowMap[row];
+      int ant=antMap[ring][phi];
+      int surf=surfMap[ant];
+      int chanH=chanMap[ant]+4;
+      int chanV=chanMap[ant];
       sprintf(padName,"phiChanPad%d",count);
       
       TPad *paddy1 = (TPad*) plotPad->FindObject(padName);
       paddy1->SetEditable(kTRUE);
-      deleteTGraphsFromPad(paddy1);
+      deleteTGraphsFromPad(paddy1,surf,chanH,chanV);
       paddy1->cd();
 
-      TGraph *grTemp=evPtr->getGraph(ringMap[row],phi,AnitaPol::kVertical);
-      grSeavey[count][0] = new WaveformGraph(grTemp->GetN(),grTemp->GetX(),grTemp->GetY());
-      TGraph *grTemp2=evPtr->getGraph(ringMap[row],phi,AnitaPol::kHorizontal);
-      grSeavey[count][1] = new WaveformGraph(grTemp2->GetN(),grTemp2->GetX(),grTemp2->GetY());
-      grSeavey[count][1]->SetLineColor(kBlue);
-
-
       if(fPowerSpecView){
-	TGraph *grTemp3 = grSeavey[count][0]->getFFT();
-	grSeavey2[count][0] = new WaveformGraph(grTemp3->GetN(),grTemp3->GetX(),grTemp3->GetY());
-	TGraph *grTemp4 = grSeavey[count][1]->getFFT();
-	grSeavey2[count][1] = new WaveformGraph(grTemp4->GetN(),grTemp4->GetX(),grTemp4->GetY());
-	grSeavey2[count][1]->SetLineColor(kBlue);
-	grSeavey2[count][0]->Draw("l");
-	grSeavey2[count][1]->Draw("l");
-	delete grTemp3;
-	delete grTemp4;
+	grSurfFFT[surf][chanH]->SetLineColor(kBlue);
+	grSurfFFT[surf][chanV]->Draw("l");
+	grSurfFFT[surf][chanH]->Draw("l");
       }
       else{
-	grSeavey[count][0]->Draw("l");
-	grSeavey[count][1]->Draw("l");
+	grSurf[surf][chanH]->SetLineColor(kBlue);
+	grSurf[surf][chanV]->Draw("l");
+	grSurf[surf][chanH]->Draw("l");
       }
 
-      delete grTemp;
-      delete grTemp2;
 
       count++;
       paddy1->SetEditable(kFALSE);
@@ -596,13 +603,19 @@ TPad *AnitaCanvasMaker::getCombinedCanvas(UsefulAnitaEvent *evPtr,
 
 void AnitaCanvasMaker::setupPhiPadWithFrames(TPad *plotPad)
 {
-  if(fLastView==2) 
-    plotPad->Clear();
-  fLastView=1;
-  static int phiPadsDone=0;
   char textLabel[180];
   char padName[180];
   plotPad->cd();
+  if(fLastView==2) {
+    plotPad->Clear();
+  } 
+  if(fRedoEventCanvas){
+    plotPad->Clear();
+  }
+
+  fLastView=1;
+
+  static int phiPadsDone=0;
   if(phiPadsDone && !fRedoEventCanvas) {
     int errors=0;
     for(int i=0;i<40;i++) {
@@ -614,14 +627,9 @@ void AnitaCanvasMaker::setupPhiPadWithFrames(TPad *plotPad)
     if(!errors)
       return;
   }
+
   phiPadsDone=1;
-      
-  if(fRedoEventCanvas){
-    for(int i=0;i<40;i++){
-      sprintf(padName,"phiChanPad%d",i);
-      plotPad->FindObject(padName)->Delete();
-    }
-  }
+    
 
   Double_t left[8]={0.04,0.165,0.28,0.395,0.51,0.625,0.74,0.855};
   Double_t right[8]={0.165,0.28,0.395,0.51,0.625,0.74,0.855,0.97};
@@ -655,7 +663,6 @@ void AnitaCanvasMaker::setupPhiPadWithFrames(TPad *plotPad)
   int count=0;
 
 
-  //  std::cout << hdPtr->eventNumber << "\t" << hdPtr->l3TrigPattern << std::endl;
 
 
   for(int column=0;column<8;column++) {
@@ -701,26 +708,35 @@ void AnitaCanvasMaker::setupPhiPadWithFrames(TPad *plotPad)
 
 void AnitaCanvasMaker::setupSurfPadWithFrames(TPad *plotPad)
 {
-  if(fLastView==1) 
-    plotPad->Clear();
-  fLastView=2;
   static int surfPadsDone=0;
   char textLabel[180];
   char padName[180];
   plotPad->cd();
-  if(surfPadsDone) {
+  if(fLastView==1) {
+    plotPad->Clear();
+  }
+
+  if(fRedoEventCanvas && surfPadsDone){
+    plotPad->Clear();
+  }
+
+  fLastView=2;
+
+  if(surfPadsDone && !fRedoEventCanvas) {
     int errors=0;
     for(int surf=0;surf<ACTIVE_SURFS;surf++) {
-      for(int chan=0;chan<ACTIVE_SURFS;chan++) {
+      for(int chan=0;chan<CHANNELS_PER_SURF;chan++) {
 	sprintf(padName,"surfChanPad%d_%d",surf,chan);
 	TPad *paddy = (TPad*) plotPad->FindObject(padName);
 	if(!paddy)
 	  errors++;
       }
     }
-      if(!errors)
-	return;
-    }
+    if(!errors)
+      return;
+  }
+
+
   surfPadsDone=1;
       
 
@@ -804,7 +820,7 @@ void AnitaCanvasMaker::setupSurfPadWithFrames(TPad *plotPad)
 
 }
 
-
+/*
 void AnitaCanvasMaker::deleteTGraphsFromPad(TPad *paddy)
 {
   paddy->cd();
@@ -815,21 +831,62 @@ void AnitaCanvasMaker::deleteTGraphsFromPad(TPad *paddy)
     TObject *fred = listy->At(i);
     if(fred->InheritsFrom("TGraph")) {
       std::cout << fred->ClassName() << "\t" << fred << std::endl;
-      for(int ant=0;ant<NUM_SEAVEYS;ant++) {
-	for(int pol=0;pol<2;pol++) {
-	  if(fred == grSeavey[ant][pol]) {
-	    delete grSeavey[ant][pol];
-	    //	    grSeavey[ant][pol]=0;
-	    std::cout << "Yes" << std::endl;
-	  }
-	  else {
-	    fred->Delete("");
-	  }
-	}
-      }
 
+      for(int surf=0;surf<ACTIVE_SURFS;surf++){
+        for(int chan=0;chan<CHANNELS_PER_SURF;chan++){
+          if(fred == grDraw[surf][chan]){
+            delete grDraw[surf][chan];
+          }
+          else if(fred == grDrawFFT[surf][chan]){
+            delete grDrawFFT[surf][chan];
+          }
+          else{
+            fred->Delete("");
+          }
+        }
+      }
+    
     }
   }
   
   //  paddy->Update();
 }
+*/
+
+
+void AnitaCanvasMaker::deleteTGraphsFromPad(TPad *paddy,int surf,int chan)
+{
+  paddy->cd();
+  if(!fPowerSpecView && !fRedoEventCanvas) paddy->GetListOfPrimitives()->Remove(grSurf[surf][chan]);
+  else if(fPowerSpecView && fRedoEventCanvas) paddy->GetListOfPrimitives()->Remove(grSurf[surf][chan]);
+  else if(!fPowerSpecView && fRedoEventCanvas) paddy->GetListOfPrimitives()->Remove(grSurfFFT[surf][chan]);
+  else if(fPowerSpecView && !fRedoEventCanvas) paddy->GetListOfPrimitives()->Remove(grSurfFFT[surf][chan]);
+  
+  //  paddy->Update();
+}
+
+void AnitaCanvasMaker::deleteTGraphsFromPad(TPad *paddy,int surf,int chan,int chan2)
+{
+  paddy->cd();
+  if(!fPowerSpecView && !fRedoEventCanvas){
+    paddy->GetListOfPrimitives()->Remove(grSurf[surf][chan]);
+    paddy->GetListOfPrimitives()->Remove(grSurf[surf][chan2]);
+  }
+  else if(fPowerSpecView && fRedoEventCanvas){
+    paddy->GetListOfPrimitives()->Remove(grSurf[surf][chan]);
+    paddy->GetListOfPrimitives()->Remove(grSurf[surf][chan2]);
+  }
+  else if(!fPowerSpecView && fRedoEventCanvas){
+    paddy->GetListOfPrimitives()->Remove(grSurfFFT[surf][chan]);
+    paddy->GetListOfPrimitives()->Remove(grSurfFFT[surf][chan2]);
+  }
+  else if(fPowerSpecView && !fRedoEventCanvas){
+    paddy->GetListOfPrimitives()->Remove(grSurfFFT[surf][chan]);
+    paddy->GetListOfPrimitives()->Remove(grSurfFFT[surf][chan2]);
+  }
+  
+  
+  //  paddy->Update();
+}
+
+
