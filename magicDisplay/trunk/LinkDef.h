@@ -6,6 +6,7 @@
 
 #pragma link C++ class AnitaCanvasMaker+;
 #pragma link C++ class WaveformGraph+;
+#pragma link C++ class FFTGraph+;
 #pragma link C++ class MagicDisplay+;
 #pragma link C++ class MagicControlPanel+;
 
