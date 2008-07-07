@@ -147,7 +147,7 @@ MagicControlPanel::MagicControlPanel(const TGWindow *p, UInt_t w, UInt_t h)
    // we need to use GetDefault...() to initialize the layout algorithm...
   Resize();   // resize to default size
    MapWindow();
-   //   Print();   
+   Print();   
  
 }
 

@@ -306,6 +306,11 @@ TPad *AnitaCanvasMaker::getHorizontalCanvas(RawAnitaHeader *hdPtr,
       }
       
 
+      grSurf[surf][chan]->setSurfChanPhiAntPolRing(surf,chan,phi,ant,
+						   AnitaPol::kHorizontal,
+						   ringMap[row]);
+
+
       if(fPowerSpecView){
 	grSurfFFT[surf][chan]->Draw("l");
       }
@@ -403,6 +408,11 @@ TPad *AnitaCanvasMaker::getVerticalCanvas(RawAnitaHeader *hdPtr,
 	grSurf[surf][chan]->SetLineColor(kRed-3);
 
 
+      grSeavey[count][0]->setSurfChanPhiAntPolRing(surf,chan,phi,ant,
+						   AnitaPol::kVertical,
+						   ringMap[row]);
+
+
       if(fPowerSpecView){
 	grSurfFFT[surf][chan]->Draw("l");
       }
@@ -495,6 +505,14 @@ TPad *AnitaCanvasMaker::getSurfChanCanvas(RawAnitaHeader *hdPtr,
       
 //      if(hdPtr->l3TrigPattern & (1<<phi))
 //	grSurf[count][1]->SetLineColor(kRed-3);
+
+      Int_t ant=0,phi=0;
+      AnitaRing::AnitaRing_t ring;
+      AnitaPol::AnitaPol_t pol;
+      
+      AnitaGeomTool::getRingAntPolPhiFromSurfChan(surf,chan,ring,ant,pol,phi);
+      grSurf[surf][chan]->setSurfChanPhiAntPolRing(surf,chan,phi,ant,
+						   pol,ring);
 
       if(fPowerSpecView && chan<(CHANNELS_PER_SURF-1)){
 	grSurfFFT[surf][chan]->Draw("l");

@@ -78,7 +78,7 @@ endif
 magicDict.C: $(CLASS_HEADERS)
 	@echo "Generating dictionary ..."
 	@ rm -f *Dict* 
-	rootcint $@ -c $(CLASS_HEADERS) LinkDef.h
+	rootcint $@ -c $(INC_ANITA_UTIL) $(CLASS_HEADERS) LinkDef.h
 
 install: $(ROOT_LIBRARY)
 ifeq ($(PLATFORM),macosx)

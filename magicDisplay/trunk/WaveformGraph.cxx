@@ -73,8 +73,9 @@ void WaveformGraph::ExecuteEvent(Int_t event, Int_t px, Int_t py)
 
 void WaveformGraph::drawInNewCanvas()
 {
+  char graphTitle[180];
   gStyle->SetTitleH(0.1);
-  gStyle->SetOptTitle(0);
+  gStyle->SetOptTitle(1);
   gStyle->SetPadLeftMargin(0.15);
   gStyle->SetPadRightMargin(0.1);
   gStyle->SetPadTopMargin(0.1);
@@ -87,6 +88,12 @@ void WaveformGraph::drawInNewCanvas()
   thisCopy->GetXaxis()->SetTitleSize(0.06);
   thisCopy->GetYaxis()->SetLabelSize(0.06);
   thisCopy->GetYaxis()->SetTitleSize(0.06);
+  thisCopy->GetXaxis()->SetTitle("Time (ns)");
+  thisCopy->GetYaxis()->SetTitle("Voltage (mV-ish)");
+  sprintf(graphTitle,"Ant %d%c (%s Ring --  Phi %d -- SURF %d -- Chan %d)",
+	  fAnt+1,AnitaPol::polAsChar(fPol),AnitaRing::ringAsString(fRing),
+	  fPhi+1,fSurf+1,fChan+1);
+  thisCopy->SetTitle(graphTitle);
   TCanvas *can = new TCanvas();
   can->SetLeftMargin(0.15);
   can->SetBottomMargin(0.15);
@@ -100,11 +107,12 @@ void WaveformGraph::drawInNewCanvas()
 //______________________________________________________________________________
 void WaveformGraph::DrawFFT()
 {
+  char graphTitle[180];
   gStyle->SetTitleH(0.1);
   gStyle->SetLabelSize(0.1,"xy");
   gStyle->SetTitleSize(0.1,"xy");
   gStyle->SetTitleOffset(0.5,"y");
-  gStyle->SetOptTitle(0);
+  gStyle->SetOptTitle(1);
   gStyle->SetCanvasDefW(600);
   gStyle->SetCanvasDefH(400);
   //   gROOT->ForceStyle();
@@ -120,6 +128,12 @@ void WaveformGraph::DrawFFT()
   grFFT->GetXaxis()->SetTitleSize(0.06);
   grFFT->GetYaxis()->SetLabelSize(0.06);
   grFFT->GetYaxis()->SetTitleSize(0.06);
+  grFFT->GetXaxis()->SetTitle("Frequency (MHz)");
+  grFFT->GetYaxis()->SetTitle("dB (m maybe)");
+  sprintf(graphTitle,"Ant %d%c (%s Ring --  Phi %d -- SURF %d -- Chan %d)",
+	  fAnt+1,AnitaPol::polAsChar(fPol),AnitaRing::ringAsString(fRing),
+	  fPhi+1,fSurf+1,fChan+1);
+  grFFT->SetTitle(graphTitle);
   grFFT->Draw("al");
   
   //   printf("WaveformGraph::DrawFFT: not yet implemented\n");

@@ -2,6 +2,8 @@
 #define WAVEFORMGRAPH_H
 #include "TGraph.h"
 
+#include "AnitaConventions.h"
+
 class TObject;
 class TGaxis;
 
@@ -18,8 +20,20 @@ class WaveformGraph : public TGraph
   void DrawFFT(); // *MENU*
   TGraph *getFFT();
 
+  void setSurfChanPhiAntPolRing(Int_t surf, Int_t chan, Int_t phi,
+				Int_t ant, AnitaPol::AnitaPol_t pol,
+				AnitaRing::AnitaRing_t ring)
+  {fSurf=surf; fChan=chan; fPhi=phi; fAnt=ant; fPol=pol; fRing=ring;}
+
  private:
-  
+  Int_t fSurf;
+  Int_t fChan;
+  Int_t fPhi;
+  Int_t fAnt;
+  AnitaRing::AnitaRing_t fRing;
+  AnitaPol::AnitaPol_t fPol;
+
+
   void ExecuteEvent(Int_t event, Int_t px, Int_t py);
   void ClearSelection(void);
   void ApplySelectionToButtons();
@@ -28,7 +42,7 @@ class WaveformGraph : public TGraph
   Int_t fNewCanvas;
   
   
-  ClassDef(WaveformGraph,1)
+  ClassDef(WaveformGraph,2)
 };                              // end of class WaveformGraph
 
 
