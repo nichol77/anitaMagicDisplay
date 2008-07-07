@@ -498,32 +498,35 @@ TPad *AnitaCanvasMaker::getSurfChanCanvas(RawAnitaHeader *hdPtr,
       //grDraw[surf][chan]=grSurf[surf][chan];
       //grDrawFFT[surf][chan]=grSurfFFT[surf][chan];
 
-//       if(ringMap[row]==AnitaRing::kUpperRing) {
-// 	if(hdPtr->upperL1TrigPattern & (1<<phi))
-// 	  grSurf[count][1]->SetLineColor(kBlue-2);
-// 	if(hdPtr->upperL2TrigPattern & (1<<phi))
-// 	  grSurf[count][1]->SetLineColor(kGreen-2);
-//       }
-//       else if(ringMap[row]==AnitaRing::kLowerRing) {
-//       	if(hdPtr->lowerL1TrigPattern & (1<<phi))
-// 	  grSurf[count][1]->SetLineColor(kBlue-2);
-// 	if(hdPtr->lowerL2TrigPattern & (1<<phi))
-// 	  grSurf[count][1]->SetLineColor(kGreen-2);
-//       }
-      
-//      if(hdPtr->l3TrigPattern & (1<<phi))
-//	grSurf[count][1]->SetLineColor(kRed-3);
+
 
       Int_t ant=0,phi=0;
       AnitaRing::AnitaRing_t ring;
       AnitaPol::AnitaPol_t pol;
       
-      AnitaGeomTool::getRingAntPolPhiFromSurfChan(surf,chan,ring,ant,pol,phi);
-      grSurf[surf][chan]->setSurfChanPhiAntPolRing(surf,chan,phi,ant,
-						   pol,ring);
-      grSurfFFT[surf][chan]->setSurfChanPhiAntPolRing(surf,chan,phi,ant,
-						   pol,ring);
-
+      if(chan<8) {
+	AnitaGeomTool::getRingAntPolPhiFromSurfChan(surf,chan,ring,ant,pol,phi);
+	grSurf[surf][chan]->setSurfChanPhiAntPolRing(surf,chan,phi,ant,
+						     pol,ring);
+	grSurfFFT[surf][chan]->setSurfChanPhiAntPolRing(surf,chan,phi,ant,
+							pol,ring);
+	
+	if(ring==AnitaRing::kUpperRing) {
+	  if(hdPtr->upperL1TrigPattern & (1<<phi))
+	    grSurf[surf][chan]->SetLineColor(kBlue-2);
+	  if(hdPtr->upperL2TrigPattern & (1<<phi))
+	    grSurf[surf][chan]->SetLineColor(kGreen-2);
+	}
+	else if(ring==AnitaRing::kLowerRing) {
+	  if(hdPtr->lowerL1TrigPattern & (1<<phi))
+	    grSurf[surf][chan]->SetLineColor(kBlue-2);
+	  if(hdPtr->lowerL2TrigPattern & (1<<phi))
+	    grSurf[surf][chan]->SetLineColor(kGreen-2);
+	}
+      
+	if(hdPtr->l3TrigPattern & (1<<phi))
+	  grSurf[surf][chan]->SetLineColor(kRed-3);
+      }
       if(fPowerSpecView && chan<(CHANNELS_PER_SURF-1)){
 	grSurfFFT[surf][chan]->Draw("l");
       }
@@ -605,6 +608,19 @@ TPad *AnitaCanvasMaker::getCombinedCanvas(RawAnitaHeader *hdPtr,
       paddy1->SetEditable(kTRUE);
       deleteTGraphsFromPad(paddy1,surf,chanH,chanV);
       paddy1->cd();
+
+      grSurfFFT[surf][chanV]->setSurfChanPhiAntPolRing(surf,chanV,phi,ant,
+						       AnitaPol::kVertical,
+						       ringMap[row]);
+      grSurfFFT[surf][chanH]->setSurfChanPhiAntPolRing(surf,chanH,phi,ant,
+						       AnitaPol::kHorizontal,
+						       ringMap[row]);
+      grSurf[surf][chanV]->setSurfChanPhiAntPolRing(surf,chanV,phi,ant,
+						       AnitaPol::kVertical,
+						       ringMap[row]);
+      grSurf[surf][chanH]->setSurfChanPhiAntPolRing(surf,chanH,phi,ant,
+						       AnitaPol::kHorizontal,
+						       ringMap[row]);
 
       if(fPowerSpecView){
 	grSurfFFT[surf][chanH]->SetLineColor(kBlue);
