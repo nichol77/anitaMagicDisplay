@@ -12,6 +12,9 @@
 #include "AnitaGeomTool.h"
 #include "UsefulAnitaEvent.h"
 #include "RawAnitaHeader.h"
+#include "WaveformGraph.h"
+#include "FFTGraph.h"
+
 
 #include "TString.h"
 #include "TObjArray.h"
@@ -23,7 +26,6 @@
 #include "TText.h"
 #include "TLatex.h"
 #include "TGraph.h"
-#include "WaveformGraph.h"
 #include "TStyle.h"
 #include "TCanvas.h"
 #include "TAxis.h"
@@ -63,7 +65,7 @@ AnitaRing::AnitaRing_t ringMap[5]={AnitaRing::kUpperRing,
 
 
 WaveformGraph *grSurf[ACTIVE_SURFS][CHANNELS_PER_SURF]={0};
-WaveformGraph *grSurfFFT[ACTIVE_SURFS][CHANNELS_PER_SURF]={0};
+FFTGraph *grSurfFFT[ACTIVE_SURFS][CHANNELS_PER_SURF]={0};
 
 AnitaCanvasMaker::AnitaCanvasMaker()
 {
@@ -88,7 +90,7 @@ AnitaCanvasMaker::AnitaCanvasMaker()
   fNewEvent=1;
   fgInstance=this;
   memset(grSurf,0,sizeof(WaveformGraph*)*ACTIVE_SURFS*CHANNELS_PER_SURF);
-  memset(grSurfFFT,0,sizeof(WaveformGraph*)*ACTIVE_SURFS*CHANNELS_PER_SURF);
+  memset(grSurfFFT,0,sizeof(FFTGraph*)*ACTIVE_SURFS*CHANNELS_PER_SURF);
   
 }
 
@@ -194,7 +196,7 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr,
 	TGraph *grTemp = evPtr->getGraphFromSurfAndChan(surf,chan);
 	grSurf[surf][chan] = new WaveformGraph(grTemp->GetN(),grTemp->GetX(),grTemp->GetY());
 	TGraph *grTempFFT = grSurf[surf][chan]->getFFT();
-	grSurfFFT[surf][chan] = new WaveformGraph(grTempFFT->GetN(),grTempFFT->GetX(),grTempFFT->GetY());
+	grSurfFFT[surf][chan] = new FFTGraph(grTempFFT->GetN(),grTempFFT->GetX(),grTempFFT->GetY());
 	delete grTemp;
 	delete grTempFFT;
 
@@ -309,6 +311,9 @@ TPad *AnitaCanvasMaker::getHorizontalCanvas(RawAnitaHeader *hdPtr,
       grSurf[surf][chan]->setSurfChanPhiAntPolRing(surf,chan,phi,ant,
 						   AnitaPol::kHorizontal,
 						   ringMap[row]);
+      grSurfFFT[surf][chan]->setSurfChanPhiAntPolRing(surf,chan,phi,ant,
+						   AnitaPol::kHorizontal,
+						   ringMap[row]);
 
 
       if(fPowerSpecView){
@@ -408,7 +413,10 @@ TPad *AnitaCanvasMaker::getVerticalCanvas(RawAnitaHeader *hdPtr,
 	grSurf[surf][chan]->SetLineColor(kRed-3);
 
 
-      grSeavey[count][0]->setSurfChanPhiAntPolRing(surf,chan,phi,ant,
+      grSurf[surf][chan]->setSurfChanPhiAntPolRing(surf,chan,phi,ant,
+						   AnitaPol::kVertical,
+						   ringMap[row]);
+      grSurfFFT[surf][chan]->setSurfChanPhiAntPolRing(surf,chan,phi,ant,
 						   AnitaPol::kVertical,
 						   ringMap[row]);
 
@@ -512,6 +520,8 @@ TPad *AnitaCanvasMaker::getSurfChanCanvas(RawAnitaHeader *hdPtr,
       
       AnitaGeomTool::getRingAntPolPhiFromSurfChan(surf,chan,ring,ant,pol,phi);
       grSurf[surf][chan]->setSurfChanPhiAntPolRing(surf,chan,phi,ant,
+						   pol,ring);
+      grSurfFFT[surf][chan]->setSurfChanPhiAntPolRing(surf,chan,phi,ant,
 						   pol,ring);
 
       if(fPowerSpecView && chan<(CHANNELS_PER_SURF-1)){
