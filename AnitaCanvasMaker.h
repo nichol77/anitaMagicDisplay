@@ -53,7 +53,7 @@ class AnitaCanvasMaker
   TPad *getCombinedPhiCanvas(RawAnitaHeader *hdPtr, TPad *useCan=0);
 
 
-  TPad *getEventInfoCanvas(RawAnitaHeader *hdPtr, TPad *useCan=0);
+  TPad *getEventInfoCanvas(UsefulAnitaEvent *evPtr,RawAnitaHeader *hdPtr, TPad *useCan=0);
   
   void setupPhiPadWithFrames(TPad *plotPad);
   void setupSurfPadWithFrames(TPad *plotPad);
