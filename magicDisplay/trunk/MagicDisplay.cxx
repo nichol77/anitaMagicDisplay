@@ -260,7 +260,7 @@ void MagicDisplay::refreshEventDisplay()
 
            
   //This will need to change
-   fEventCanMaker->getEventInfoCanvas(fHeadPtr,fMagicEventInfoPad);
+   fEventCanMaker->getEventInfoCanvas(fUsefulEventPtr,fHeadPtr,fMagicEventInfoPad);
    switch(fMainOption) {
    case MagicDisplayOption::kWavePhiVerticalOnly:
      fEventCanMaker->fPolView=0;
