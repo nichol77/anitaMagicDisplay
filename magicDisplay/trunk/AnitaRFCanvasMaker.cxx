@@ -42,7 +42,7 @@
 AnitaRFCanvasMaker*  AnitaRFCanvasMaker::fgInstance = 0;
 AnitaGeomTool *fARFCGeomTool=0;
 
-TH1F *histTurfRate[5]={0};
+TH1F *histTurfRate[6]={0};
 TH1F *histAntMask[2]={0};
 
 TH1F *histSurfHk[3][ACTIVE_SURFS]={0};
@@ -119,10 +119,10 @@ TPad *AnitaRFCanvasMaker::getTurfRateCanvas(TurfRate *turfPtr, TPad *useCan)
   plotPad->cd();
   plotPad->Clear();
 
-  char *histNames[5]={"histUpperL1","histLowerL1","histUpperL2","histLowerL2","histL3"};
-  char *histTitles[5]={"Upper L1","Lower L1","Upper L2","Lower L2","L3"};
+  char *histNames[6]={"histUpperL1","histLowerL1","histUpperL2","histLowerL2","histNadirL","histL3"};
+  char *histTitles[6]={"Upper L1","Lower L1","Upper L2","Lower L2","Nadir L1/2","L3"};
 
-  for(int i=0;i<5;i++) {
+  for(int i=0;i<6;i++) {
     if(histTurfRate[i]) {
       histTurfRate[i]->Reset();
     }
@@ -162,8 +162,10 @@ TPad *AnitaRFCanvasMaker::getTurfRateCanvas(TurfRate *turfPtr, TPad *useCan)
     histTurfRate[0]->Fill(phi+1,1e-3*turfPtr->getL1Rate(phi,0));
     histTurfRate[1]->Fill(phi+1,1e-3*turfPtr->getL1Rate(phi,1));
     histTurfRate[2]->Fill(phi+1,turfPtr->getL2Rate(phi,0));
-    histTurfRate[3]->Fill(phi+1,turfPtr->getL2Rate(phi,1));
-    histTurfRate[4]->Fill(phi+1,turfPtr->getL3Rate(phi));
+    histTurfRate[3]->Fill(phi+1,turfPtr->getL2Rate(phi,1));    
+    histTurfRate[4]->Fill(phi+1,turfPtr->getNadirL12Rate(phi));
+    histTurfRate[5]->Fill(phi+1,turfPtr->getL3Rate(phi));
+
   }
   l1Max*=1.1e-3;
   l2Max*=1.1;
@@ -171,7 +173,7 @@ TPad *AnitaRFCanvasMaker::getTurfRateCanvas(TurfRate *turfPtr, TPad *useCan)
   plotPad->SetLeftMargin(0.1);
   plotPad->SetTopMargin(0.05);
   plotPad->SetBottomMargin(0.1);
-  plotPad->Divide(1,5,0,0);
+  plotPad->Divide(1,6,0,0);
    
   TLatex texy;
   texy.SetTextAlign(21);
@@ -202,17 +204,17 @@ TPad *AnitaRFCanvasMaker::getTurfRateCanvas(TurfRate *turfPtr, TPad *useCan)
   }
 
 
-  for(int i=0;i<5;i++) {
+  for(int i=0;i<6;i++) {
     TPad* paddy = (TPad*)plotPad->cd(i+1);
     //      if(i==4)
     paddy->SetBottomMargin(0.12);
-    if(i==4)
+    if(i==5)
       paddy->SetBottomMargin(0.18);
     paddy->SetRightMargin(0.05);
     histTurfRate[i]->SetFillStyle(3001);
     histTurfRate[i]->SetFillColor(getNiceColour(i));
     histTurfRate[i]->SetLineColor(getNiceColour(i));
-    if(i==4)      
+    if(i==5)      
       histTurfRate[i]->SetXTitle("Phi Sector");
     if(i<2)
       histTurfRate[i]->SetYTitle("Rate (kHz)");
@@ -228,8 +230,8 @@ TPad *AnitaRFCanvasMaker::getTurfRateCanvas(TurfRate *turfPtr, TPad *useCan)
     histTurfRate[i]->GetYaxis()->SetTitleOffset(0.4);
     histTurfRate[i]->SetTitle("");
     histTurfRate[i]->Draw();
-    if(i<2) {
-      histAntMask[i]->Draw("same");
+    if(i<4) {
+      histAntMask[i%2]->Draw("same");
     }
     texy.DrawTextNDC(0.96,0.5,histTitles[i]);
   }
@@ -761,10 +763,10 @@ TPad *AnitaRFCanvasMaker::getSumTurfRateCanvas(SummedTurfRate *sumTurfPtr, TPad 
   plotPad->cd();
   plotPad->Clear();
 
-  char *histNames[5]={"histUpperL1","histLowerL1","histUpperL2","histLowerL2","histL3"};
-  char *histTitles[5]={"Upper L1","Lower L1","Upper L2","Lower L2","L3"};
+  char *histNames[6]={"histUpperL1","histLowerL1","histUpperL2","histLowerL2","histNadirL","histL3"};
+  char *histTitles[6]={"Upper L1","Lower L1","Upper L2","Lower L2","Nadir L1/2","L3"};
 
-  for(int i=0;i<5;i++) {
+  for(int i=0;i<6;i++) {
     if(histTurfRate[i]) {
       histTurfRate[i]->Reset();
     }
@@ -806,11 +808,12 @@ TPad *AnitaRFCanvasMaker::getSumTurfRateCanvas(SummedTurfRate *sumTurfPtr, TPad 
     histTurfRate[1]->Fill(phi+1,(1e-3*sumTurfPtr->getL1Rate(phi,1)));
     histTurfRate[2]->Fill(phi+1,(sumTurfPtr->getL2Rate(phi,0)));
     histTurfRate[3]->Fill(phi+1,(sumTurfPtr->getL2Rate(phi,1)));
-    histTurfRate[4]->Fill(phi+1,sumTurfPtr->getL3Rate(phi));
+    histTurfRate[4]->Fill(phi+1,sumTurfPtr->getNadirL12Rate(phi));
+    histTurfRate[5]->Fill(phi+1,sumTurfPtr->getL3Rate(phi));
   }
 
   float scale=1./sumTurfPtr->numRates;
-  for(int i=0;i<5;i++)
+  for(int i=0;i<6;i++)
     histTurfRate[i]->Scale(scale);
 
   l1Max*=1.1e-3;
@@ -853,17 +856,17 @@ TPad *AnitaRFCanvasMaker::getSumTurfRateCanvas(SummedTurfRate *sumTurfPtr, TPad 
   }
 
 
-  for(int i=0;i<5;i++) {
+  for(int i=0;i<6;i++) {
     TPad* paddy = (TPad*)plotPad->cd(i+1);
     //      if(i==4)
     paddy->SetBottomMargin(0.12);
-    if(i==4)
+    if(i==5)
       paddy->SetBottomMargin(0.18);
     paddy->SetRightMargin(0.05);
     histTurfRate[i]->SetFillStyle(3001);
     histTurfRate[i]->SetFillColor(getNiceColour(i));
     histTurfRate[i]->SetLineColor(getNiceColour(i));
-    if(i==4)      
+    if(i==5)      
       histTurfRate[i]->SetXTitle("Phi Sector");
     if(i<2)
       histTurfRate[i]->SetYTitle("Rate (kHz)");
@@ -879,8 +882,8 @@ TPad *AnitaRFCanvasMaker::getSumTurfRateCanvas(SummedTurfRate *sumTurfPtr, TPad 
     histTurfRate[i]->GetYaxis()->SetTitleOffset(0.4);
     histTurfRate[i]->SetTitle("");
     histTurfRate[i]->Draw();
-    if(i<2) {
-      histAntMask[i]->Draw("same");
+    if(i<4) {
+      histAntMask[i%2]->Draw("same");
     }
     texy.DrawTextNDC(0.96,0.5,histTitles[i]);
   }

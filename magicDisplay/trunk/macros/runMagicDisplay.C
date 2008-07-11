@@ -15,12 +15,12 @@ void runMagicDisplay() {
 
   TChain *fred=0; //Will this work?
 
-  MagicDisplay *magicPtr = new MagicDisplay("/data/anita/palestine08/root",3228);
+  MagicDisplay *magicPtr = new MagicDisplay("/data/anita/palestine08/root",3270);
   //  magicPtr->startSurfDisplay();
   //  magicPtr->startAvgSurfDisplay();
   //  magicPtr->startTurfDisplay();
   //  magicPtr->startSumTurfDisplay();
   magicPtr->startEventDisplay();
-    ////    magicPtr->startControlPanel();
+  //  magicPtr->startControlPanel();
 
 }

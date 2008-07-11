@@ -259,7 +259,7 @@ void MagicDisplay::refreshEventDisplay()
    //   fMagicMainPad->Clear();
 
            
-  //This will need to change
+  //This will neesd to change
    fEventCanMaker->getEventInfoCanvas(fUsefulEventPtr,fHeadPtr,fMagicEventInfoPad);
    switch(fMainOption) {
    case MagicDisplayOption::kWavePhiVerticalOnly:
@@ -318,9 +318,10 @@ int MagicDisplay::displayPreviousEvent()
 
 int MagicDisplay::displayThisEvent(UInt_t eventNumber, UInt_t runNumber)
 {
-  //  cout << "displayThisEvent: " << eventNumber << endl;  
+  //  cout << "displayThisEvent: " << eventNumber << "\t" << runNumber <<endl;  
   
   if(fCurrentRun != runNumber) {
+    //    cout << "\t" << fCurrentRun << "\t" << runNumber << endl;
     closeCurrentRun();
     fCurrentRun=runNumber;
   }
@@ -462,8 +463,16 @@ void MagicDisplay::loadTurfTree()
     cout << "Couldn't get turfRateTree from " << turfName << endl;
     return;
   }
-  fTurfRateTree->SetBranchAddress("turf",&fTurfPtr);
-  fTurfRateEntry=0;
+  if(fTurfRateTree->GetEntries()>0) {
+    fTurfRateTree->SetBranchAddress("turf",&fTurfPtr);
+    fTurfRateEntry=0;
+  }
+  else {
+    delete fTurfRateTree;
+    fTurfRateFile->Close();
+    fTurfRateFile=0;
+    fTurfRateTree=0;
+  }
 } 
 
 
@@ -481,6 +490,10 @@ int MagicDisplay::getTurfEntry()
 {
   if(!fTurfRateTree) {
     loadTurfTree();     
+  }
+  if(!fTurfRateTree) {
+    std::cout << "No Turf Rates to play with\n";
+    return -1;
   }
   if(fTurfRateEntry<fTurfRateTree->GetEntries())
     fTurfRateTree->GetEntry(fTurfRateEntry);
