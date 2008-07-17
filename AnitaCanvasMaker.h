@@ -45,12 +45,12 @@ class AnitaCanvasMaker
   TPad *getHorizontalCanvas(RawAnitaHeader *hdPtr, TPad *useCan=0);
   TPad *getVerticalCanvas(RawAnitaHeader *hdPtr, TPad *useCan=0);
   TPad *getCombinedCanvas(RawAnitaHeader *hdPtr, TPad *useCan=0);
-  TPad *getSurfChanCanvas(RawAnitaHeader *hdPtr, TPad *useCan=0);
+    TPad *getSurfChanCanvas(RawAnitaHeader *hdPtr, TPad *useCan=0);
   
-   TPad *getHorizontalPhiCanvas(RawAnitaHeader *hdPtr, TPad *useCan=0);
-  TPad *getVerticalPhiCanvas(RawAnitaHeader *hdPtr, TPad *useCan=0);
-  TPad *getSurfChanPhiCanvas(RawAnitaHeader *hdPtr, TPad *useCan=0);
-  TPad *getCombinedPhiCanvas(RawAnitaHeader *hdPtr, TPad *useCan=0);
+    //   TPad *getHorizontalPhiCanvas(RawAnitaHeader *hdPtr, TPad *useCan=0);
+    //  TPad *getVerticalPhiCanvas(RawAnitaHeader *hdPtr, TPad *useCan=0);
+    //  TPad *getSurfChanPhiCanvas(RawAnitaHeader *hdPtr, TPad *useCan=0);
+    //  TPad *getCombinedPhiCanvas(RawAnitaHeader *hdPtr, TPad *useCan=0);
 
 
   TPad *getEventInfoCanvas(UsefulAnitaEvent *evPtr,RawAnitaHeader *hdPtr, TPad *useCan=0);
