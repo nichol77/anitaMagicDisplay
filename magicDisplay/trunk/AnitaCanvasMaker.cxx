@@ -189,10 +189,14 @@ TPad *AnitaCanvasMaker::getEventInfoCanvas(UsefulAnitaEvent *evPtr, RawAnitaHead
       }
       midRightPave->Draw();
 
-      //      TPaveText *rightPave = new TPaveText(0.66,0,0.8,0.95);
-      //      rightPave->SetBorderSize(0);
-      //      rightPave->SetTextAlign(13);
-      //      rightPave->Draw();
+      TPaveText *rightPave = new TPaveText(0.66,0,0.8,0.95);
+      rightPave->SetBorderSize(0);
+      rightPave->SetTextAlign(13);
+      sprintf(textLabel,"TURF This Hold: %#x",hdPtr->reserved[0]&0xf);
+      midRightPave->AddText(textLabel);
+      sprintf(textLabel,"TURF Active Holds: %#x",(hdPtr->reserved[0]&0xf0)>>4);
+      midRightPave->AddText(textLabel);
+      rightPave->Draw();
 
 
 
