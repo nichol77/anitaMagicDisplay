@@ -71,6 +71,7 @@ MagicDisplay::MagicDisplay()
    fSumTurfRateFile=0;
    fSurfHkFile=0;
    fAvgSurfHkFile=0;
+   fCalType=WaveCalType::kVoltageTime;
 }
 
 MagicDisplay::~MagicDisplay()
@@ -79,7 +80,7 @@ MagicDisplay::~MagicDisplay()
 }
 
 
-MagicDisplay::MagicDisplay(char *baseDir, int run)
+MagicDisplay::MagicDisplay(char *baseDir, int run, WaveCalType::WaveCalType_t calType)
 {
   //Offline constructor
    fHeadFile=0;
@@ -113,6 +114,7 @@ MagicDisplay::MagicDisplay(char *baseDir, int run)
    fTurfRateTree=0;
    fAvgSurfHkTree=0;
    fSumTurfRateTree=0;
+   fCalType=calType;
 
 
 
@@ -144,22 +146,27 @@ void MagicDisplay::startControlPanel()
 
 void MagicDisplay::startEventDisplay()
 {
-   fEventCanMaker=AnitaCanvasMaker::Instance();
-   int retVal=getEventEntry();
-   if(retVal==0)
+  fEventCanMaker=new AnitaCanvasMaker(fCalType);
+  int retVal=getEventEntry();
+  if(retVal==0)
       refreshEventDisplay();   
 }
 
 int MagicDisplay::getEventEntry()
 {
 
-  if(!fEventTree) loadEventTree(); 
-   if(fEventEntry<fEventTree->GetEntries())
+  if(!fEventTree) {
+    if(loadEventTree()<0) {
+      std::cout << "Couldn't open event file\n";
+      return -1;
+    }
+  }
+    if(fEventEntry<fEventTree->GetEntries())
       fEventTree->GetEntry(fEventEntry);
-   else {
+    else {
       std::cout << "No more entries in event tree" << endl;
       return -1;
-   }
+    }
             
    if(fEventEntry<fHeadTree->GetEntries())
       fHeadTree->GetEntry(fEventEntry);
@@ -169,7 +176,7 @@ int MagicDisplay::getEventEntry()
    }
    if(fUsefulEventPtr)
       delete fUsefulEventPtr;
-   fUsefulEventPtr = new UsefulAnitaEvent(fRawEventPtr,WaveCalType::kVoltageTime);  
+   fUsefulEventPtr = new UsefulAnitaEvent(fRawEventPtr,fCalType);  
   //Need to make configurable at some point
   //This will also need to be modifed to make realEvent accessible outside here
    return 0;
@@ -208,7 +215,7 @@ void MagicDisplay::closeCurrentRun()
 }
 
 
-void MagicDisplay::loadEventTree()
+int MagicDisplay::loadEventTree()
 {       
   char eventName[FILENAME_MAX];
   char headerName[FILENAME_MAX];
@@ -218,15 +225,20 @@ void MagicDisplay::loadEventTree()
   fEventTree->Add(eventName);
   fEventTree->SetBranchAddress("event",&fRawEventPtr);
       
+  if(fEventTree->GetEntries()<1) {
+    cout << "Couldn't open: " << eventName << "\n";
+    return -1;
+  }
+
   fHeadFile = new TFile(headerName);
   if(!fHeadFile) {
     cout << "Couldn't open: " << headerName << "\n";
-    return;
+    return -1;
   }
   fHeadTree = (TTree*) fHeadFile->Get("headTree");
   if(!fHeadTree) {
     cout << "Couldn't get headTree from " << headerName << endl;
-    return;
+    return -1;
   }
   fHeadTree->SetBranchAddress("header",&fHeadPtr);
   fEventEntry=0;
@@ -235,6 +247,7 @@ void MagicDisplay::loadEventTree()
   std::cerr << fEventTree << "\t" << fHeadTree << "\n";
   std::cerr << fHeadTree->GetEntries() << "\t"
 	    << fEventTree->GetEntries() << "\n";
+  return 0;
 }
 
 void MagicDisplay::refreshEventDisplay()
@@ -318,10 +331,10 @@ int MagicDisplay::displayPreviousEvent()
 
 int MagicDisplay::displayThisEvent(UInt_t eventNumber, UInt_t runNumber)
 {
-  //  cout << "displayThisEvent: " << eventNumber << "\t" << runNumber <<endl;  
+  cout << "displayThisEvent: " << eventNumber << "\t" << runNumber <<endl;  
   
   if(fCurrentRun != runNumber) {
-    //    cout << "\t" << fCurrentRun << "\t" << runNumber << endl;
+    cout << "\t" << fCurrentRun << "\t" << runNumber << endl;
     closeCurrentRun();
     fCurrentRun=runNumber;
   }
@@ -448,7 +461,7 @@ void MagicDisplay::toggleWaveformView(Int_t surfView)
       
 }
 
-void MagicDisplay::loadTurfTree() 
+int MagicDisplay::loadTurfTree() 
 {
   char turfName[FILENAME_MAX];
   sprintf(turfName,"%s/run%d/turfRateFile%d.root",fCurrentBaseDir,
@@ -456,12 +469,12 @@ void MagicDisplay::loadTurfTree()
   fTurfRateFile = new TFile(turfName);
   if(!fTurfRateFile) {
     cout << "Couldn't open: " << turfName << "\n";
-    return;
+    return -1;
   }
   fTurfRateTree = (TTree*) fTurfRateFile->Get("turfRateTree");
   if(!fTurfRateTree) {
     cout << "Couldn't get turfRateTree from " << turfName << endl;
-    return;
+    return -1;
   }
   if(fTurfRateTree->GetEntries()>0) {
     fTurfRateTree->SetBranchAddress("turf",&fTurfPtr);
@@ -473,6 +486,7 @@ void MagicDisplay::loadTurfTree()
     fTurfRateFile=0;
     fTurfRateTree=0;
   }
+  return 0;
 } 
 
 
@@ -489,7 +503,8 @@ void MagicDisplay::startTurfDisplay()
 int MagicDisplay::getTurfEntry() 
 {
   if(!fTurfRateTree) {
-    loadTurfTree();     
+    if(loadTurfTree()<0) 
+      return -1;
   }
   if(!fTurfRateTree) {
     std::cout << "No Turf Rates to play with\n";
@@ -589,7 +604,7 @@ void MagicDisplay::toggleTurfYScale()
       
 }
 
-void MagicDisplay::loadSurfTree()
+int MagicDisplay::loadSurfTree()
 {
  char surfName[FILENAME_MAX];
  sprintf(surfName,"%s/run%d/surfHkFile%d.root",fCurrentBaseDir,
@@ -597,15 +612,16 @@ void MagicDisplay::loadSurfTree()
  fSurfHkFile = new TFile(surfName);
  if(!fSurfHkFile) {
    cout << "Couldn't open: " << surfName << "\n";
-   return;
-      }
+   return -1;
+ }
  fSurfHkTree = (TTree*) fSurfHkFile->Get("surfHkTree");
  if(!fSurfHkTree) {
    cout << "Couldn't get surfHkTree from " << surfName << endl;
-   return;
+   return -1;
  }
  fSurfHkTree->SetBranchAddress("surf",&fSurfPtr);
  fSurfHkEntry=0;
+ return 0;
 }
 
 void MagicDisplay::startSurfDisplay()
@@ -623,16 +639,19 @@ void MagicDisplay::startSurfDisplay()
 int MagicDisplay::getSurfEntry() 
 {
   if(!fSurfHkTree) {
-    loadSurfTree();     
-   }
-   //   std::cerr << 
-   if(fSurfHkEntry<fSurfHkTree->GetEntries())
-      fSurfHkTree->GetEntry(fSurfHkEntry);
-   else {
-      std::cout << "No more entries in surfHkTree" << endl;
+    if(loadSurfTree()<0) {
+      cout << "Couldn't open SURF hk tree\n";
       return -1;
-   }
-   //   std::cout << fSurfHkEntry << "\t" << fSurfPtr->realTime 
+    }
+  }
+   //   std::cerr << 
+  if(fSurfHkEntry<fSurfHkTree->GetEntries())
+    fSurfHkTree->GetEntry(fSurfHkEntry);
+  else {
+    std::cout << "No more entries in surfHkTree" << endl;
+    return -1;
+  }
+  //   std::cout << fSurfHkEntry << "\t" << fSurfPtr->realTime 
    //	     << "\t" << fSurfPtr->ppsNum << std::endl;
 
    return 0;
@@ -735,7 +754,7 @@ void MagicDisplay::toggleSurfSurfView(Int_t surfView)
 
 
 
-void MagicDisplay::loadAvgSurfTree()
+int MagicDisplay::loadAvgSurfTree()
 {
   char surfName[FILENAME_MAX];
   sprintf(surfName,"%s/run%d/avgSurfHkFile%d.root",fCurrentBaseDir,
@@ -743,16 +762,16 @@ void MagicDisplay::loadAvgSurfTree()
   fSurfHkFile = new TFile(surfName);
   if(!fSurfHkFile) {
     cout << "Couldn't open: " << surfName << "\n";
-    return;
+    return -1;
   }
   fAvgSurfHkTree = (TTree*) fSurfHkFile->Get("avgSurfHkTree");
   if(!fAvgSurfHkTree) {
     cout << "Couldn't get avgSurfHkTree from " << surfName << endl;
-    return;
+    return -1;
   }
   fAvgSurfHkTree->SetBranchAddress("avgsurf",&fAvgSurfPtr);
   fAvgSurfHkEntry=0;
-
+  return 0;
 }
 
 void MagicDisplay::startAvgSurfDisplay()
@@ -768,12 +787,16 @@ void MagicDisplay::startAvgSurfDisplay()
 int MagicDisplay::getAvgSurfEntry() 
 {
   if(!fAvgSurfHkTree) {
-    loadAvgSurfTree();
+    int retVal=loadAvgSurfTree();
+    if(retVal<0) {
+      std::cout << "Couldn't load average surf tree\n";
+      return retVal;
+    }
   }
-   //   std::cerr << 
-   if(fAvgSurfHkEntry<fAvgSurfHkTree->GetEntries())
-      fAvgSurfHkTree->GetEntry(fAvgSurfHkEntry);
-   else {
+  //   std::cerr << 
+  if(fAvgSurfHkEntry<fAvgSurfHkTree->GetEntries())
+    fAvgSurfHkTree->GetEntry(fAvgSurfHkEntry);
+  else {
       std::cout << "No more entries in avgSurfHkTree" << endl;
       return -1;
    }
@@ -878,7 +901,7 @@ void MagicDisplay::toggleAvgSurfSurfView(Int_t surfView)
       
 }
 
-void MagicDisplay::loadSumTurfTree()
+int MagicDisplay::loadSumTurfTree()
 {
 
   char sumTurfName[FILENAME_MAX];
@@ -887,16 +910,16 @@ void MagicDisplay::loadSumTurfTree()
   fSumTurfRateFile = new TFile(sumTurfName);
   if(!fSumTurfRateFile) {
     cout << "Couldn't open: " << sumTurfName << "\n";
-    return;
+    return -1;
   }
   fSumTurfRateTree = (TTree*) fSumTurfRateFile->Get("sumTurfRateTree");
   if(!fSumTurfRateTree) {
     cout << "Couldn't get sumTurfRateTree from " << sumTurfName << endl;
-    return;
+    return -1;
   }
   fSumTurfRateTree->SetBranchAddress("sumturf",&fSumTurfPtr);
   fSumTurfRateEntry=0;
-
+  return 0;
 }
 
 
@@ -914,7 +937,8 @@ void MagicDisplay::startSumTurfDisplay()
 int MagicDisplay::getSumTurfEntry() 
 {
   if(!fSumTurfRateTree) {
-    loadSumTurfTree();
+    if(loadSumTurfTree()<0)
+      return -1;
   }
    if(fSumTurfRateEntry<fSumTurfRateTree->GetEntries())
       fSumTurfRateTree->GetEntry(fSumTurfRateEntry);

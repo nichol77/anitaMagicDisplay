@@ -16,6 +16,7 @@
 //Includes
 #include "TChain.h"
 #include "MagicDisplayConventions.h"
+#include "AnitaConventions.h"
 
 class TCanvas;
 class TPad;
@@ -35,7 +36,7 @@ class MagicDisplay
 {
  public:
   
-  MagicDisplay(char *baseDir, int run);
+  MagicDisplay(char *baseDir, int run, WaveCalType::WaveCalType_t calType=WaveCalType::kVoltageTime);
   MagicDisplay();
   ~MagicDisplay();
 
@@ -48,7 +49,7 @@ class MagicDisplay
 
   void closeCurrentRun();
 
-  void loadEventTree();
+  int loadEventTree();
   void startEventDisplay();
   int displayThisEvent(UInt_t eventNumber, UInt_t runNumber);
   int displayNextEvent();
@@ -59,7 +60,7 @@ class MagicDisplay
   void setMainCanvasOption(MagicDisplayOption::MagicDisplayOption_t option); 
   void toggleWaveformView(Int_t waveformView);
 
-  void loadTurfTree();
+  int loadTurfTree();
   void startTurfDisplay();
   int displayNextTurf();
   int displayPreviousTurf();
@@ -68,7 +69,7 @@ class MagicDisplay
   void drawTurfButtons();
   void toggleTurfYScale();
 
-  void loadSurfTree();
+  int loadSurfTree();
   void startSurfDisplay();
   int displayNextSurf();
   int displayPreviousSurf();
@@ -77,7 +78,7 @@ class MagicDisplay
   void drawSurfButtons();
   void toggleSurfSurfView(Int_t surfView);
 
-  void loadAvgSurfTree();
+  int loadAvgSurfTree();
   void startAvgSurfDisplay();
   int displayNextAvgSurf();
   int displayPreviousAvgSurf();
@@ -86,7 +87,7 @@ class MagicDisplay
   void drawAvgSurfButtons();
   void toggleAvgSurfSurfView(Int_t surfView);
 
-  void loadSumTurfTree();
+  int loadSumTurfTree();
   void startSumTurfDisplay();
   int displayNextSumTurf();
   int displayPreviousSumTurf();
@@ -143,13 +144,14 @@ class MagicDisplay
    TCanvas *fTurfCanvas;
    TPad *fTurfMainPad;
    TPad *fTurfInfoPad;
-   TCanvas *fSurfCanvas;
-   TPad *fSurfMainPad;
-   TPad *fSurfInfoPad;
 
    TCanvas *fSumTurfCanvas;
    TPad *fSumTurfMainPad;
    TPad *fSumTurfInfoPad;
+
+   TCanvas *fSurfCanvas;
+   TPad *fSurfMainPad;
+   TPad *fSurfInfoPad;
 
    TCanvas *fAvgSurfCanvas;
    TPad *fAvgSurfMainPad;
@@ -178,6 +180,8 @@ class MagicDisplay
    TButton *fSumTurfYScaleButton;
    TButton *fAvgSurfSurfViewButton;
    TButton *fAvgSurfPhiViewButton;
+
+   WaveCalType::WaveCalType_t fCalType;
 
 };
 

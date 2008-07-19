@@ -33,6 +33,8 @@
 #include "TApplication.h"
 
 
+ClassImp(MagicControlPanel)
+
 MagicControlPanel*  MagicControlPanel::fgInstance = 0;
 
 
