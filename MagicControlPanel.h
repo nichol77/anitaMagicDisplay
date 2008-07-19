@@ -89,7 +89,7 @@ class MagicControlPanel : public TGMainFrame
    // protect against multiple instances
 
 
-   //   ClassDef(MagicControlPanel,1);
+   ClassDef(MagicControlPanel,1);
 };
 
 

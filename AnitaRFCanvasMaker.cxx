@@ -45,16 +45,16 @@ AnitaGeomTool *fARFCGeomTool=0;
 TH1F *histTurfRate[6]={0};
 TH1F *histAntMask[2]={0};
 
-TH1F *histSurfHk[3][ACTIVE_SURFS]={0};
-TH1F *histSurfHkPhi[3][PHI_SECTORS]={0};
+TH1F *histSurfHk[3][ACTIVE_SURFS]={{0}};
+TH1F *histSurfHkPhi[3][PHI_SECTORS]={{0}};
 TH1F *histBadThreshold=0;
 TH1F *histBandMask=0;
 THStack *histSurfHkStack[3];
 THStack *histSurfHkPhiStack[3];
 TH1F *surfHkFramey[3]={0};
 
-TH1F *histAvgSurfHk[3][ACTIVE_SURFS]={0};
-TH1F *histAvgSurfHkPhi[3][PHI_SECTORS]={0};
+TH1F *histAvgSurfHk[3][ACTIVE_SURFS]={{0}};
+TH1F *histAvgSurfHkPhi[3][PHI_SECTORS]={{0}};
 TH1F *histAvgSurfBadThreshold=0;
 TH1F *histAvgSurfBandMask=0;
 THStack *histAvgSurfHkStack[3];
@@ -763,7 +763,7 @@ TPad *AnitaRFCanvasMaker::getSumTurfRateCanvas(SummedTurfRate *sumTurfPtr, TPad 
   plotPad->cd();
   plotPad->Clear();
 
-  char *histNames[6]={"histUpperL1","histLowerL1","histUpperL2","histLowerL2","histNadirL","histL3"};
+  char *histNames[6]={"histSumUpperL1","histSumLowerL1","histSumUpperL2","histSumLowerL2","histSumNadirL","histSumL3"};
   char *histTitles[6]={"Upper L1","Lower L1","Upper L2","Lower L2","Nadir L1/2","L3"};
 
   for(int i=0;i<6;i++) {
@@ -973,7 +973,7 @@ void AnitaRFCanvasMaker::getAvgSurfHkSurfCanvas(AveragedSurfHk *avgSurfPtr,TPad 
   //   plotPad->Clear();
 
   char actualName[180];
-  char *histNames[3]={"histScaler","histThreshold","histRFPower"};
+  char *histNames[3]={"histAvgScaler","histAvgThreshold","histAvgRFPower"};
   char *histTitles[3]={"Scaler","Threshold","RF Power"};
 
   if(histAvgSurfBadThreshold)
@@ -1162,7 +1162,7 @@ void AnitaRFCanvasMaker::getAvgSurfHkPhiCanvas(AveragedSurfHk *avgSurfPtr,TPad *
   if(!fARFCGeomTool)
     fARFCGeomTool=AnitaGeomTool::Instance();
   char actualName[180];
-  char *histNames[3]={"histScaler","histThreshold","histRFPower"};
+  char *histNames[3]={"histAvgScaler","histAvgThreshold","histAvgRFPower"};
   char *histTitles[3]={"Scaler","Threshold","RF Power"};
 
   if(histAvgSurfBadThreshold)

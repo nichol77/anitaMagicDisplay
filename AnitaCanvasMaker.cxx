@@ -64,10 +64,10 @@ AnitaRing::AnitaRing_t ringMap[5]={AnitaRing::kUpperRing,
 				   AnitaRing::kNadirRing};
 
 
-WaveformGraph *grSurf[ACTIVE_SURFS][CHANNELS_PER_SURF]={0};
-FFTGraph *grSurfFFT[ACTIVE_SURFS][CHANNELS_PER_SURF]={0};
+WaveformGraph *grSurf[ACTIVE_SURFS][CHANNELS_PER_SURF]={{0}};
+FFTGraph *grSurfFFT[ACTIVE_SURFS][CHANNELS_PER_SURF]={{0}};
 
-AnitaCanvasMaker::AnitaCanvasMaker()
+AnitaCanvasMaker::AnitaCanvasMaker(WaveCalType::WaveCalType_t calType)
 {
   //Default constructor
   fACMGeomTool=AnitaGeomTool::Instance();
@@ -88,10 +88,22 @@ AnitaCanvasMaker::AnitaCanvasMaker()
   //fRedoSurfCanvas=0;
   fLastView=0;
   fNewEvent=1;
+  fCalType=calType;
   fgInstance=this;
   memset(grSurf,0,sizeof(WaveformGraph*)*ACTIVE_SURFS*CHANNELS_PER_SURF);
   memset(grSurfFFT,0,sizeof(FFTGraph*)*ACTIVE_SURFS*CHANNELS_PER_SURF);
   
+  switch(fCalType) {
+  case WaveCalType::kNoCalib:
+  case WaveCalType::kJustUnwrap:
+    fMinTimeLimit=0;
+    fMaxTimeLimit=260;
+    break;
+  default:
+    break;
+  }
+
+
 }
 
 AnitaCanvasMaker::~AnitaCanvasMaker()
@@ -206,6 +218,46 @@ TPad *AnitaCanvasMaker::getEventInfoCanvas(UsefulAnitaEvent *evPtr, RawAnitaHead
    return topPad;
 }
 
+
+TPad *AnitaCanvasMaker::quickGetEventViewerCanvasForWebPlottter(UsefulAnitaEvent *evPtr,RawAnitaHeader *hdPtr, TPad *useCan)
+{
+  TPad *retCan;
+
+  //  static Int_t lastEventView=0;
+
+
+
+  for(int surf=0;surf<ACTIVE_SURFS;surf++){
+    for(int chan=0;chan<CHANNELS_PER_SURF;chan++){
+      
+      if(grSurf[surf][chan]){
+	delete grSurf[surf][chan];
+	//grSurf[surf][chan]=0;
+      }
+      
+      
+      TGraph *grTemp = evPtr->getGraphFromSurfAndChan(surf,chan);
+      grSurf[surf][chan] = new WaveformGraph(grTemp->GetN(),grTemp->GetX(),grTemp->GetY());
+      //      std::cout << hdPtr->eventNumber << "\n";
+      //      std::cout << surf << "\t" << chan << "\t" 
+      //		<< grSurf[surf][chan]->GetRMS(2) << std::endl;
+	delete grTemp;
+	
+    }
+  }
+
+  fRedoEventCanvas=0;
+
+  retCan=AnitaCanvasMaker::getVerticalCanvasForWebPlotter(hdPtr,useCan);
+
+ //  if(fPolView==0) 
+//   else if(fPolView==1) retCan=AnitaCanvasMaker::getHorizontalCanvas(hdPtr,useCan);
+//   else if(fPolView==2) retCan=AnitaCanvasMaker::getCombinedCanvas(hdPtr,useCan);
+//   else if(fPolView==3) retCan=AnitaCanvasMaker::getSurfChanCanvas(hdPtr,useCan);
+
+  return retCan;
+
+}
 
 TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr,
 					     RawAnitaHeader *hdPtr,
@@ -465,6 +517,109 @@ TPad *AnitaCanvasMaker::getVerticalCanvas(RawAnitaHeader *hdPtr,
       else{
 	grSurf[surf][chan]->Draw("l");
       }
+
+
+      count++;
+      paddy1->SetEditable(kFALSE);
+    }
+  }
+
+  if(!useCan)
+    return canVert;
+  else
+    return plotPad;
+  
+
+}
+
+
+TPad *AnitaCanvasMaker::getVerticalCanvasForWebPlotter(RawAnitaHeader *hdPtr,
+						       TPad *useCan)
+{
+  //  gStyle->SetTitleH(0.1);
+  gStyle->SetOptTitle(0); 
+
+  if(!fACMGeomTool)
+    fACMGeomTool=AnitaGeomTool::Instance();
+  char textLabel[180];
+  char padName[180];
+  TPad *canVert;
+  TPad *plotPad;
+  if(!useCan) {
+    canVert = (TPad*) gROOT->FindObject("canVert");
+    if(!canVert) {
+      canVert = new TCanvas("canVert","canVert",1000,600);
+    }
+    canVert->Clear();
+    canVert->SetTopMargin(0);
+    TPaveText *leftPave = new TPaveText(0.05,0.92,0.95,0.98);
+    leftPave->SetBorderSize(0);
+    sprintf(textLabel,"Run %d, Event %d",hdPtr->run,hdPtr->eventNumber);
+    TText *eventText = leftPave->AddText(textLabel);
+    eventText->SetTextColor(50);
+    leftPave->Draw();
+    plotPad = new TPad("canVertMain","canVertMain",0,0,1,0.9);
+    plotPad->Draw();
+  }
+  else {
+    plotPad=useCan;
+  }
+  plotPad->cd();
+  setupPhiPadWithFrames(plotPad);
+
+
+  // Upper
+  // 1 3 5 7 9 11 13 15
+  // 2 4 6 8 10 12 14 16
+  // Lower
+  // 1 3 5 7 9 11 13 15
+  // 2 4 6 8 10 12 14 16
+
+  int count=0;
+
+
+  //  std::cout << hdPtr->eventNumber << "\t" << hdPtr->l3TrigPattern << std::endl;
+  for(int column=0;column<8;column++) {
+    for(int row=0;row<5;row++) {
+      plotPad->cd();
+      int phi=phiMap[row][column];
+      int ring=rowMap[row];
+      int ant=antMap[ring][phi];
+      int surf=surfMap[ant];
+      int chan=chanMap[ant];
+      sprintf(padName,"phiChanPad%d",count);
+      TPad *paddy1 = (TPad*) plotPad->FindObject(padName);
+      paddy1->SetEditable(kTRUE);
+      deleteTGraphsFromPad(paddy1,surf,chan,chan+4);
+      paddy1->cd();
+
+      //      std::cout << phi << "\t" << ring << "\t" << surf << "\t" 
+      //		<< chan << "\t" << grSurf[surf][chan]->GetRMS(2) << "\n";
+
+      if(ringMap[row]==AnitaRing::kUpperRing) {
+	if(hdPtr->upperL1TrigPattern & (1<<phi))
+	  grSurf[surf][chan]->SetLineColor(kBlue-2);
+	if(hdPtr->upperL2TrigPattern & (1<<phi))
+	  grSurf[surf][chan]->SetLineColor(kGreen-2);
+      }
+      else if(ringMap[row]==AnitaRing::kLowerRing) {
+      	if(hdPtr->lowerL1TrigPattern & (1<<phi))
+	  grSurf[surf][chan]->SetLineColor(kBlue-2);
+	if(hdPtr->lowerL2TrigPattern & (1<<phi))
+	  grSurf[surf][chan]->SetLineColor(kGreen-2);
+      }
+      
+      if(hdPtr->l3TrigPattern & (1<<phi))
+	grSurf[surf][chan]->SetLineColor(kRed-3);
+
+
+      grSurf[surf][chan]->setSurfChanPhiAntPolRing(surf,chan,phi,ant,
+						   AnitaPol::kVertical,
+						   ringMap[row]);
+
+     
+      grSurf[surf][chan]->Draw("l");
+    
 
 
       count++;
