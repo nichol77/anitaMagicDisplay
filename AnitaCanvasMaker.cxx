@@ -631,6 +631,10 @@ TPad *AnitaCanvasMaker::getVerticalCanvasForWebPlotter(RawAnitaHeader *hdPtr,
       if(hdPtr->l3TrigPattern & (1<<phi))
 	grSurf[surf][chan]->SetLineColor(kRed-3);
 
+
+      if(hdPtr->phiTrigMask & (1<<phi)) {
+	grSurf[surf][chan]->SetLineColor(kViolet);
+      }
      
       grSurf[surf][chan]->Draw("l");
     
@@ -848,13 +852,13 @@ TPad *AnitaCanvasMaker::getCombinedCanvas(RawAnitaHeader *hdPtr,
 
       if(fPowerSpecView){
 	grSurfFFT[surf][chanH]->SetLineColor(kBlue);
-	grSurfFFT[surf][chanV]->Draw("l");
 	grSurfFFT[surf][chanH]->Draw("l");
+	grSurfFFT[surf][chanV]->Draw("l");
       }
       else{
 	grSurf[surf][chanH]->SetLineColor(kBlue);
-	grSurf[surf][chanV]->Draw("l");
 	grSurf[surf][chanH]->Draw("l");
+	grSurf[surf][chanV]->Draw("l");
       }
 
 
