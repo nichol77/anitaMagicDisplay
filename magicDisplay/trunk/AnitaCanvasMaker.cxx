@@ -47,13 +47,6 @@ int phiMap[5][8]={{0,2,4,6,8,10,12,14},
 		  {1,3,5,7,9,11,13,15},
 		  {0,2,4,6,8,10,12,14}};
 
-int antMap[3][16]={{8,0,9,1,10,2,11,3,12,4,13,5,14,6,15,7},
-		   {16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31},
-		   {32,100,33,100,34,100,35,100,36,100,37,100,38,100,39,100}};
-
-int surfMap[40]={5,7,6,1,5,7,6,1,0,2,3,4,0,2,3,4,0,5,2,7,3,6,4,1,0,5,2,7,3,6,4,1,8,9,8,9,8,9,8,9};
-
-int chanMap[40]={0,0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,0,0,1,1,2,2,3,3};
 
 int rowMap[5]={0,0,1,1,2};
 
@@ -205,9 +198,11 @@ TPad *AnitaCanvasMaker::getEventInfoCanvas(UsefulAnitaEvent *evPtr, RawAnitaHead
       rightPave->SetBorderSize(0);
       rightPave->SetTextAlign(13);
       sprintf(textLabel,"TURF This Hold: %#x",hdPtr->reserved[0]&0xf);
-      midRightPave->AddText(textLabel);
+      rightPave->AddText(textLabel);
       sprintf(textLabel,"TURF Active Holds: %#x",(hdPtr->reserved[0]&0xf0)>>4);
-      midRightPave->AddText(textLabel);
+      rightPave->AddText(textLabel);
+      sprintf(textLabel,"Phi Mask: %#x",(hdPtr->phiTrigMask));
+      rightPave->AddText(textLabel);     
       rightPave->Draw();
 
 
@@ -363,10 +358,15 @@ TPad *AnitaCanvasMaker::getHorizontalCanvas(RawAnitaHeader *hdPtr,
     for(int row=0;row<5;row++) {
       plotPad->cd();
       int phi=phiMap[row][column];
-      int ring=rowMap[row];
-      int ant=antMap[ring][phi];
-      int surf=surfMap[ant];
-      int chan=chanMap[ant]+4;
+      //      int ring=rowMap[row];
+      int ant=0;//=antMap[ring][phi];      
+      int surf=0;//=surfMap[ant];
+      int chan=0;//=chanMap[ant];
+
+      fACMGeomTool->getSurfChanAntFromRingPhiPol(ringMap[row],
+						 phi,AnitaPol::kHorizontal,
+						 surf,chan,ant);
+
       sprintf(padName,"phiChanPad%d",count);
       TPad *paddy1 = (TPad*) plotPad->FindObject(padName);
       paddy1->SetEditable(kTRUE);
@@ -476,10 +476,15 @@ TPad *AnitaCanvasMaker::getVerticalCanvas(RawAnitaHeader *hdPtr,
     for(int row=0;row<5;row++) {
       plotPad->cd();
       int phi=phiMap[row][column];
-      int ring=rowMap[row];
-      int ant=antMap[ring][phi];
-      int surf=surfMap[ant];
-      int chan=chanMap[ant];
+      //      int ring=rowMap[row];
+      int ant=0;//=antMap[ring][phi];      
+      int surf=0;//=surfMap[ant];
+      int chan=0;//=chanMap[ant];
+
+      fACMGeomTool->getSurfChanAntFromRingPhiPol(ringMap[row],
+						 phi,AnitaPol::kVertical,
+						 surf,chan,ant);
+
       sprintf(padName,"phiChanPad%d",count);
       TPad *paddy1 = (TPad*) plotPad->FindObject(padName);
       paddy1->SetEditable(kTRUE);
@@ -502,6 +507,10 @@ TPad *AnitaCanvasMaker::getVerticalCanvas(RawAnitaHeader *hdPtr,
       if(hdPtr->l3TrigPattern & (1<<phi))
 	grSurf[surf][chan]->SetLineColor(kRed-3);
 
+
+      if(hdPtr->phiTrigMask & (1<<phi)) {
+	grSurf[surf][chan]->SetLineColor(kViolet);
+      }
 
       grSurf[surf][chan]->setSurfChanPhiAntPolRing(surf,chan,phi,ant,
 						   AnitaPol::kVertical,
@@ -583,10 +592,15 @@ TPad *AnitaCanvasMaker::getVerticalCanvasForWebPlotter(RawAnitaHeader *hdPtr,
     for(int row=0;row<5;row++) {
       plotPad->cd();
       int phi=phiMap[row][column];
-      int ring=rowMap[row];
-      int ant=antMap[ring][phi];
-      int surf=surfMap[ant];
-      int chan=chanMap[ant];
+      //      int ring=rowMap[row];
+      int ant=0;//=antMap[ring][phi];      
+      int surf=0;//=surfMap[ant];
+      int chan=0;//=chanMap[ant];
+
+      fACMGeomTool->getSurfChanAntFromRingPhiPol(ringMap[row],
+						 phi,AnitaPol::kVertical,
+						 surf,chan,ant);
+
       sprintf(padName,"phiChanPad%d",count);
       TPad *paddy1 = (TPad*) plotPad->FindObject(padName);
       paddy1->SetEditable(kTRUE);
@@ -608,14 +622,14 @@ TPad *AnitaCanvasMaker::getVerticalCanvasForWebPlotter(RawAnitaHeader *hdPtr,
 	if(hdPtr->lowerL2TrigPattern & (1<<phi))
 	  grSurf[surf][chan]->SetLineColor(kGreen-2);
       }
-      
-      if(hdPtr->l3TrigPattern & (1<<phi))
-	grSurf[surf][chan]->SetLineColor(kRed-3);
 
 
       grSurf[surf][chan]->setSurfChanPhiAntPolRing(surf,chan,phi,ant,
 						   AnitaPol::kVertical,
 						   ringMap[row]);
+      
+      if(hdPtr->l3TrigPattern & (1<<phi))
+	grSurf[surf][chan]->SetLineColor(kRed-3);
 
      
       grSurf[surf][chan]->Draw("l");
@@ -719,6 +733,10 @@ TPad *AnitaCanvasMaker::getSurfChanCanvas(RawAnitaHeader *hdPtr,
       
 	if(hdPtr->l3TrigPattern & (1<<phi))
 	  grSurf[surf][chan]->SetLineColor(kRed-3);
+
+	if(hdPtr->phiTrigMask & (1<<phi))
+	  grSurf[surf][chan]->SetLineColor(kViolet);
+
       }
       if(fPowerSpecView && chan<(CHANNELS_PER_SURF-1)){
 	grSurfFFT[surf][chan]->Draw("l");
@@ -789,12 +807,21 @@ TPad *AnitaCanvasMaker::getCombinedCanvas(RawAnitaHeader *hdPtr,
   for(int column=0;column<8;column++) {
     for(int row=0;row<5;row++) {
       plotPad->cd();
+
       int phi=phiMap[row][column];
-      int ring=rowMap[row];
-      int ant=antMap[ring][phi];
-      int surf=surfMap[ant];
-      int chanH=chanMap[ant]+4;
-      int chanV=chanMap[ant];
+      //      int ring=rowMap[row];
+      int ant=0;//=antMap[ring][phi];      
+      int surf=0;//=surfMap[ant];
+      int chanV=0;//=chanMap[ant];
+      int chanH=0;
+
+      fACMGeomTool->getSurfChanAntFromRingPhiPol(ringMap[row],
+						 phi,AnitaPol::kVertical,
+						 surf,chanV,ant);
+      fACMGeomTool->getSurfChanAntFromRingPhiPol(ringMap[row],
+						 phi,AnitaPol::kHorizontal,
+						 surf,chanH,ant);
+
       sprintf(padName,"phiChanPad%d",count);
       
       TPad *paddy1 = (TPad*) plotPad->FindObject(padName);
@@ -814,6 +841,10 @@ TPad *AnitaCanvasMaker::getCombinedCanvas(RawAnitaHeader *hdPtr,
       grSurf[surf][chanH]->setSurfChanPhiAntPolRing(surf,chanH,phi,ant,
 						       AnitaPol::kHorizontal,
 						       ringMap[row]);
+
+
+      if(hdPtr->phiTrigMask & (1<<phi))
+	grSurf[surf][chanV]->SetLineColor(kViolet);
 
       if(fPowerSpecView){
 	grSurfFFT[surf][chanH]->SetLineColor(kBlue);
@@ -1125,5 +1156,7 @@ void AnitaCanvasMaker::deleteTGraphsFromPad(TPad *paddy,int surf,int chan,int ch
   
   //  paddy->Update();
 }
+
+
 
 
