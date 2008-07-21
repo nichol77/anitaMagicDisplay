@@ -633,7 +633,10 @@ TPad *AnitaCanvasMaker::getVerticalCanvasForWebPlotter(RawAnitaHeader *hdPtr,
 
 
       if(hdPtr->phiTrigMask & (1<<phi)) {
-	grSurf[surf][chan]->SetLineColor(kViolet);
+	grSurf[surf][chan]->SetLineStyle(2);
+      }
+      else {
+	grSurf[surf][chan]->SetLineStyle(1);
       }
      
       grSurf[surf][chan]->Draw("l");
