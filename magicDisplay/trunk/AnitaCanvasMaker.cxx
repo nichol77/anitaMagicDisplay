@@ -117,6 +117,12 @@ AnitaCanvasMaker*  AnitaCanvasMaker::Instance()
 TPad *AnitaCanvasMaker::getEventInfoCanvas(UsefulAnitaEvent *evPtr, RawAnitaHeader *hdPtr, TPad *useCan)
 {
    static UInt_t lastEventNumber=0;
+   static TPaveText *leftPave=0;
+   static TPaveText *midLeftPave=0;
+   static TPaveText *midRightPave=0;
+   static TPaveText *rightPave=0;
+
+
    if(!fACMGeomTool)
       fACMGeomTool=AnitaGeomTool::Instance();
    char textLabel[180];
@@ -129,85 +135,90 @@ TPad *AnitaCanvasMaker::getEventInfoCanvas(UsefulAnitaEvent *evPtr, RawAnitaHead
       topPad=useCan;
    } 
    if(hdPtr->eventNumber != lastEventNumber) {
-      topPad->Clear();
-      topPad->SetTopMargin(0.05);
-      topPad->cd();
-      TPaveText *leftPave = new TPaveText(0,0,0.24,0.9);
-      leftPave->SetBorderSize(0);
-      leftPave->SetFillColor(0);
-      leftPave->SetTextAlign(13);
-      sprintf(textLabel,"Run:    %d",hdPtr->run);
-      TText *runText = leftPave->AddText(textLabel);
-      runText->SetTextColor(50);
-      sprintf(textLabel,"Event: %d",hdPtr->eventNumber);
-      TText *eventText = leftPave->AddText(textLabel);
-      eventText->SetTextColor(50);
-      leftPave->Draw();
+     fNewEvent=1;
+     topPad->Clear();
+     topPad->SetTopMargin(0.05);
+     topPad->cd();
+     if(leftPave) delete leftPave;
+     leftPave = new TPaveText(0,0,0.24,0.9);
+     leftPave->SetBorderSize(0);
+     leftPave->SetFillColor(0);
+     leftPave->SetTextAlign(13);
+     sprintf(textLabel,"Run:    %d",hdPtr->run);
+     TText *runText = leftPave->AddText(textLabel);
+     runText->SetTextColor(50);
+     sprintf(textLabel,"Event: %d",hdPtr->eventNumber);
+     TText *eventText = leftPave->AddText(textLabel);
+     eventText->SetTextColor(50);
+     leftPave->Draw();
 
-      TPaveText *midLeftPave = new TPaveText(0.26,0,0.49,0.95);
-      midLeftPave->SetBorderSize(0);
-      midLeftPave->SetTextAlign(13);
-      TTimeStamp trigTime((time_t)hdPtr->triggerTime,(Int_t)hdPtr->triggerTimeNs);
-      sprintf(textLabel,"Time: %s",trigTime.AsString("s"));
-      TText *timeText = midLeftPave->AddText(textLabel);
-      timeText->SetTextColor(1);
-      sprintf(textLabel,"Trigger: %8.6f ms",1e-6*hdPtr->triggerTimeNs);
-      TText *timeText2 = midLeftPave->AddText(textLabel);
-      timeText2->SetTextColor(1);
-      sprintf(textLabel,"Priority: %d -- Queue: %d",(hdPtr->priority&0xf0)/16,hdPtr->priority&0xf);
-      midLeftPave->AddText(textLabel);
-      //      sprintf(textLabel,"Lab Chip %d",labChip);
-      //      midLeftPave->AddText(textLabel);
-      sprintf(textLabel,"Trig Num: %d -- Trig Type: %s",hdPtr->trigNum,hdPtr->trigTypeAsString());
-      midLeftPave->AddText(textLabel);
-      if(hdPtr->errorFlag&0x1) {
-	 TText *slipText = midLeftPave->AddText("Possible Sync Slip");
+     if(midLeftPave) delete midLeftPave;
+     midLeftPave = new TPaveText(0.26,0,0.49,0.95);
+     midLeftPave->SetBorderSize(0);
+     midLeftPave->SetTextAlign(13);
+     TTimeStamp trigTime((time_t)hdPtr->triggerTime,(Int_t)hdPtr->triggerTimeNs);
+     sprintf(textLabel,"Time: %s",trigTime.AsString("s"));
+     TText *timeText = midLeftPave->AddText(textLabel);
+     timeText->SetTextColor(1);
+     sprintf(textLabel,"Trigger: %8.6f ms",1e-6*hdPtr->triggerTimeNs);
+     TText *timeText2 = midLeftPave->AddText(textLabel);
+     timeText2->SetTextColor(1);
+     sprintf(textLabel,"Priority: %d -- Queue: %d",(hdPtr->priority&0xf0)/16,hdPtr->priority&0xf);
+     midLeftPave->AddText(textLabel);
+     //      sprintf(textLabel,"Lab Chip %d",labChip);
+     //      midLeftPave->AddText(textLabel);
+     sprintf(textLabel,"Trig Num: %d -- Trig Type: %s",hdPtr->trigNum,hdPtr->trigTypeAsString());
+     midLeftPave->AddText(textLabel);
+     if(hdPtr->errorFlag&0x1) {
+       TText *slipText = midLeftPave->AddText("Possible Sync Slip");
 	 slipText->SetTextColor(6);   
-      }
-      char labLetter[4]={'A','B','C','D'};
-      sprintf(textLabel,"Labrador ");
-      
-      int good=1;
-      for(int surf=0;surf<ACTIVE_SURFS;surf++) {
-	sprintf(textLabel,"%s%c",textLabel,labLetter[evPtr->getLabChip(1+ 9*surf)]);
-	if(evPtr->getLabChip(10) != evPtr->getLabChip(9*surf + 1))
-	  good=0;
-      }
-      TText *labText=midLeftPave->AddText(textLabel);
-      if(!good)
-	labText->SetTextColor(6);
-      midLeftPave->Draw();
-
-
-      TPaveText *midRightPave = new TPaveText(0.51,0,0.66,0.95);
-      midRightPave->SetBorderSize(0);
-      midRightPave->SetTextAlign(13);
-      sprintf(textLabel,"TURF: %d",hdPtr->turfEventId&0xfffff);
-      midRightPave->AddText(textLabel);
-      for(int surf=0;surf<ACTIVE_SURFS;surf++) {
-	sprintf(textLabel,"SURF %d: %d",surf+1,evPtr->surfEventId[surf]&0xfffff);
-
-	if(evPtr->surfEventId[surf]!=hdPtr->turfEventId) {
-	  TText *slipText = midRightPave->AddText(textLabel);
-	  slipText->SetTextColor(6);
-	}
-      }
-      midRightPave->Draw();
-
-      TPaveText *rightPave = new TPaveText(0.66,0,0.8,0.95);
-      rightPave->SetBorderSize(0);
-      rightPave->SetTextAlign(13);
-      sprintf(textLabel,"TURF This Hold: %#x",hdPtr->reserved[0]&0xf);
-      rightPave->AddText(textLabel);
-      sprintf(textLabel,"TURF Active Holds: %#x",(hdPtr->reserved[0]&0xf0)>>4);
-      rightPave->AddText(textLabel);
-      sprintf(textLabel,"Phi Mask: %#x",(hdPtr->phiTrigMask));
-      rightPave->AddText(textLabel);     
-      rightPave->Draw();
-
-
-
-      lastEventNumber=hdPtr->eventNumber;
+     }
+     char labLetter[4]={'A','B','C','D'};
+     sprintf(textLabel,"Labrador ");
+     
+     int good=1;
+     for(int surf=0;surf<ACTIVE_SURFS;surf++) {
+       sprintf(textLabel,"%s%c",textLabel,labLetter[evPtr->getLabChip(1+ 9*surf)]);
+       if(evPtr->getLabChip(10) != evPtr->getLabChip(9*surf + 1))
+	 good=0;
+     }
+     TText *labText=midLeftPave->AddText(textLabel);
+     if(!good)
+       labText->SetTextColor(6);
+     midLeftPave->Draw();
+     
+     
+     if(midRightPave) delete midRightPave;
+     midRightPave = new TPaveText(0.51,0,0.66,0.95);
+     midRightPave->SetBorderSize(0);
+     midRightPave->SetTextAlign(13);
+     sprintf(textLabel,"TURF: %d",hdPtr->turfEventId&0xfffff);
+     midRightPave->AddText(textLabel);
+     for(int surf=0;surf<ACTIVE_SURFS;surf++) {
+       sprintf(textLabel,"SURF %d: %d",surf+1,evPtr->surfEventId[surf]&0xfffff);
+       
+       if(evPtr->surfEventId[surf]!=hdPtr->turfEventId) {
+	 TText *slipText = midRightPave->AddText(textLabel);
+	 slipText->SetTextColor(6);
+       }
+     }
+     midRightPave->Draw();
+     
+     if(rightPave) delete rightPave;
+     rightPave = new TPaveText(0.66,0,0.8,0.95);
+     rightPave->SetBorderSize(0);
+     rightPave->SetTextAlign(13);
+     sprintf(textLabel,"TURF This Hold: %#x",hdPtr->reserved[0]&0xf);
+     rightPave->AddText(textLabel);
+     sprintf(textLabel,"TURF Active Holds: %#x",(hdPtr->reserved[0]&0xf0)>>4);
+     rightPave->AddText(textLabel);
+     sprintf(textLabel,"Phi Mask: %#x",(hdPtr->phiTrigMask));
+     rightPave->AddText(textLabel);     
+     rightPave->Draw();
+     
+     
+     
+     lastEventNumber=hdPtr->eventNumber;
    }
       
    return topPad;
@@ -261,10 +272,11 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr,
   TPad *retCan;
 
   static Int_t lastEventView=0;
-
+  static UInt_t lastEventNumber=0;
 
   
-  if(fNewEvent==1){
+  if(evPtr->eventNumber!=lastEventNumber){
+    lastEventNumber=evPtr->eventNumber;
 
     for(int surf=0;surf<ACTIVE_SURFS;surf++){
       for(int chan=0;chan<CHANNELS_PER_SURF;chan++){
@@ -509,8 +521,12 @@ TPad *AnitaCanvasMaker::getVerticalCanvas(RawAnitaHeader *hdPtr,
 
 
       if(hdPtr->phiTrigMask & (1<<phi)) {
-	grSurf[surf][chan]->SetLineColor(kViolet);
+	grSurf[surf][chan]->SetLineStyle(2);
       }
+      else {
+	grSurf[surf][chan]->SetLineStyle(1);
+      }
+	
 
       grSurf[surf][chan]->setSurfChanPhiAntPolRing(surf,chan,phi,ant,
 						   AnitaPol::kVertical,
@@ -741,8 +757,12 @@ TPad *AnitaCanvasMaker::getSurfChanCanvas(RawAnitaHeader *hdPtr,
 	if(hdPtr->l3TrigPattern & (1<<phi))
 	  grSurf[surf][chan]->SetLineColor(kRed-3);
 
-	if(hdPtr->phiTrigMask & (1<<phi))
-	  grSurf[surf][chan]->SetLineColor(kViolet);
+	if(hdPtr->phiTrigMask & (1<<phi)) {
+	  grSurf[surf][chan]->SetLineStyle(2);
+	}
+	else {
+	  grSurf[surf][chan]->SetLineStyle(1);
+	}
 
       }
       if(fPowerSpecView && chan<(CHANNELS_PER_SURF-1)){
@@ -850,8 +870,13 @@ TPad *AnitaCanvasMaker::getCombinedCanvas(RawAnitaHeader *hdPtr,
 						       ringMap[row]);
 
 
-      if(hdPtr->phiTrigMask & (1<<phi))
-	grSurf[surf][chanV]->SetLineColor(kViolet);
+      if(hdPtr->phiTrigMask & (1<<phi)) {
+	grSurf[surf][chanV]->SetLineColor(2);
+      }
+      else {
+	grSurf[surf][chanV]->SetLineColor(1);
+      }
+	
 
       if(fPowerSpecView){
 	grSurfFFT[surf][chanH]->SetLineColor(kBlue);
