@@ -1,0 +1,50 @@
+################################################################################
+#### Magic Display   
+####	   Marvellous Anita Graphical Interface & Classy Display
+####
+####  May 2008 -- Ryan Nichol <rjn@hep.ucl.ac.uk>
+################################################################################
+
+Preparation
+============
+In order to use MagicDisplay remotely you need to have enabled ssh access to the server using keys. This isn't nearly as painful as it sounds (and once you've tried keys you'll never go back to nasty password access).
+
+Step 1. Making an SSH Key
+Do this by typing:	
+ssh-keygen -t dsa	
+enter a passphrase when prompted. This will create two files:
+.ssh/id_dsa  (your private key)
+.ssh/id_dsa.pub   (your public key)
+
+Step 2. Putting it on the server
+Log on to your server using standard password ssh. Append (note append do not replace otherwise other users of the same account will get shirty) the contents of your id_dsa.pub key to the .ssh/authorized_keys2 on the server machine
+
+Step 3. Test it
+Log out and when you log back in, instead of being asked for the password you'll be asked for your passphrase. 
+
+Step 4. Enable ssh-agent
+That way you only need to enter your pass phrase once a session. See
+http://mah.everybody.org/docs/ssh
+
+
+Using MagicDisplay remotely
+===========================
+Option A) 
+The server has rootd spawned from inetd (loki and larry in palestine are setup this way). All you need to do is edit the macros/runMagicDisplayRemote.C macro to point to your favourite server and run number and then run it
+
+Option B)
+If the server isn't setup up to automatically spawn rootd, then one needs to ssh to the server and start rootd.
+rootd -p <port>       (I recommend using a high numbered port (10000+))
+Log out and back on your local machine edit the macro to port to your favourite server and port.
+
+Brief TNetFile tutorial
+=======================
+MagiDisplay works using roots built in rootd support. The syntax for the filename is:
+root://user@server:port//full/path/to/remote/data/file
+
+For instance if you just wanted to look at a header file on larry you could do
+TFile *fpHead = TFile::Open("root://anita@192.168.2.103:1234//TBdata/anita/palestine08/root/run3791/headFile3791.root");
+and then fpHead looks just like a TFile you opened yourself
+
+
+
