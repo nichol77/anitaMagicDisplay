@@ -317,6 +317,41 @@ int MagicDisplay::displayNextEvent()
 }
 
 
+int MagicDisplay::displayFirstEvent()
+{
+  fEventEntry=0;
+   int retVal=getEventEntry();
+     fEventCanMaker->fNewEvent=1;
+   if(retVal==0) {
+      refreshEventDisplay(); 
+   }
+   else fEventEntry--;
+   return retVal;  
+}
+
+
+int MagicDisplay::displayLastEvent()
+{
+  //  fEventTree->Refresh();
+  //  fHeadTree->Refresh();
+  
+
+  Long64_t headEnts=fHeadTree->GetEntries();
+  Long64_t eventEnts=fEventTree->GetEntries();
+
+  fEventEntry=headEnts-1;
+  if(eventEnts<headEnts)
+    fEventEntry=eventEnts-1;
+   int retVal=getEventEntry();
+     fEventCanMaker->fNewEvent=1;
+   if(retVal==0) {
+      refreshEventDisplay(); 
+   }
+   else fEventEntry--;
+   return retVal;  
+}
+
+
 int MagicDisplay::displayPreviousEvent()
 {
    if(fEventEntry>0)
@@ -362,14 +397,24 @@ int MagicDisplay::displayThisEvent(UInt_t eventNumber, UInt_t runNumber)
 }
 
 void MagicDisplay::drawEventButtons() {
-   TButton *butNext = new TButton("Next ","MagicDisplay::Instance()->displayNextEvent();",0.95,0.95,1,1);
+   TButton *butNext = new TButton("Next ","MagicDisplay::Instance()->displayNextEvent();",0.95,0.975,1,1);
    butNext->SetTextSize(0.5);
    butNext->SetFillColor(kGreen-10);
    butNext->Draw();
-   TButton *butPrev = new TButton("Prev.","MagicDisplay::Instance()->displayPreviousEvent();",0.95,0.90,1,0.95);
+   TButton *butPrev = new TButton("Prev.","MagicDisplay::Instance()->displayPreviousEvent();",0.95,0.95,1,0.975);
    butPrev->SetTextSize(0.5);
    butPrev->SetFillColor(kBlue-10);
    butPrev->Draw();
+   TButton *butFirst = new TButton("First ","MagicDisplay::Instance()->displayFirstEvent();",0.95,0.925,1,0.95);
+   butFirst->SetTextSize(0.5);
+   butFirst->SetFillColor(kOrange+10);
+   butFirst->Draw();
+   TButton *butLast = new TButton("Last.","MagicDisplay::Instance()->displayLastEvent();",0.95,0.90,1,0.925);
+   butLast->SetTextSize(0.5);
+   butLast->SetFillColor(kViolet-10);
+   butLast->Draw();
+   
+
    TButton *butPlay = new TButton("Play","MagicDisplay::Instance()->startEventPlaying();",0.9,0.97,0.95,1);
    butPlay->SetTextSize(0.5);
    butPlay->SetFillColor(kGreen-10);
@@ -1065,6 +1110,17 @@ void MagicDisplay::startEventPlaying()
       gSystem->Sleep(fEventPlaySleepMs);
   }
   while(this->displayNextEvent()==0);
+  if(fInEventPlayMode) {
+    Long64_t headEntries=fHeadTree->GetEntries();
+    //    fHeadTree->Refresh();
+    //fEventTree->Refresh();
+    if(fHeadTree->GetEntries()!=headEntries) {
+      std::cout << headEntries << "\t" << fHeadTree->GetEntries() << "\n";
+      startEventPlaying();
+    }
+  }
+  
+  
 }
 
 

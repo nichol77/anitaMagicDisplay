@@ -56,6 +56,8 @@ class MagicDisplay
   void startEventDisplay();
   int displayThisEvent(UInt_t eventNumber, UInt_t runNumber);
   int displayNextEvent();
+  int displayFirstEvent();
+  int displayLastEvent();
   int displayPreviousEvent();
   void refreshEventDisplay();
   int getEventEntry();
