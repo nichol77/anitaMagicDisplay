@@ -46,6 +46,8 @@ MagicControlPanel *fControlPanel=0;
 MagicDisplay::MagicDisplay()
 {
   //Default constructor
+  fInEventPlayMode=0;
+  fEventPlaySleepMs=0;
    fRawEventPtr=0;
    fHeadPtr=0;
    fHkPtr=0;
@@ -122,7 +124,7 @@ MagicDisplay::MagicDisplay(char *baseDir, int run, WaveCalType::WaveCalType_t ca
   //  char hkName[FILENAME_MAX];
 
   //  sprintf(hkName,"/unix/anita2/testing/rootFiles/run%d/prettyHkFile%d.root",run,run);
-  //  TFile *fpHk = new TFile(hkName);
+  //  TFile *fpHk = TFile::Open(hkName);
   //  TTree *prettyHkTree = (TTree*) fpHk->Get("prettyHkTree");
   //  prettyHkTree->SetBranchAddress("hk",&hk);  
   //  startEventDisplay();
@@ -219,7 +221,7 @@ int MagicDisplay::loadEventTree()
 {       
   char eventName[FILENAME_MAX];
   char headerName[FILENAME_MAX];
-  sprintf(eventName,"%s/run%d/eventFile%d*.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);
+  sprintf(eventName,"%s/run%d/eventFile%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);
   sprintf(headerName,"%s/run%d/headFile%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);
   fEventTree = new TChain("eventTree");
   fEventTree->Add(eventName);
@@ -230,7 +232,7 @@ int MagicDisplay::loadEventTree()
     return -1;
   }
 
-  fHeadFile = new TFile(headerName);
+  fHeadFile = TFile::Open(headerName);
   if(!fHeadFile) {
     cout << "Couldn't open: " << headerName << "\n";
     return -1;
@@ -272,7 +274,8 @@ void MagicDisplay::refreshEventDisplay()
    //   fMagicMainPad->Clear();
 
            
-  //This will neesd to change
+  //This will need to change
+  
    fEventCanMaker->getEventInfoCanvas(fUsefulEventPtr,fHeadPtr,fMagicEventInfoPad);
    switch(fMainOption) {
    case MagicDisplayOption::kWavePhiVerticalOnly:
@@ -359,14 +362,26 @@ int MagicDisplay::displayThisEvent(UInt_t eventNumber, UInt_t runNumber)
 }
 
 void MagicDisplay::drawEventButtons() {
-   TButton *butNext = new TButton("Next Event","MagicDisplay::Instance()->displayNextEvent();",0.9,0.95,1,1);
+   TButton *butNext = new TButton("Next ","MagicDisplay::Instance()->displayNextEvent();",0.95,0.95,1,1);
    butNext->SetTextSize(0.5);
    butNext->SetFillColor(kGreen-10);
    butNext->Draw();
-   TButton *butPrev = new TButton("Prev. Event","MagicDisplay::Instance()->displayPreviousEvent();",0.9,0.90,1,0.95);
+   TButton *butPrev = new TButton("Prev.","MagicDisplay::Instance()->displayPreviousEvent();",0.95,0.90,1,0.95);
    butPrev->SetTextSize(0.5);
    butPrev->SetFillColor(kBlue-10);
    butPrev->Draw();
+   TButton *butPlay = new TButton("Play","MagicDisplay::Instance()->startEventPlaying();",0.9,0.97,0.95,1);
+   butPlay->SetTextSize(0.5);
+   butPlay->SetFillColor(kGreen-10);
+   butPlay->Draw();
+   TButton *butPlayRev = new TButton("Rev ","MagicDisplay::Instance()->startEventPlayingReverse();",0.9,0.94,0.95,0.97);
+   butPlayRev->SetTextSize(0.5);
+   butPlayRev->SetFillColor(kBlue-10);
+   butPlayRev->Draw();
+   TButton *butStop = new TButton("Stop","MagicDisplay::Instance()->stopEventPlaying();",0.90,0.90,0.95,0.94);
+   butStop->SetTextSize(0.5);
+   butStop->SetFillColor(kRed-10);
+   butStop->Draw();
 
    fVertButton = new TButton("Vertical","MagicDisplay::Instance()->setMainCanvasOption(MagicDisplayOption::kWavePhiVerticalOnly); MagicDisplay::Instance()->refreshEventDisplay();",0,0.975,0.05,1);
    fVertButton->SetTextSize(0.4);
@@ -466,7 +481,7 @@ int MagicDisplay::loadTurfTree()
   char turfName[FILENAME_MAX];
   sprintf(turfName,"%s/run%d/turfRateFile%d.root",fCurrentBaseDir,
 	  fCurrentRun,fCurrentRun);
-  fTurfRateFile = new TFile(turfName);
+  fTurfRateFile = TFile::Open(turfName);
   if(!fTurfRateFile) {
     cout << "Couldn't open: " << turfName << "\n";
     return -1;
@@ -609,7 +624,7 @@ int MagicDisplay::loadSurfTree()
  char surfName[FILENAME_MAX];
  sprintf(surfName,"%s/run%d/surfHkFile%d.root",fCurrentBaseDir,
 	 fCurrentRun,fCurrentRun);
- fSurfHkFile = new TFile(surfName);
+ fSurfHkFile = TFile::Open(surfName);
  if(!fSurfHkFile) {
    cout << "Couldn't open: " << surfName << "\n";
    return -1;
@@ -759,7 +774,7 @@ int MagicDisplay::loadAvgSurfTree()
   char surfName[FILENAME_MAX];
   sprintf(surfName,"%s/run%d/avgSurfHkFile%d.root",fCurrentBaseDir,
 	  fCurrentRun,fCurrentRun);
-  fSurfHkFile = new TFile(surfName);
+  fSurfHkFile = TFile::Open(surfName);
   if(!fSurfHkFile) {
     cout << "Couldn't open: " << surfName << "\n";
     return -1;
@@ -907,7 +922,7 @@ int MagicDisplay::loadSumTurfTree()
   char sumTurfName[FILENAME_MAX];
   sprintf(sumTurfName,"%s/run%d/sumTurfRateFile%d.root",fCurrentBaseDir,
 	  fCurrentRun,fCurrentRun);
-  fSumTurfRateFile = new TFile(sumTurfName);
+  fSumTurfRateFile = TFile::Open(sumTurfName);
   if(!fSumTurfRateFile) {
     cout << "Couldn't open: " << sumTurfName << "\n";
     return -1;
@@ -1040,6 +1055,35 @@ UInt_t MagicDisplay::getCurrentEvent()
   return 0;
 }
 
+void MagicDisplay::startEventPlaying()
+{
+  fInEventPlayMode=1;
+  do {
+    gSystem->ProcessEvents();
+    if(!fInEventPlayMode) break;
+    if(fEventPlaySleepMs>0)
+      gSystem->Sleep(fEventPlaySleepMs);
+  }
+  while(this->displayNextEvent()==0);
+}
+
+
+void MagicDisplay::startEventPlayingReverse()
+{
+  fInEventPlayMode=1;
+  do {
+    gSystem->ProcessEvents();
+    if(!fInEventPlayMode) break;
+    if(fEventPlaySleepMs>0)
+      gSystem->Sleep(fEventPlaySleepMs);
+  }
+  while(this->displayPreviousEvent()==0);
+}
+
+void MagicDisplay::stopEventPlaying() 
+{
+  fInEventPlayMode=0;
+}
 
 
 /*
@@ -1054,7 +1098,7 @@ void MagicDisplay::startSummaryDisplay()
   fEventTree->Add(eventName);
   fEventTree->SetBranchAddress("event",&fSummaryEventPtr);
 
-  TFile *fHeadFile = new TFile(headerName);
+  TFile *fHeadFile = TFile::Open(headerName);
   if(!fHeadFile) {
      cout << "Couldn't open: " << headerName << "\n";
      return;
