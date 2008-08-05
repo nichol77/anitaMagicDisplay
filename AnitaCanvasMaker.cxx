@@ -67,8 +67,11 @@ AnitaCanvasMaker::AnitaCanvasMaker(WaveCalType::WaveCalType_t calType)
   fSetVoltLimits=1;
   fMinVoltLimit=-60;
   fMaxVoltLimit=60;
+  fMinVertVoltLimit=-60;
+  fMaxVertVoltLimit=60;
   fMinClockVoltLimit=-200;
   fMaxClockVoltLimit=200;
+  fAutoScale=1;
   fMinTimeLimit=0;
   fMaxTimeLimit=100;
   fMinPowerLimit=-90;
@@ -138,9 +141,11 @@ TPad *AnitaCanvasMaker::getEventInfoCanvas(UsefulAnitaEvent *evPtr, RawAnitaHead
      fNewEvent=1;
      topPad->Clear();
      topPad->SetTopMargin(0.05);
-     topPad->cd();
+     topPad->Divide(4,1);
+     topPad->cd(1);
      if(leftPave) delete leftPave;
-     leftPave = new TPaveText(0,0,0.24,0.9);
+     leftPave = new TPaveText(0,0,1,0.9);
+     leftPave->SetName("leftPave");
      leftPave->SetBorderSize(0);
      leftPave->SetFillColor(0);
      leftPave->SetTextAlign(13);
@@ -152,8 +157,11 @@ TPad *AnitaCanvasMaker::getEventInfoCanvas(UsefulAnitaEvent *evPtr, RawAnitaHead
      eventText->SetTextColor(50);
      leftPave->Draw();
 
+
+     topPad->cd(2);
      if(midLeftPave) delete midLeftPave;
-     midLeftPave = new TPaveText(0.26,0,0.49,0.95);
+     midLeftPave = new TPaveText(0,0,1,0.9);
+     midLeftPave->SetName("midLeftPave");
      midLeftPave->SetBorderSize(0);
      midLeftPave->SetTextAlign(13);
      TTimeStamp trigTime((time_t)hdPtr->triggerTime,(Int_t)hdPtr->triggerTimeNs);
@@ -186,10 +194,11 @@ TPad *AnitaCanvasMaker::getEventInfoCanvas(UsefulAnitaEvent *evPtr, RawAnitaHead
      if(!good)
        labText->SetTextColor(6);
      midLeftPave->Draw();
+
      
-     
+     topPad->cd(3);
      if(midRightPave) delete midRightPave;
-     midRightPave = new TPaveText(0.51,0,0.66,0.95);
+     midRightPave = new TPaveText(0,0,1,0.95);
      midRightPave->SetBorderSize(0);
      midRightPave->SetTextAlign(13);
      sprintf(textLabel,"TURF: %d",hdPtr->turfEventId&0xfffff);
@@ -203,9 +212,11 @@ TPad *AnitaCanvasMaker::getEventInfoCanvas(UsefulAnitaEvent *evPtr, RawAnitaHead
        }
      }
      midRightPave->Draw();
+
      
+     topPad->cd(4);
      if(rightPave) delete rightPave;
-     rightPave = new TPaveText(0.66,0,0.8,0.95);
+     rightPave = new TPaveText(0,0,1,0.95);
      rightPave->SetBorderSize(0);
      rightPave->SetTextAlign(13);
      sprintf(textLabel,"TURF This Hold: %#x",hdPtr->reserved[0]&0xf);
@@ -215,6 +226,8 @@ TPad *AnitaCanvasMaker::getEventInfoCanvas(UsefulAnitaEvent *evPtr, RawAnitaHead
      sprintf(textLabel,"Phi Mask: %#x",(hdPtr->phiTrigMask));
      rightPave->AddText(textLabel);     
      rightPave->Draw();
+     topPad->Update();
+     topPad->Modified();
      
      
      
@@ -277,6 +290,16 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr,
   
   if(evPtr->eventNumber!=lastEventNumber){
     lastEventNumber=evPtr->eventNumber;
+    
+    if(fAutoScale) {
+      fMinVoltLimit=0;
+      fMaxVoltLimit=0;
+      fMinVertVoltLimit=0;
+      fMaxVertVoltLimit=0;
+      fMinClockVoltLimit=0;
+      fMaxClockVoltLimit=0;
+    }
+    
 
     for(int surf=0;surf<ACTIVE_SURFS;surf++){
       for(int chan=0;chan<CHANNELS_PER_SURF;chan++){
@@ -291,6 +314,40 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr,
 	}
 
 	TGraph *grTemp = evPtr->getGraphFromSurfAndChan(surf,chan);
+	if(fAutoScale) {
+	  Int_t numPoints=grTemp->GetN();
+	  Double_t *yVals=grTemp->GetY();
+	  
+	  if(chan<8) {
+	    int ant=0;
+	    AnitaPol::AnitaPol_t pol;
+	    AnitaGeomTool::getAntPolFromSurfChan(surf,chan,ant,pol);
+	    
+	    for(int i=0;i<numPoints;i++) {
+	      
+	      if(yVals[i]<fMinVoltLimit)
+		fMinVoltLimit=yVals[i];
+	      if(yVals[i]>fMaxVoltLimit)
+		fMaxVoltLimit=yVals[i];
+	      
+	      if(pol==AnitaPol::kVertical) {
+		if(yVals[i]<fMinVertVoltLimit)
+		  fMinVertVoltLimit=yVals[i];
+		if(yVals[i]>fMaxVertVoltLimit)
+		  fMaxVertVoltLimit=yVals[i];
+	      }	      
+	    }
+	  }
+	  else {	     
+	    for(int i=0;i<numPoints;i++) {	      
+	      if(yVals[i]<fMinClockVoltLimit)
+		fMinClockVoltLimit=yVals[i];
+	      if(yVals[i]>fMaxClockVoltLimit)
+		fMaxClockVoltLimit=yVals[i];	    
+	    }
+	  }
+	  
+	}
 	grSurf[surf][chan] = new WaveformGraph(grTemp->GetN(),grTemp->GetX(),grTemp->GetY());
 	TGraph *grTempFFT = grSurf[surf][chan]->getFFT();
 	grSurfFFT[surf][chan] = new FFTGraph(grTempFFT->GetN(),grTempFFT->GetX(),grTempFFT->GetY());
@@ -299,6 +356,30 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr,
 
       }
     }
+  }
+
+  if(fAutoScale) {
+    if(fMaxVoltLimit>-1*fMinVoltLimit) {
+      fMinVoltLimit=-1*fMaxVoltLimit;
+    }
+    else {
+      fMaxVoltLimit=-1*fMinVoltLimit;
+    }
+
+    if(fMaxVertVoltLimit>-1*fMinVertVoltLimit) {
+      fMinVertVoltLimit=-1*fMaxVertVoltLimit;
+    }
+    else {
+      fMaxVertVoltLimit=-1*fMinVertVoltLimit;
+    }
+
+   if(fMaxClockVoltLimit>-1*fMinClockVoltLimit) {
+      fMinClockVoltLimit=-1*fMaxClockVoltLimit;
+    }
+    else {
+      fMaxClockVoltLimit=-1*fMinClockVoltLimit;
+    }
+    
   }
 
   fNewEvent=0;
@@ -382,7 +463,10 @@ TPad *AnitaCanvasMaker::getHorizontalCanvas(RawAnitaHeader *hdPtr,
       sprintf(padName,"phiChanPad%d",count);
       TPad *paddy1 = (TPad*) plotPad->FindObject(padName);
       paddy1->SetEditable(kTRUE);
-      deleteTGraphsFromPad(paddy1,surf,chan,chan-4);
+      if(chan>4)
+	deleteTGraphsFromPad(paddy1,surf,chan,chan-4);
+      else 
+	deleteTGraphsFromPad(paddy1,surf,chan,chan+4);
       paddy1->cd();
 
 
@@ -423,6 +507,18 @@ TPad *AnitaCanvasMaker::getHorizontalCanvas(RawAnitaHeader *hdPtr,
       }
       else{
 	grSurf[surf][chan]->Draw("l");
+
+	if(fAutoScale) {
+	  TList *listy = gPad->GetListOfPrimitives();
+	  for(int i=0;i<listy->GetSize();i++) {
+	    TObject *fred = listy->At(i);
+	    TH1F *tempHist = (TH1F*) fred;
+	    if(tempHist->InheritsFrom("TH1")) {
+	      tempHist->GetYaxis()->SetRangeUser(fMinVoltLimit,fMaxVoltLimit);
+	    }
+	  }
+	}
+
       }
 
 
@@ -541,6 +637,22 @@ TPad *AnitaCanvasMaker::getVerticalCanvas(RawAnitaHeader *hdPtr,
       }
       else{
 	grSurf[surf][chan]->Draw("l");
+	
+	if(fAutoScale) {
+	  TList *listy = gPad->GetListOfPrimitives();
+	  for(int i=0;i<listy->GetSize();i++) {
+	    TObject *fred = listy->At(i);
+	    TH1F *tempHist = (TH1F*) fred;
+	    if(tempHist->InheritsFrom("TH1")) {
+	      if(chan<8) {
+		tempHist->GetYaxis()->SetRangeUser(fMinVertVoltLimit,fMaxVertVoltLimit);
+	      }
+	      else {
+		tempHist->GetYaxis()->SetRangeUser(fMinClockVoltLimit,fMaxClockVoltLimit);
+	      }
+	    }
+	  }
+	}
       }
 
 
@@ -620,7 +732,10 @@ TPad *AnitaCanvasMaker::getVerticalCanvasForWebPlotter(RawAnitaHeader *hdPtr,
       sprintf(padName,"phiChanPad%d",count);
       TPad *paddy1 = (TPad*) plotPad->FindObject(padName);
       paddy1->SetEditable(kTRUE);
-      deleteTGraphsFromPad(paddy1,surf,chan,chan+4);
+      if(chan<4) 
+	deleteTGraphsFromPad(paddy1,surf,chan,chan+4);
+      else
+	deleteTGraphsFromPad(paddy1,surf,chan,chan-4);
       paddy1->cd();
 
       //      std::cout << phi << "\t" << ring << "\t" << surf << "\t" 
@@ -770,6 +885,22 @@ TPad *AnitaCanvasMaker::getSurfChanCanvas(RawAnitaHeader *hdPtr,
       }
       else{
 	grSurf[surf][chan]->Draw("l");
+
+	if(fAutoScale) {
+	  TList *listy = gPad->GetListOfPrimitives();
+	  for(int i=0;i<listy->GetSize();i++) {
+	    TObject *fred = listy->At(i);
+	    TH1F *tempHist = (TH1F*) fred;
+	    if(tempHist->InheritsFrom("TH1")) {
+	      if(chan<8) {
+		tempHist->GetYaxis()->SetRangeUser(fMinVertVoltLimit,fMaxVertVoltLimit);
+	      }
+	      else {
+		tempHist->GetYaxis()->SetRangeUser(fMinClockVoltLimit,fMaxClockVoltLimit);
+	      }
+	    }
+	  }
+	}
       }
 
       paddy1->SetEditable(kFALSE);
@@ -887,6 +1018,21 @@ TPad *AnitaCanvasMaker::getCombinedCanvas(RawAnitaHeader *hdPtr,
 	grSurf[surf][chanH]->SetLineColor(kBlue);
 	grSurf[surf][chanH]->Draw("l");
 	grSurf[surf][chanV]->Draw("l");
+
+	if(fAutoScale) {
+	  TList *listy = gPad->GetListOfPrimitives();
+	  for(int i=0;i<listy->GetSize();i++) {
+	    TObject *fred = listy->At(i);
+	    TH1F *tempHist = (TH1F*) fred;
+	    if(tempHist->InheritsFrom("TH1")) {
+	      //	      std::cout << tempHist->ClassName() << "\t" << tempHist << std::endl;
+	      //	  std::cout << tempHist->GetYaxis()->GetXmin() << "\n";
+	      tempHist->GetYaxis()->SetRangeUser(fMinVoltLimit,fMaxVoltLimit);
+	      //	      std::cout << fMinVoltLimit << "\t" << fMaxVoltLimit << "\n";
+	    }
+	  }
+	}
+
       }
 
 
@@ -989,7 +1135,7 @@ void AnitaCanvasMaker::setupPhiPadWithFrames(TPad *plotPad)
       if(!fPowerSpecView) framey = (TH1F*) paddy1->DrawFrame(fMinTimeLimit,fMinVoltLimit,fMaxTimeLimit,fMaxVoltLimit);
       else framey = (TH1F*) paddy1->DrawFrame(fMinFreqLimit,fMinPowerLimit,fMaxFreqLimit,fMaxPowerLimit); 
 
-      framey->GetYaxis()->SetLabelSize(0.1);
+      framey->GetYaxis()->SetLabelSize(0.08);
       framey->GetYaxis()->SetTitleSize(0.1);
       framey->GetYaxis()->SetTitleOffset(0.5);
       if(row==4) {
@@ -1120,38 +1266,7 @@ void AnitaCanvasMaker::setupSurfPadWithFrames(TPad *plotPad)
 
 }
 
-/*
-void AnitaCanvasMaker::deleteTGraphsFromPad(TPad *paddy)
-{
-  paddy->cd();
-  //  paddy->Update();
-  //  std::cout << "deleteTGraphsFromPad: " << paddy->GetName() << std::endl;
-  TList *listy = paddy->GetListOfPrimitives();
-  for(int i=0;i<listy->GetSize();i++) {
-    TObject *fred = listy->At(i);
-    if(fred->InheritsFrom("TGraph")) {
-      std::cout << fred->ClassName() << "\t" << fred << std::endl;
 
-      for(int surf=0;surf<ACTIVE_SURFS;surf++){
-        for(int chan=0;chan<CHANNELS_PER_SURF;chan++){
-          if(fred == grDraw[surf][chan]){
-            delete grDraw[surf][chan];
-          }
-          else if(fred == grDrawFFT[surf][chan]){
-            delete grDrawFFT[surf][chan];
-          }
-          else{
-            fred->Delete("");
-          }
-        }
-      }
-    
-    }
-  }
-  
-  //  paddy->Update();
-}
-*/
 
 
 void AnitaCanvasMaker::deleteTGraphsFromPad(TPad *paddy,int surf,int chan)

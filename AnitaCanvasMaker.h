@@ -26,6 +26,9 @@ class AnitaCanvasMaker
   Int_t fSetVoltLimits;
   Double_t fMinVoltLimit;
   Double_t fMaxVoltLimit;
+  Double_t fMinVertVoltLimit;
+  Double_t fMaxVertVoltLimit;
+  Int_t fAutoScale;
   Double_t fMinClockVoltLimit;
   Double_t fMaxClockVoltLimit;
   Double_t fMinTimeLimit;

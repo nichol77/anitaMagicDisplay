@@ -46,6 +46,9 @@ class MagicDisplay
   {return fCurrentRun;}
   UInt_t getCurrentEvent();
 
+  void startEventPlaying();
+  void startEventPlayingReverse();
+  void stopEventPlaying();
 
   void closeCurrentRun();
 
@@ -180,6 +183,9 @@ class MagicDisplay
    TButton *fSumTurfYScaleButton;
    TButton *fAvgSurfSurfViewButton;
    TButton *fAvgSurfPhiViewButton;
+
+   Int_t fInEventPlayMode;
+   Int_t fEventPlaySleepMs;
 
    WaveCalType::WaveCalType_t fCalType;
 
