@@ -1,7 +1,7 @@
 gSystem->Reset();
 
 void runMagicDisplayRemote() {
-  runMagicDisplayRemoteRun(3791);
+  runMagicDisplayRemoteRun(3797);
 }
 
 void runMagicDisplayRemoteRun(int run) {
@@ -19,8 +19,8 @@ void runMagicDisplayRemoteRun(int run) {
 
   TChain *fred=0; //Will this work?
 
-  MagicDisplay *magicPtr = new MagicDisplay("root://anita@192.168.2.2//data/anita/palestine08/webPlotter/events/root",run);
-  //  MagicDisplay *magicPtr = new MagicDisplay("root://anita@192.168.2.103:1234//TBdata/anita/palestine08//root",run);
+  //  MagicDisplay *magicPtr = new MagicDisplay("root://anita@192.168.2.2//data/anita/palestine08/webPlotter/events/root",run);
+  MagicDisplay *magicPtr = new MagicDisplay("root://anita@192.168.2.103//data/anita/palestine08//root",run);
   //  magicPtr->startSurfDisplay();
   //   magicPtr->startAvgSurfDisplay();
   //   magicPtr->startTurfDisplay();
