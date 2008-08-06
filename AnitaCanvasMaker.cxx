@@ -244,7 +244,14 @@ TPad *AnitaCanvasMaker::quickGetEventViewerCanvasForWebPlottter(UsefulAnitaEvent
 
   //  static Int_t lastEventView=0;
 
-
+  if(fAutoScale) {
+    fMinVoltLimit=0;
+    fMaxVoltLimit=0;
+    fMinVertVoltLimit=0;
+      fMaxVertVoltLimit=0;
+      fMinClockVoltLimit=0;
+      fMaxClockVoltLimit=0;
+  }
 
   for(int surf=0;surf<ACTIVE_SURFS;surf++){
     for(int chan=0;chan<CHANNELS_PER_SURF;chan++){
@@ -260,10 +267,70 @@ TPad *AnitaCanvasMaker::quickGetEventViewerCanvasForWebPlottter(UsefulAnitaEvent
       //      std::cout << hdPtr->eventNumber << "\n";
       //      std::cout << surf << "\t" << chan << "\t" 
       //		<< grSurf[surf][chan]->GetRMS(2) << std::endl;
+
+      if(fAutoScale) {
+	  Int_t numPoints=grTemp->GetN();
+	  Double_t *yVals=grTemp->GetY();
+	  
+	  if(chan<8) {
+	    int ant=0;
+	    AnitaPol::AnitaPol_t pol;
+	    AnitaGeomTool::getAntPolFromSurfChan(surf,chan,ant,pol);
+	    
+	    for(int i=0;i<numPoints;i++) {
+	      
+	      if(yVals[i]<fMinVoltLimit)
+		fMinVoltLimit=yVals[i];
+	      if(yVals[i]>fMaxVoltLimit)
+		fMaxVoltLimit=yVals[i];
+	      
+	      if(pol==AnitaPol::kVertical) {
+		if(yVals[i]<fMinVertVoltLimit)
+		  fMinVertVoltLimit=yVals[i];
+		if(yVals[i]>fMaxVertVoltLimit)
+		  fMaxVertVoltLimit=yVals[i];
+	      }	      
+	    }
+	  }
+	  else {	     
+	    for(int i=0;i<numPoints;i++) {	      
+	      if(yVals[i]<fMinClockVoltLimit)
+		fMinClockVoltLimit=yVals[i];
+	      if(yVals[i]>fMaxClockVoltLimit)
+		fMaxClockVoltLimit=yVals[i];	    
+	    }
+	  }
+	  
+	}
+
 	delete grTemp;
 	
     }
   }
+
+  if(fAutoScale) {
+    if(fMaxVoltLimit>-1*fMinVoltLimit) {
+      fMinVoltLimit=-1*fMaxVoltLimit;
+    }
+    else {
+      fMaxVoltLimit=-1*fMinVoltLimit;
+    }
+
+    if(fMaxVertVoltLimit>-1*fMinVertVoltLimit) {
+      fMinVertVoltLimit=-1*fMaxVertVoltLimit;
+    }
+    else {
+      fMaxVertVoltLimit=-1*fMinVertVoltLimit;
+    }
+
+   if(fMaxClockVoltLimit>-1*fMinClockVoltLimit) {
+      fMinClockVoltLimit=-1*fMaxClockVoltLimit;
+    }
+    else {
+      fMaxClockVoltLimit=-1*fMinClockVoltLimit;
+    }
+  }
+    
 
   fRedoEventCanvas=0;
 
@@ -771,7 +838,22 @@ TPad *AnitaCanvasMaker::getVerticalCanvasForWebPlotter(RawAnitaHeader *hdPtr,
       }
      
       grSurf[surf][chan]->Draw("l");
-    
+
+      if(fAutoScale) {
+	TList *listy = gPad->GetListOfPrimitives();
+	for(int i=0;i<listy->GetSize();i++) {
+	    TObject *fred = listy->At(i);
+	    TH1F *tempHist = (TH1F*) fred;
+	    if(tempHist->InheritsFrom("TH1")) {
+	      if(chan<8) {
+		tempHist->GetYaxis()->SetRangeUser(fMinVertVoltLimit,fMaxVertVoltLimit);
+	      }
+	      else {
+		tempHist->GetYaxis()->SetRangeUser(fMinClockVoltLimit,fMaxClockVoltLimit);
+	      }
+	    }
+	}
+      }
 
 
       count++;
