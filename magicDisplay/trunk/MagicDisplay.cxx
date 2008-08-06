@@ -163,12 +163,12 @@ int MagicDisplay::getEventEntry()
       return -1;
     }
   }
-    if(fEventEntry<fEventTree->GetEntries())
-      fEventTree->GetEntry(fEventEntry);
-    else {
-      std::cout << "No more entries in event tree" << endl;
-      return -1;
-    }
+  if(fEventEntry<fEventTree->GetEntries())
+    fEventTree->GetEntry(fEventEntry);
+  else {
+    std::cout << "No more entries in event tree " << fEventEntry << "\t" << fEventTree->GetEntries() << endl;
+    return -1;
+  }
             
    if(fEventEntry<fHeadTree->GetEntries())
       fHeadTree->GetEntry(fEventEntry);
@@ -225,6 +225,19 @@ int MagicDisplay::loadEventTree()
   sprintf(headerName,"%s/run%d/headFile%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);
   fEventTree = new TChain("eventTree");
   fEventTree->Add(eventName);
+
+  for(int extra=1;extra<100;extra++) {
+    sprintf(eventName,"%s/run%d/eventFile%d_%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun,extra);
+    TFile *fpTest = TFile::Open(eventName);
+    if(!fpTest) 
+      break;
+    else {
+      delete fpTest;
+      fEventTree->Add(eventName);
+    }
+  }
+
+
   fEventTree->SetBranchAddress("event",&fRawEventPtr);
       
   if(fEventTree->GetEntries()<1) {
@@ -392,7 +405,9 @@ int MagicDisplay::displayThisEvent(UInt_t eventNumber, UInt_t runNumber)
   int retVal=getEventEntry();
   if(retVal==0) 
     refreshEventDisplay(); 
-  else fEventEntry--;
+  else {
+    cout << "retVal: " << retVal << endl;
+  }
   return retVal;  
 }
 
