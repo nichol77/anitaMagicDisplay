@@ -64,7 +64,6 @@ AnitaCanvasMaker::AnitaCanvasMaker(WaveCalType::WaveCalType_t calType)
 {
   //Default constructor
   fACMGeomTool=AnitaGeomTool::Instance();
-  fSetVoltLimits=1;
   fMinVoltLimit=-60;
   fMaxVoltLimit=60;
   fMinVertVoltLimit=-60;
@@ -248,9 +247,9 @@ TPad *AnitaCanvasMaker::quickGetEventViewerCanvasForWebPlottter(UsefulAnitaEvent
     fMinVoltLimit=0;
     fMaxVoltLimit=0;
     fMinVertVoltLimit=0;
-      fMaxVertVoltLimit=0;
-      fMinClockVoltLimit=0;
-      fMaxClockVoltLimit=0;
+    fMaxVertVoltLimit=0;
+    fMinClockVoltLimit=0;
+    fMaxClockVoltLimit=0;
   }
 
   for(int surf=0;surf<ACTIVE_SURFS;surf++){
@@ -663,7 +662,10 @@ TPad *AnitaCanvasMaker::getVerticalCanvas(RawAnitaHeader *hdPtr,
       sprintf(padName,"phiChanPad%d",count);
       TPad *paddy1 = (TPad*) plotPad->FindObject(padName);
       paddy1->SetEditable(kTRUE);
-      deleteTGraphsFromPad(paddy1,surf,chan,chan+4);
+      if(chan>4)
+	deleteTGraphsFromPad(paddy1,surf,chan,chan-4);
+      else 
+	deleteTGraphsFromPad(paddy1,surf,chan,chan+4);
       paddy1->cd();
 
       if(ringMap[row]==AnitaRing::kUpperRing) {

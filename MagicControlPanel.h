@@ -48,48 +48,62 @@
 #include <TGFontDialog.h>
 
 
+//!  The Magic Display control panel
+/*!
+  This is the horribly buggy control panel that was meant to enable easy control of magic Display, without resorting to command line power user mode. Unfortunately, it doesn't yet really work in a non segmentation violation frenzy way. I blame ROOT, others may have different opinions.
+*/
 class MagicControlPanel : public TGMainFrame
 {
  private:
  
  public:
-  TGTextButton    *fButton0,*fButton1,*fButton2,*fButton3;
-  TGTextButton    *fGotoBut;
-  TGCheckButton   *fEventBut,*fSurfBut,*fTurfBut,*fAvgSurfBut,*fSumTurfBut;
-  TGLayoutHints   *fLayout, *fLeftLayout, *fRightLayout, *fButtonLayout, *fCenterLayout;
-  TGNumberEntry   *fRunEntry;
-  TGNumberEntry   *fEventEntry;
-  TGLabel         *fRunLabel,*fEventLabel,*fQuickJumpLabel,*fUpdateLabel;
+   TGTextButton    *fButton0; ///< Text button.
+   TGTextButton    *fButton1; ///< Text button.
+   TGTextButton    *fButton2; ///< Text button.
+   TGTextButton    *fButton3; ///< Text button.
+   TGTextButton    *fGotoBut; ///< Text button.
+   TGCheckButton   *fEventBut; ///< Check button
+   TGCheckButton   *fSurfBut; ///< Check button
+   TGCheckButton   *fTurfBut; ///< Check button
+   TGCheckButton   *fAvgSurfBut; ///< Check button
+   TGCheckButton   *fSumTurfBut; ///< Check button
+   TGLayoutHints   *fLayout; ///< Layout nonsense
+   TGLayoutHints   *fLeftLayout; ///< Layout nonsense
+   TGLayoutHints   *fRightLayout; ///< Layout nonsense
+   TGLayoutHints   *fButtonLayout; ///< Layout nonsense
+   TGLayoutHints   *fCenterLayout; ///< Layout nonsense
+   TGNumberEntry   *fRunEntry; ///< Number entry form
+   TGNumberEntry   *fEventEntry; ///< Number entry form
+   TGLabel         *fRunLabel; ///< It's a label
+   TGLabel         *fEventLabel; ///< It's a label
+   TGLabel         *fQuickJumpLabel; ///< It's a label
+   TGLabel         *fUpdateLabel; ///< It's a label
 
-  TGVerticalFrame *fEntryPanel;
-  TGHorizontalFrame *fRunPanel;
-  TGHorizontalFrame *fEventPanel;
-  TGVerticalFrame *fButtonPanel;
+   TGVerticalFrame *fEntryPanel; ///< A vertical frame
+   TGHorizontalFrame *fRunPanel; ///< A horizontal frame
+   TGHorizontalFrame *fEventPanel; ///< A horizontal frame
+   TGVerticalFrame *fButtonPanel; ///< A vertical frame
 
 
 
-    MagicControlPanel();
-  //  virtual ~MagicControlPanel();
+   MagicControlPanel(); ///< The default constructor
+   MagicControlPanel(const TGWindow *p, UInt_t w, UInt_t h); ///< The constructor
+   virtual ~MagicControlPanel(); ///< The destructor
 
-  MagicControlPanel(const TGWindow *p, UInt_t w, UInt_t h);
-   virtual ~MagicControlPanel();
-
-   virtual void CloseWindow();
-   virtual Bool_t ProcessMessage(Long_t msg, Long_t parm1, Long_t);
+   virtual void CloseWindow(); ///< ROOT underlying code fragment
+   virtual Bool_t ProcessMessage(Long_t msg, Long_t parm1, Long_t); ///< ROOT underlying code fragment
 
   
 
   //Instance generator
-  static MagicControlPanel*  Instance();
+   static MagicControlPanel*  Instance(); ///< The instance generator (there should only be one instance of the MagicControlPanel at a time
   
   
 
  protected:
-   static MagicControlPanel *fgInstance;  
-   // protect against multiple instances
+   static MagicControlPanel *fgInstance;   ///< Protect against multiple instances
 
-
-   ClassDef(MagicControlPanel,1);
+   ClassDef(MagicControlPanel,1); ///< One of the magic ROOT macros.
 };
 
 

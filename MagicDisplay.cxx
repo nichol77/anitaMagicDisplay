@@ -1,10 +1,34 @@
 //////////////////////////////////////////////////////////////////////////////
-/////  MagicDisplay.cxx        ANITA Event Canvas maker                  /////
+/////  MagicDisplay.cxx       Magic Display                              /////
 /////                                                                    /////
 /////  Description:                                                      /////
-/////     Class for making pretty event canvases for ANITA-II            /////
+/////     The main Magic Display class displaying data for ANITA-II      /////
 /////  Author: Ryan Nichol (rjn@hep.ucl.ac.uk)                           /////
 //////////////////////////////////////////////////////////////////////////////
+/*! \mainpage Magic Display
+ *
+ * \section intro_sec Introduction
+ *
+ * Here is some Doxygen generated documentation for the Marvellous ANITA Graphical Interface and Classy Display (Magic Display).
+ *
+ * \section prereq_sec Prerequisites
+ *
+ * -# <A HREF="http://root.cern.ch">ROOT</A>
+ * -# <A HREF="http://www.fftw.org/">FFTW 3 -- Fastest Fourier Transform in the West</a>
+ * -# <A HREF="http://www.hep.ucl.ac.uk/uhen/anita/libRootFftwWrapper">libRootFftwWrapper -- a ROOT wrapper for FFTW 3</a>
+ * -# <A HREF="http://www.hep.ucl.ac.uk/uhen/anita/eventReader">ANITA-II Event Reader</a>
+ * 
+ * \section install_sec Installation
+ * -# Ensure all the prerequisites are installed and in LD_LIBRARY_PATH or system paths.
+ * -# Checkout the code from the SVN repository, eg.: <BR><PRE>svn co https://delos.mps.ohio-state.edu/anitaGround/magicDisplay/trunk mySillyNamedMagicDisplayDir</PRE>
+ * -# Define the ANITA_UTIL_INSTALL_DIR to point to the location you want the library installed (the library files will end up in (ANITA_UTIL_INSTALL_DIR)/lib and the header files in (ANITA_UTIL_INSTALL_DIR)/include).
+ * -# Do <PRE>make</PRE><PRE>make install</PRE>
+ * \section manual_sec Manual
+ * If you are averse to reading web pages (and who wouldn't be) you can download a <a href="manual/magicDisplay.pdf">pdf copy of the reference material</a> but be warned it won't be a thrilling read as it was written by a computer program.
+ */
+
+
+
 //System includes
 #include <fstream>
 #include <iostream>
