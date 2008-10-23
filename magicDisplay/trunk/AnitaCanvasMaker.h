@@ -20,67 +20,118 @@ class UsefulAnitaEvent;
 class RawAnitaHeader;
 class TPad;
 
+//!  The event display canvas maker.
+/*!
+  This is where all the heavy lifting regarding the main event display canvas takes place. Lots of things are hard-coded and unchangeable in order to make the display look reasonable (on my computer at least). 
+*/
 class AnitaCanvasMaker 
 {
  public:
-  Int_t fSetVoltLimits;
-  Double_t fMinVoltLimit;
-  Double_t fMaxVoltLimit;
-  Double_t fMinVertVoltLimit;
-  Double_t fMaxVertVoltLimit;
-  Int_t fAutoScale;
-  Double_t fMinClockVoltLimit;
-  Double_t fMaxClockVoltLimit;
-  Double_t fMinTimeLimit;
-  Double_t fMaxTimeLimit;
-  Double_t fMinPowerLimit;
-  Double_t fMaxPowerLimit;
-  Double_t fMinFreqLimit;
-  Double_t fMaxFreqLimit;
-  Int_t fPolView;
-  Int_t fPowerSpecView;
-  Int_t fRedoEventCanvas;
-  //Int_t fRedoSurfCanvas;
-  Int_t fLastView;
-  Int_t fNewEvent;
+   Double_t fMinVoltLimit; ///< The minimum voltage. 
+   Double_t fMaxVoltLimit; ///< The maximum voltage.
+   Double_t fMinVertVoltLimit; ///< The minimum voltage in vertical channels.
+   Double_t fMaxVertVoltLimit; ///< The maximum voltage in vertical channels.
+   Int_t fAutoScale; ///< Fixed or auto-scaling y-axis?
+   Double_t fMinClockVoltLimit; ///< The minimum voltage in the clock channels.
+   Double_t fMaxClockVoltLimit; ///< The maximum voltage in the clock channels.
+   Double_t fMinTimeLimit; ///< The minimum time in the waveform (typically 0).
+   Double_t fMaxTimeLimit; ///< The maximum time in the waveform (typically 100).
+   Double_t fMinPowerLimit; ///< The minimum power in the PSDs.
+   Double_t fMaxPowerLimit; ///< The maximum power in the PSDs.
+   Double_t fMinFreqLimit; ///< The minimum frequency in the PSDs (typically 0).
+   Double_t fMaxFreqLimit; ///< The maximum frequency in the PSDs (typically 1200).
+   Int_t fPolView; ///< Which polarisation are we viewing?
+   Int_t fPowerSpecView; ///< Are we viewing PSDs or waveforms?
+   Int_t fRedoEventCanvas; ///< Do we neeed to redraw the event canvas (eg. switching from phi to SURF)?
+   //Int_t fRedoSurfCanvas;
+   Int_t fLastView; ///< What was the last view (phi or SURF)?
+   Int_t fNewEvent; ///< Is this a new event?
+  
+   //!  The main event view canvas getter.
+   /*!
+     Actually draws all the little squiggly lines.
+     /param evPtr Pointer to the UsefulAnitaEvent we want to draw.
+     /param hdPtr Pointer to the header of the event we want to draw
+     /param useCan Optional pointer to a canvas to draw the squiggly ines in (if zero a canvas will be created).
+   */
+   TPad *getEventViewerCanvas(UsefulAnitaEvent *evPtr,RawAnitaHeader *hdPtr, TPad *useCan=0);
+   
+   //!  The main event view canvas getter used by QnDWBOM.
+   /*!
+     Actually draws all the little squiggly lines.
+     /param evPtr Pointer to the UsefulAnitaEvent we want to draw.
+     /param hdPtr Pointer to the header of the event we want to draw
+     /param useCan Optional pointer to a canvas to draw the squiggly ines in (if zero a canvas will be created).
+   */
+   TPad *quickGetEventViewerCanvasForWebPlottter(UsefulAnitaEvent *evPtr,RawAnitaHeader *hdPtr, TPad *useCan=0);
+   
+  
   
 
-  TPad *getEventViewerCanvas(UsefulAnitaEvent *evPtr,RawAnitaHeader *hdPtr, TPad *useCan=0);
-  TPad *getHorizontalCanvas(RawAnitaHeader *hdPtr, TPad *useCan=0);
-  TPad *getVerticalCanvas(RawAnitaHeader *hdPtr, TPad *useCan=0);
-  TPad *getCombinedCanvas(RawAnitaHeader *hdPtr, TPad *useCan=0);
-  TPad *getSurfChanCanvas(RawAnitaHeader *hdPtr, TPad *useCan=0);
+   //!  The event info canvas getter.
+   /*!
+     Fills in run number and times and all those good things.
+     /param hdPtr Pointer to the header of the event we want to draw
+     /param useCan Optional pointer to a canvas to draw all the TPaveText's (if zero a canvas will be created).
+   */
+   TPad *getEventInfoCanvas(UsefulAnitaEvent *evPtr,RawAnitaHeader *hdPtr, TPad *useCan=0);
   
-  TPad *quickGetEventViewerCanvasForWebPlottter(UsefulAnitaEvent *evPtr,RawAnitaHeader *hdPtr, TPad *useCan=0);
-  TPad *getVerticalCanvasForWebPlotter(RawAnitaHeader *hdPtr, TPad *useCan=0);
-  
-  
-  //   TPad *getHorizontalPhiCanvas(RawAnitaHeader *hdPtr, TPad *useCan=0);
-  //  TPad *getVerticalPhiCanvas(RawAnitaHeader *hdPtr, TPad *useCan=0);
-  //  TPad *getSurfChanPhiCanvas(RawAnitaHeader *hdPtr, TPad *useCan=0);
-  //  TPad *getCombinedPhiCanvas(RawAnitaHeader *hdPtr, TPad *useCan=0);
-
-
-  TPad *getEventInfoCanvas(UsefulAnitaEvent *evPtr,RawAnitaHeader *hdPtr, TPad *useCan=0);
-  
-  void setupPhiPadWithFrames(TPad *plotPad);
-  void setupSurfPadWithFrames(TPad *plotPad);
-  //void deleteTGraphsFromPad(TPad *paddy);
-  void deleteTGraphsFromPad(TPad *paddy,int surf,int chan);
-  void deleteTGraphsFromPad(TPad *paddy,int surf,int chan,int chan2);
-
-  AnitaCanvasMaker(WaveCalType::WaveCalType_t calType=WaveCalType::kVoltageTime);
-  ~AnitaCanvasMaker();
-
-  //Instance generator
-  static AnitaCanvasMaker*  Instance();
-  
-
-  WaveCalType::WaveCalType_t fCalType;
-
+   
+   void setupPhiPadWithFrames(TPad *plotPad); ///< Worker function to setup the phi view canvas.
+   void setupSurfPadWithFrames(TPad *plotPad); ///< Worker function to setup the surf view canvas.
+   //void deleteTGraphsFromPad(TPad *paddy); ///< Deprecated.
+   void deleteTGraphsFromPad(TPad *paddy,int surf,int chan); ///< Worker fucntion to delete a specific graph from a pad.
+   void deleteTGraphsFromPad(TPad *paddy,int surf,int chan,int chan2); ///< Worker fucntion to delete specific graphs from a pad.
+   
+   //!  The assignment constructor.
+   /*!
+     Creates an AnitaCanvasMaker object/
+     /param calType The calibration type used (only needed to set the time axis for ns vs samples).
+   */
+   AnitaCanvasMaker(WaveCalType::WaveCalType_t calType=WaveCalType::kVoltageTime);
+   ~AnitaCanvasMaker(); ///<Destructor.
+   
+   //Instance generator
+   static AnitaCanvasMaker*  Instance(); ///< The instance generator.
+   
+   
+   WaveCalType::WaveCalType_t fCalType; ///< The calibration type.
+   
  protected:
-   static AnitaCanvasMaker *fgInstance;  
-   // protect against multiple instances
+   static AnitaCanvasMaker *fgInstance; ///< To protect against multiple instances.
+
+ private:
+
+   //!  A worker function to draw the horizontal canvas -- shouldn't be called directly.
+   /*!
+     /param hdPtr Pointer to the header of the event we want to draw.
+     /param useCan Optional pointer to a canvas to draw the squiggly ines in (if zero a canvas will be created).
+   */
+   TPad *getHorizontalCanvas(RawAnitaHeader *hdPtr, TPad *useCan=0);
+   //!  A worker function to draw the vertical canvas -- shouldn't be called directly.
+   /*!
+     /param hdPtr Pointer to the header of the event we want to draw.
+     /param useCan Optional pointer to a canvas to draw the squiggly ines in (if zero a canvas will be created).
+   */
+   TPad *getVerticalCanvas(RawAnitaHeader *hdPtr, TPad *useCan=0);
+   //!  A worker function to draw the combined canvas -- shouldn't be called directly.
+   /*!
+     /param hdPtr Pointer to the header of the event we want to draw.
+     /param useCan Optional pointer to a canvas to draw the squiggly ines in (if zero a canvas will be created).
+   */
+   TPad *getCombinedCanvas(RawAnitaHeader *hdPtr, TPad *useCan=0);
+   //!  A worker function to draw the SURF canvas -- shouldn't be called directly.
+   /*!
+     /param hdPtr Pointer to the header of the event we want to draw.
+     /param useCan Optional pointer to a canvas to draw the squiggly ines in (if zero a canvas will be created).
+   */
+   TPad *getSurfChanCanvas(RawAnitaHeader *hdPtr, TPad *useCan=0);
+   //!  A worker function to draw the vertical canvas for QnDWBOM -- shouldn't be called directly.
+   /*!
+     /param hdPtr Pointer to the header of the event we want to draw.
+     /param useCan Optional pointer to a canvas to draw the squiggly ines in (if zero a canvas will be created).
+   */
+   TPad *getVerticalCanvasForWebPlotter(RawAnitaHeader *hdPtr, TPad *useCan=0);
 
 
 };
