@@ -57,6 +57,7 @@
 #include "TFile.h"
 #include "TButton.h"
 #include "TGroupButton.h"
+#include "TThread.h"
 #include <TGClient.h>
 
 using namespace std;
@@ -172,10 +173,11 @@ void MagicDisplay::startControlPanel()
 
 void MagicDisplay::startEventDisplay()
 {
-  fEventCanMaker=new AnitaCanvasMaker(fCalType);
-  int retVal=getEventEntry();
+ 
+  fEventCanMaker=new AnitaCanvasMaker(this->fCalType);
+  int retVal=this->getEventEntry();
   if(retVal==0)
-      refreshEventDisplay();   
+      this->refreshEventDisplay();   
 }
 
 int MagicDisplay::getEventEntry()
@@ -591,12 +593,10 @@ int MagicDisplay::loadTurfTree()
 
 void MagicDisplay::startTurfDisplay()
 {
-  
-   
-   fRFCanMaker=AnitaRFCanvasMaker::Instance();
-   int retVal=getTurfEntry();
-   if(retVal==0)
-      refreshTurfDisplay();   
+  fRFCanMaker=AnitaRFCanvasMaker::Instance();
+  int retVal=this->getTurfEntry();
+  if(retVal==0)
+    this->refreshTurfDisplay();   
 }
 
 int MagicDisplay::getTurfEntry() 
@@ -1139,8 +1139,10 @@ UInt_t MagicDisplay::getCurrentEvent()
   return 0;
 }
 
+
 void MagicDisplay::startEventPlaying()
 {
+
   fInEventPlayMode=1;
   do {
     gSystem->ProcessEvents();
@@ -1157,10 +1159,9 @@ void MagicDisplay::startEventPlaying()
       std::cout << headEntries << "\t" << fHeadTree->GetEntries() << "\n";
       startEventPlaying();
     }
-  }
-  
-  
+  }    
 }
+
 
 
 void MagicDisplay::startEventPlayingReverse()
