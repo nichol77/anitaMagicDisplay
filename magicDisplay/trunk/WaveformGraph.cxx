@@ -141,6 +141,8 @@ void WaveformGraph::DrawFFT()
 
 TGraph *WaveformGraph::getFFT()
 {
-  TGraph *grFFT = FFTtools::makePowerSpectrumMilliVoltsNanoSecondsdB(this);
+  TGraph *grInt = FFTtools::getInterpolatedGraph(this,1./2.6);
+  TGraph *grFFT = FFTtools::makePowerSpectrumMilliVoltsNanoSecondsdB(grInt);
+  delete grInt;
   return grFFT;
 }
