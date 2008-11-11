@@ -81,12 +81,14 @@ magicDict.C: $(CLASS_HEADERS)
 	rootcint $@ -c $(INC_ANITA_UTIL) $(CLASS_HEADERS) LinkDef.h
 
 install: $(ROOT_LIBRARY)
+	install -d $(ANITA_UTIL_LIB_DIR)
+	install -d $(ANITA_UTIL_INC_DIR)
 ifeq ($(PLATFORM),macosx)
-	cp $(ROOT_LIBRARY) $(subst .$(DLLSUF),.so,$(ROOT_LIBRARY)) $(ANITA_UTIL_LIB_DIR)
+	install -c -m 755 $(ROOT_LIBRARY) $(subst .$(DLLSUF),.so,$(ROOT_LIBRARY)) $(ANITA_UTIL_LIB_DIR)
 else
-	cp $(ROOT_LIBRARY) $(ANITA_UTIL_LIB_DIR)
+	install -c -m 755 $(ROOT_LIBRARY) $(ANITA_UTIL_LIB_DIR)
 endif
-	cp  $(CLASS_HEADERS) $(ANITA_UTIL_INC_DIR)
+	install -c -m 644  $(CLASS_HEADERS) $(ANITA_UTIL_INC_DIR)
 
 clean:
 	@rm -f *Dict*
