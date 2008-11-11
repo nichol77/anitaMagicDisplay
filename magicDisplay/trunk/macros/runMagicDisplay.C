@@ -14,12 +14,12 @@ void runMagicDisplay() {
   gSystem->Load("libMagicDisplay.so");
 
   TChain *fred=0; //Will this work?
-  runMagicDisplayRun(3459);
+  runMagicDisplayRun(7);
 }
 
 
 void runMagicDisplayRun(int run) {
-  MagicDisplay *magicPtr = new MagicDisplay("/home/rjn/anita/data/palestine/root/",run,WaveCalType::kJustTimeNoUnwrap);
+  MagicDisplay *magicPtr = new MagicDisplay("/TBdata/anita/antarctica08/root/",run,WaveCalType::kVTLabAG);
 
   //  magicPtr->startSurfDisplay();
   //  magicPtr->startAvgSurfDisplay();
