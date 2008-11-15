@@ -58,6 +58,7 @@ AnitaRing::AnitaRing_t ringMap[5]={AnitaRing::kUpperRing,
 
 
 WaveformGraph *grSurf[ACTIVE_SURFS][CHANNELS_PER_SURF]={{0}};
+WaveformGraph *grSurfHilbert[ACTIVE_SURFS][CHANNELS_PER_SURF]={{0}};
 FFTGraph *grSurfFFT[ACTIVE_SURFS][CHANNELS_PER_SURF]={{0}};
 
 AnitaCanvasMaker::AnitaCanvasMaker(WaveCalType::WaveCalType_t calType)
@@ -77,15 +78,17 @@ AnitaCanvasMaker::AnitaCanvasMaker(WaveCalType::WaveCalType_t calType)
   fMaxPowerLimit=10;
   fMinFreqLimit=0;
   fMaxFreqLimit=1200;
-  fPolView=0;
-  fPowerSpecView=0;
+  fCanvasView=MagicDisplayCanvasLayoutOption::kPhiVerticalOnly;
+  fWaveformOption=MagicDisplayFormatOption::kWaveform;
   fRedoEventCanvas=0;
   //fRedoSurfCanvas=0;
-  fLastView=0;
+  fLastCanvasView=MagicDisplayCanvasLayoutOption::kPhiVerticalOnly;
+  fLastWaveformFormat=MagicDisplayFormatOption::kWaveform;
   fNewEvent=1;
   fCalType=calType;
   fgInstance=this;
   memset(grSurf,0,sizeof(WaveformGraph*)*ACTIVE_SURFS*CHANNELS_PER_SURF);
+  memset(grSurfHilbert,0,sizeof(WaveformGraph*)*ACTIVE_SURFS*CHANNELS_PER_SURF);
   memset(grSurfFFT,0,sizeof(FFTGraph*)*ACTIVE_SURFS*CHANNELS_PER_SURF);
   
   switch(fCalType) {
@@ -335,10 +338,7 @@ TPad *AnitaCanvasMaker::quickGetEventViewerCanvasForWebPlottter(UsefulAnitaEvent
 
   retCan=AnitaCanvasMaker::getVerticalCanvasForWebPlotter(hdPtr,useCan);
 
- //  if(fPolView==0) 
-//   else if(fPolView==1) retCan=AnitaCanvasMaker::getHorizontalCanvas(hdPtr,useCan);
-//   else if(fPolView==2) retCan=AnitaCanvasMaker::getCombinedCanvas(hdPtr,useCan);
-//   else if(fPolView==3) retCan=AnitaCanvasMaker::getSurfChanCanvas(hdPtr,useCan);
+ 
 
   return retCan;
 
@@ -350,11 +350,10 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr,
 {
   TPad *retCan;
 
-  static Int_t lastEventView=0;
   static UInt_t lastEventNumber=0;
 
   
-  if(evPtr->eventNumber!=lastEventNumber){
+  if(evPtr->eventNumber!=lastEventNumber || fWaveformOption!=fLastWaveformFormat) {
     lastEventNumber=evPtr->eventNumber;
     
     if(fAutoScale) {
@@ -372,11 +371,16 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr,
 
 	if(grSurf[surf][chan]){
 	  delete grSurf[surf][chan];
-	  //grSurf[surf][chan]=0;
+	  grSurf[surf][chan]=0;
 	}
+	if(grSurfHilbert[surf][chan]) {
+	  delete grSurfHilbert[surf][chan];
+	  grSurfHilbert[surf][chan]=0;
+	}
+	  
 	if(grSurfFFT[surf][chan]){
 	  delete grSurfFFT[surf][chan];
-	  //grSurfFFT[surf][chan]=0;
+	  grSurfFFT[surf][chan]=0;
 	}
 
 	TGraph *grTemp = evPtr->getGraphFromSurfAndChan(surf,chan);
@@ -414,11 +418,19 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr,
 	  }
 	  
 	}
-	grSurf[surf][chan] = new WaveformGraph(grTemp->GetN(),grTemp->GetX(),grTemp->GetY());
-	TGraph *grTempFFT = grSurf[surf][chan]->getFFT();
-	grSurfFFT[surf][chan] = new FFTGraph(grTempFFT->GetN(),grTempFFT->GetX(),grTempFFT->GetY());
+	grSurf[surf][chan] = new WaveformGraph(grTemp->GetN(),grTemp->GetX(),grTemp->GetY());	
+	if(fWaveformOption==MagicDisplayFormatOption::kFFT) {
+	  TGraph *grTempFFT = grSurf[surf][chan]->getFFT();
+	  grSurfFFT[surf][chan] = new FFTGraph(grTempFFT->GetN(),grTempFFT->GetX(),grTempFFT->GetY());
+	  delete grTempFFT;
+	}
+	if(fWaveformOption==MagicDisplayFormatOption::kHilbertEnvelope) {
+	  TGraph *grTempHilbert = grSurf[surf][chan]->getHilbert();
+	  grSurfHilbert[surf][chan] = new WaveformGraph(grTempHilbert->GetN(),grTempHilbert->GetX(),grTempHilbert->GetY());
+	  delete grTempHilbert;
+	}
 	delete grTemp;
-	delete grTempFFT;
+
 
       }
     }
@@ -450,15 +462,17 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr,
 
   fNewEvent=0;
 
-  if(lastEventView==fPowerSpecView) fRedoEventCanvas=0;
-  else fRedoEventCanvas=1;
+  fRedoEventCanvas=0;
+  if(fLastWaveformFormat!=fWaveformOption) fRedoEventCanvas=1;
+  if(fLastCanvasView!=fCanvasView) fRedoEventCanvas=1;
 
-  if(fPolView==0) retCan=AnitaCanvasMaker::getVerticalCanvas(hdPtr,useCan);
-  else if(fPolView==1) retCan=AnitaCanvasMaker::getHorizontalCanvas(hdPtr,useCan);
-  else if(fPolView==2) retCan=AnitaCanvasMaker::getCombinedCanvas(hdPtr,useCan);
-  else if(fPolView==3) retCan=AnitaCanvasMaker::getSurfChanCanvas(hdPtr,useCan);
+  if(fCanvasView==MagicDisplayCanvasLayoutOption::kPhiVerticalOnly) retCan=AnitaCanvasMaker::getVerticalCanvas(hdPtr,useCan);
+  else if(fCanvasView==MagicDisplayCanvasLayoutOption::kPhiHorizontalOnly) retCan=AnitaCanvasMaker::getHorizontalCanvas(hdPtr,useCan);
+  else if(fCanvasView==MagicDisplayCanvasLayoutOption::kPhiCombined) retCan=AnitaCanvasMaker::getCombinedCanvas(hdPtr,useCan);
+  else if(fCanvasView==MagicDisplayCanvasLayoutOption::kSurfOnly) retCan=AnitaCanvasMaker::getSurfChanCanvas(hdPtr,useCan);
 
-  lastEventView=fPowerSpecView;
+  fLastWaveformFormat=fWaveformOption;
+  fLastCanvasView=fCanvasView;
 
   return retCan;
 
@@ -563,15 +577,24 @@ TPad *AnitaCanvasMaker::getHorizontalCanvas(RawAnitaHeader *hdPtr,
       grSurf[surf][chan]->setSurfChanPhiAntPolRing(surf,chan,phi,ant,
 						   AnitaPol::kHorizontal,
 						   ringMap[row]);
-      grSurfFFT[surf][chan]->setSurfChanPhiAntPolRing(surf,chan,phi,ant,
+
+
+
+      if(fWaveformOption==MagicDisplayFormatOption::kPowerSpectralDensity){
+	grSurfFFT[surf][chan]->Draw("l");
+
+	grSurfFFT[surf][chan]->setSurfChanPhiAntPolRing(surf,chan,phi,ant,
+							AnitaPol::kHorizontal,
+							ringMap[row]);
+      }
+      else if(fWaveformOption==MagicDisplayFormatOption::kHilbertEnvelope) {
+	
+	grSurfHilbert[surf][chan]->setSurfChanPhiAntPolRing(surf,chan,phi,ant,
 						   AnitaPol::kHorizontal,
 						   ringMap[row]);
-
-
-      if(fPowerSpecView){
-	grSurfFFT[surf][chan]->Draw("l");
+	grSurfHilbert[surf][chan]->Draw("l");
       }
-      else{
+      else if (fWaveformOption==MagicDisplayFormatOption::kWaveform) {
 	grSurf[surf][chan]->Draw("l");
 
 	if(fAutoScale) {
@@ -696,15 +719,22 @@ TPad *AnitaCanvasMaker::getVerticalCanvas(RawAnitaHeader *hdPtr,
       grSurf[surf][chan]->setSurfChanPhiAntPolRing(surf,chan,phi,ant,
 						   AnitaPol::kVertical,
 						   ringMap[row]);
-      grSurfFFT[surf][chan]->setSurfChanPhiAntPolRing(surf,chan,phi,ant,
-						   AnitaPol::kVertical,
-						   ringMap[row]);
 
 
-      if(fPowerSpecView){
+      if(fWaveformOption==MagicDisplayFormatOption::kPowerSpectralDensity){
+	grSurfFFT[surf][chan]->setSurfChanPhiAntPolRing(surf,chan,phi,ant,
+							AnitaPol::kVertical,
+							ringMap[row]);
 	grSurfFFT[surf][chan]->Draw("l");
       }
-      else{
+      else if(fWaveformOption==MagicDisplayFormatOption::kHilbertEnvelope) {
+	
+	grSurfHilbert[surf][chan]->setSurfChanPhiAntPolRing(surf,chan,phi,ant,
+							    AnitaPol::kVertical,
+							    ringMap[row]);
+	grSurfHilbert[surf][chan]->Draw("l");
+      }
+      else if(fWaveformOption==MagicDisplayFormatOption::kWaveform){
 	grSurf[surf][chan]->Draw("l");
 	
 	if(fAutoScale) {
@@ -877,14 +907,6 @@ TPad *AnitaCanvasMaker::getSurfChanCanvas(RawAnitaHeader *hdPtr,
    //  gStyle->SetTitleH(0.1);
   gStyle->SetOptTitle(0); 
 
-
-  static Int_t lastSurfView=0;
-
-  if(lastSurfView==fPowerSpecView) fRedoEventCanvas=0;
-  else fRedoEventCanvas=1;
-
-  lastSurfView=fPowerSpecView;
-
   if(!fACMGeomTool)
     fACMGeomTool=AnitaGeomTool::Instance();
   char textLabel[180];
@@ -937,8 +959,6 @@ TPad *AnitaCanvasMaker::getSurfChanCanvas(RawAnitaHeader *hdPtr,
 	AnitaGeomTool::getRingAntPolPhiFromSurfChan(surf,chan,ring,ant,pol,phi);
 	grSurf[surf][chan]->setSurfChanPhiAntPolRing(surf,chan,phi,ant,
 						     pol,ring);
-	grSurfFFT[surf][chan]->setSurfChanPhiAntPolRing(surf,chan,phi,ant,
-							pol,ring);
 	
 	if(ring==AnitaRing::kUpperRing) {
 	  if(hdPtr->upperL1TrigPattern & (1<<phi))
@@ -964,10 +984,17 @@ TPad *AnitaCanvasMaker::getSurfChanCanvas(RawAnitaHeader *hdPtr,
 	}
 
       }
-      if(fPowerSpecView && chan<(CHANNELS_PER_SURF-1)){
+      if(fWaveformOption==MagicDisplayFormatOption::kPowerSpectralDensity){
+	grSurfFFT[surf][chan]->setSurfChanPhiAntPolRing(surf,chan,phi,ant,
+							pol,ring);
 	grSurfFFT[surf][chan]->Draw("l");
       }
-      else{
+      else if(fWaveformOption==MagicDisplayFormatOption::kHilbertEnvelope) {
+	grSurfHilbert[surf][chan]->setSurfChanPhiAntPolRing(surf,chan,phi,ant,
+							    pol,ring);
+	grSurfHilbert[surf][chan]->Draw("l");
+      }
+      else if(fWaveformOption==MagicDisplayFormatOption::kWaveform) {
 	grSurf[surf][chan]->Draw("l");
 
 	if(fAutoScale) {
@@ -990,6 +1017,8 @@ TPad *AnitaCanvasMaker::getSurfChanCanvas(RawAnitaHeader *hdPtr,
       paddy1->SetEditable(kFALSE);
     }
   }
+
+  
 
   if(!useCan)
     return canSurf;
@@ -1071,12 +1100,6 @@ TPad *AnitaCanvasMaker::getCombinedCanvas(RawAnitaHeader *hdPtr,
       deleteTGraphsFromPad(paddy1,surf,chanH,chanV);
       paddy1->cd();
 
-      grSurfFFT[surf][chanV]->setSurfChanPhiAntPolRing(surf,chanV,phi,ant,
-						       AnitaPol::kVertical,
-						       ringMap[row]);
-      grSurfFFT[surf][chanH]->setSurfChanPhiAntPolRing(surf,chanH,phi,ant,
-						       AnitaPol::kHorizontal,
-						       ringMap[row]);
       grSurf[surf][chanV]->setSurfChanPhiAntPolRing(surf,chanV,phi,ant,
 						       AnitaPol::kVertical,
 						       ringMap[row]);
@@ -1093,12 +1116,32 @@ TPad *AnitaCanvasMaker::getCombinedCanvas(RawAnitaHeader *hdPtr,
       }
 	
 
-      if(fPowerSpecView){
+      if(fWaveformOption==MagicDisplayFormatOption::kPowerSpectralDensity){
+	
+	grSurfFFT[surf][chanV]->setSurfChanPhiAntPolRing(surf,chanV,phi,ant,
+							 AnitaPol::kVertical,
+							 ringMap[row]);
+	grSurfFFT[surf][chanH]->setSurfChanPhiAntPolRing(surf,chanH,phi,ant,
+							 AnitaPol::kHorizontal,
+							 ringMap[row]);
 	grSurfFFT[surf][chanH]->SetLineColor(kBlue);
 	grSurfFFT[surf][chanH]->Draw("l");
 	grSurfFFT[surf][chanV]->Draw("l");
       }
-      else{
+      else if(fWaveformOption==MagicDisplayFormatOption::kHilbertEnvelope) {
+	
+	grSurfHilbert[surf][chanV]->setSurfChanPhiAntPolRing(surf,chanV,phi,ant,
+							     AnitaPol::kVertical,
+							     ringMap[row]);
+	grSurfHilbert[surf][chanH]->setSurfChanPhiAntPolRing(surf,chanH,phi,ant,
+							     AnitaPol::kHorizontal,
+							     ringMap[row]);
+	grSurfHilbert[surf][chanH]->SetLineColor(kBlue);
+	grSurfHilbert[surf][chanH]->Draw("l");
+	grSurfHilbert[surf][chanV]->Draw("l");
+      }
+      else if(fWaveformOption==MagicDisplayFormatOption::kWaveform){
+	
 	grSurf[surf][chanH]->SetLineColor(kBlue);
 	grSurf[surf][chanH]->Draw("l");
 	grSurf[surf][chanV]->Draw("l");
@@ -1136,14 +1179,14 @@ void AnitaCanvasMaker::setupPhiPadWithFrames(TPad *plotPad)
   char textLabel[180];
   char padName[180];
   plotPad->cd();
-  if(fLastView==2) {
+  if(fLastCanvasView==MagicDisplayCanvasLayoutOption::kSurfOnly) {
     plotPad->Clear();
   } 
   if(fRedoEventCanvas){
     plotPad->Clear();
   }
 
-  fLastView=1;
+  fLastCanvasView=MagicDisplayCanvasLayoutOption::kPhiVerticalOnly; //Well just phi
 
   static int phiPadsDone=0;
   if(phiPadsDone && !fRedoEventCanvas) {
@@ -1216,8 +1259,10 @@ void AnitaCanvasMaker::setupPhiPadWithFrames(TPad *plotPad)
 
       TH1F *framey;
       
-      if(!fPowerSpecView) framey = (TH1F*) paddy1->DrawFrame(fMinTimeLimit,fMinVoltLimit,fMaxTimeLimit,fMaxVoltLimit);
-      else framey = (TH1F*) paddy1->DrawFrame(fMinFreqLimit,fMinPowerLimit,fMaxFreqLimit,fMaxPowerLimit); 
+      if(fWaveformOption==MagicDisplayFormatOption::kWaveform || fWaveformOption==MagicDisplayFormatOption::kHilbertEnvelope) 
+	framey = (TH1F*) paddy1->DrawFrame(fMinTimeLimit,fMinVoltLimit,fMaxTimeLimit,fMaxVoltLimit);
+      else if(fWaveformOption==MagicDisplayFormatOption::kFFT)
+	framey = (TH1F*) paddy1->DrawFrame(fMinFreqLimit,fMinPowerLimit,fMaxFreqLimit,fMaxPowerLimit); 
 
       framey->GetYaxis()->SetLabelSize(0.08);
       framey->GetYaxis()->SetTitleSize(0.1);
@@ -1242,7 +1287,7 @@ void AnitaCanvasMaker::setupSurfPadWithFrames(TPad *plotPad)
   char textLabel[180];
   char padName[180];
   plotPad->cd();
-  if(fLastView==1) {
+  if(fLastCanvasView!=MagicDisplayCanvasLayoutOption::kSurfOnly) {
     plotPad->Clear();
   }
 
@@ -1250,7 +1295,7 @@ void AnitaCanvasMaker::setupSurfPadWithFrames(TPad *plotPad)
     plotPad->Clear();
   }
 
-  fLastView=2;
+  fLastCanvasView=MagicDisplayCanvasLayoutOption::kSurfOnly;
 
   if(surfPadsDone && !fRedoEventCanvas) {
     int errors=0;
@@ -1318,15 +1363,11 @@ void AnitaCanvasMaker::setupSurfPadWithFrames(TPad *plotPad)
       paddy1->Draw();
       paddy1->cd();
       TH1F *framey;
-      if(fPowerSpecView){
-	if(row<8) {
+      if(fWaveformOption==MagicDisplayFormatOption::kFFT){
 	  framey = (TH1F*) paddy1->DrawFrame(fMinFreqLimit,fMinPowerLimit,fMaxFreqLimit,fMaxPowerLimit);
-	}
-	else{
-	  framey = (TH1F*) paddy1->DrawFrame(fMinTimeLimit,fMinClockVoltLimit,fMaxTimeLimit,fMaxClockVoltLimit);
-	}
       }
-      else{
+      else if(fWaveformOption==MagicDisplayFormatOption::kWaveform || 
+	      fWaveformOption==MagicDisplayFormatOption::kHilbertEnvelope) {
 	if(row<8) {
 	  framey = (TH1F*) paddy1->DrawFrame(fMinTimeLimit,fMinVoltLimit,fMaxTimeLimit,fMaxVoltLimit);
 	}
@@ -1356,34 +1397,27 @@ void AnitaCanvasMaker::setupSurfPadWithFrames(TPad *plotPad)
 void AnitaCanvasMaker::deleteTGraphsFromPad(TPad *paddy,int surf,int chan)
 {
   paddy->cd();
-  if(!fPowerSpecView && !fRedoEventCanvas) paddy->GetListOfPrimitives()->Remove(grSurf[surf][chan]);
-  else if(fPowerSpecView && fRedoEventCanvas) paddy->GetListOfPrimitives()->Remove(grSurf[surf][chan]);
-  else if(!fPowerSpecView && fRedoEventCanvas) paddy->GetListOfPrimitives()->Remove(grSurfFFT[surf][chan]);
-  else if(fPowerSpecView && !fRedoEventCanvas) paddy->GetListOfPrimitives()->Remove(grSurfFFT[surf][chan]);
-  
+  if(fLastWaveformFormat==MagicDisplayFormatOption::kWaveform) paddy->GetListOfPrimitives()->Remove(grSurf[surf][chan]);
+  else if(fLastWaveformFormat==MagicDisplayFormatOption::kFFT) paddy->GetListOfPrimitives()->Remove(grSurfFFT[surf][chan]); 
+  else if(fLastWaveformFormat==MagicDisplayFormatOption::kHilbertEnvelope) paddy->GetListOfPrimitives()->Remove(grSurfHilbert[surf][chan]);  
   //  paddy->Update();
 }
 
 void AnitaCanvasMaker::deleteTGraphsFromPad(TPad *paddy,int surf,int chan,int chan2)
 {
   paddy->cd();
-  if(!fPowerSpecView && !fRedoEventCanvas){
+  if(fLastWaveformFormat==MagicDisplayFormatOption::kWaveform){
     paddy->GetListOfPrimitives()->Remove(grSurf[surf][chan]);
     paddy->GetListOfPrimitives()->Remove(grSurf[surf][chan2]);
   }
-  else if(fPowerSpecView && fRedoEventCanvas){
-    paddy->GetListOfPrimitives()->Remove(grSurf[surf][chan]);
-    paddy->GetListOfPrimitives()->Remove(grSurf[surf][chan2]);
-  }
-  else if(!fPowerSpecView && fRedoEventCanvas){
+  else if(fLastWaveformFormat==MagicDisplayFormatOption::kFFT){
     paddy->GetListOfPrimitives()->Remove(grSurfFFT[surf][chan]);
     paddy->GetListOfPrimitives()->Remove(grSurfFFT[surf][chan2]);
   }
-  else if(fPowerSpecView && !fRedoEventCanvas){
-    paddy->GetListOfPrimitives()->Remove(grSurfFFT[surf][chan]);
-    paddy->GetListOfPrimitives()->Remove(grSurfFFT[surf][chan2]);
+  else if(fLastWaveformFormat==MagicDisplayFormatOption::kHilbertEnvelope){
+    paddy->GetListOfPrimitives()->Remove(grSurfHilbert[surf][chan]);
+    paddy->GetListOfPrimitives()->Remove(grSurfHilbert[surf][chan2]);
   }
-  
   
   //  paddy->Update();
 }

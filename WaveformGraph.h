@@ -22,8 +22,10 @@ class WaveformGraph : public TGraph
    virtual ~WaveformGraph(); ///< Destructor.
   
    //!Draws the PSD of the waveform in a new window (NB: It is the *MENU* desigination that ROOT uses to add it to the right click list).   
-  void DrawFFT(); // *MENU* 
+  void DrawFFT(); // *MENU*   
+  void DrawHilbert(); // *MENU* 
   TGraph *getFFT(); ///< Returns a pointer to a TGraph containing the PSD of the waveform.
+  TGraph *getHilbert(); ///< Returns a pointer to a TGraph containing the hilbert envelope of the waveform.
 
   void setSurfChanPhiAntPolRing(Int_t surf, Int_t chan, Int_t phi,
 				Int_t ant, AnitaPol::AnitaPol_t pol,

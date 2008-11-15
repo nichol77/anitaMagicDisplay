@@ -14,5 +14,13 @@
 #pragma link C++ enum          MagicDisplayOption::EMagicDisplayOption;
 #pragma link C++ nestedtypedef MagicDisplayOption::MagicDisplayOption_t;
 
+#pragma link C++ namespace     MagicDisplayCanvasLayoutOption;
+#pragma link C++ enum          MagicDisplayCanvasLayoutOption::EMagicDisplayCanvasLayoutOption;
+#pragma link C++ nestedtypedef MagicDisplayCanvasLayoutOption::MagicDisplayCanvasLayoutOption_t;
+
+#pragma link C++ namespace     MagicDisplayFormatOption;
+#pragma link C++ enum          MagicDisplayFormatOption::EMagicDisplayFormatOption;
+#pragma link C++ nestedtypedef MagicDisplayFormatOption::MagicDisplayFormatOption_t;
+
 #endif
 

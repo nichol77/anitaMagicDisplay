@@ -15,6 +15,7 @@
 #include <TMath.h>
 #include <TVector3.h>
 #include "AnitaConventions.h"
+#include "MagicDisplayConventions.h"
 
 class UsefulAnitaEvent;
 class RawAnitaHeader;
@@ -27,6 +28,10 @@ class TPad;
 class AnitaCanvasMaker 
 {
  public:
+
+  void setCanvasLayout(MagicDisplayCanvasLayoutOption::MagicDisplayCanvasLayoutOption_t canLay) {fCanvasView=canLay;}
+  void setWaveformFormat(MagicDisplayFormatOption::MagicDisplayFormatOption_t waveOption) {fWaveformOption=waveOption;}
+
    Double_t fMinVoltLimit; ///< The minimum voltage. 
    Double_t fMaxVoltLimit; ///< The maximum voltage.
    Double_t fMinVertVoltLimit; ///< The minimum voltage in vertical channels.
@@ -40,11 +45,12 @@ class AnitaCanvasMaker
    Double_t fMaxPowerLimit; ///< The maximum power in the PSDs.
    Double_t fMinFreqLimit; ///< The minimum frequency in the PSDs (typically 0).
    Double_t fMaxFreqLimit; ///< The maximum frequency in the PSDs (typically 1200).
-   Int_t fPolView; ///< Which polarisation are we viewing?
-   Int_t fPowerSpecView; ///< Are we viewing PSDs or waveforms?
+   MagicDisplayCanvasLayoutOption::MagicDisplayCanvasLayoutOption_t fCanvasView; ///< Which canvas layout do we want?
+   MagicDisplayFormatOption::MagicDisplayFormatOption_t fWaveformOption; ///< Are we viewing PSDs, waveforms or other stuff?
    Int_t fRedoEventCanvas; ///< Do we neeed to redraw the event canvas (eg. switching from phi to SURF)?
    //Int_t fRedoSurfCanvas;
-   Int_t fLastView; ///< What was the last view (phi or SURF)?
+   MagicDisplayCanvasLayoutOption::MagicDisplayCanvasLayoutOption_t fLastCanvasView; ///< What was the last view (phi or SURF)?
+   MagicDisplayFormatOption::MagicDisplayFormatOption_t fLastWaveformFormat; ///< What did we plot last time??
    Int_t fNewEvent; ///< Is this a new event?
   
    //!  The main event view canvas getter.
