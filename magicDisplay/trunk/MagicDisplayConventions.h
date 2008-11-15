@@ -32,9 +32,41 @@ namespace MagicDisplayOption {
       kPowerPhiVerticalOnly, ///< Power spectral density view of vertical polarisation arranged by phi.
       kPowerPhiHorizontalOnly, ///< Power spectral density view of horizontal polarisation arranged by phi.
       kPowerPhiCombined, ///< Power spectral density view of both polarisations arranged by phi.
-      kPowerSurfOnly ///< Power spectral density view of all channels arranged by SURF.
+      kPowerSurfOnly, ///< Power spectral density view of all channels arranged by SURF.
+      kHilbertEnvelopePhiVerticalOnly, ///< Hilbert envelope view of vertical polarisation arranged by phi.
+      kHilbertEnvelopePhiHorizontalOnly, ///< Hilbert envelope view of horizontal polarisation arranged by phi.
+      kHilbertEnvelopePhiCombined, ///< Hilbert envelope view of both polarisations arranged by phi.
+      kHilbertEnvelopeSurfOnly ///<  Hilbert envelope view of all channels arranged by SURF.
    } MagicDisplayOption_t; ///< The event display option enumeration.
 };
+
+//!  Canvas layout option
+/*!
+  A simple enumeration to enumerate the canvas layout options for MagicDisplay
+*/
+namespace MagicDisplayCanvasLayoutOption {
+  typedef enum EMagicDisplayCanvasLayoutOption {
+    kPhiVerticalOnly = 0, ///< View of vertical polarisation arranged by phi.
+    kPhiHorizontalOnly, ///< View of horizontal polarisation arranged by phi.
+    kPhiCombined, ///< View of both polarisations arranged by phi.
+    kSurfOnly ///< View of all channels arranged by SURF. 
+  } MagicDisplayCanvasLayoutOption_t; ///< Enumeration for canvas layout.
+};
+
+
+//!  Waveform display format option
+/*!
+  A simple enumeration to enumerate the different waveform display options for MagicDisplay (eg. waveform, PSD (FFT), Hilbert envelope, etc.)
+*/
+namespace MagicDisplayFormatOption {
+  typedef enum EMagicDisplayFormatOption {
+    kWaveform = 0, ///< View of vertical polarisation arranged by phi.
+    kPowerSpectralDensity = 1, ///< View of horizontal polarisation arranged by phi.
+    kFFT = 1, ///< View of horizontal polarisation arranged by phi.
+    kHilbertEnvelope ///< View of both polarisations arranged by phi.
+  } MagicDisplayFormatOption_t; ///< Enumeration for plot style.
+};
+    
 
 int getNiceColour(int ind); ///< Simple fucntion to return some of my favourite colours.
 

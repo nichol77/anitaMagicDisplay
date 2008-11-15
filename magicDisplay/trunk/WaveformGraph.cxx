@@ -139,10 +139,54 @@ void WaveformGraph::DrawFFT()
   //   printf("WaveformGraph::DrawFFT: not yet implemented\n");
 }
 
+//______________________________________________________________________________
+void WaveformGraph::DrawHilbert()
+{
+  char graphTitle[180];
+  gStyle->SetTitleH(0.1);
+  gStyle->SetLabelSize(0.1,"xy");
+  gStyle->SetTitleSize(0.1,"xy");
+  gStyle->SetTitleOffset(0.5,"y");
+  gStyle->SetOptTitle(1);
+  gStyle->SetCanvasDefW(600);
+  gStyle->SetCanvasDefH(400);
+  //   gROOT->ForceStyle();
+   
+  TCanvas *can = new TCanvas();
+  can->SetLeftMargin(0.15);
+  can->SetBottomMargin(0.15);
+  can->SetTopMargin(0.1);
+  can->SetRightMargin(0.1);
+
+  TGraph *grHilbert  = this->getHilbert();
+  grHilbert->GetXaxis()->SetLabelSize(0.06);
+  grHilbert->GetXaxis()->SetTitleSize(0.06);
+  grHilbert->GetYaxis()->SetLabelSize(0.06);
+  grHilbert->GetYaxis()->SetTitleSize(0.06);
+  grHilbert->GetXaxis()->SetTitle("Time (ns)");
+  grHilbert->GetYaxis()->SetTitle("Voltage^2 (mv^2) ");
+  sprintf(graphTitle,"Ant %d%c (%s Ring --  Phi %d -- SURF %d -- Chan %d)",
+	  fAnt+1,AnitaPol::polAsChar(fPol),AnitaRing::ringAsString(fRing),
+	  fPhi+1,fSurf+1,fChan+1);
+  grHilbert->SetTitle(graphTitle);
+  grHilbert->Draw("al");
+  
+  //   printf("WaveformGraph::DrawFFT: not yet implemented\n");
+}
+
 TGraph *WaveformGraph::getFFT()
 {
   TGraph *grInt = FFTtools::getInterpolatedGraph(this,1./2.6);
   TGraph *grFFT = FFTtools::makePowerSpectrumMilliVoltsNanoSecondsdB(grInt);
   delete grInt;
   return grFFT;
+}
+
+
+TGraph *WaveformGraph::getHilbert()
+{
+  TGraph *grInt = FFTtools::getInterpolatedGraph(this,1./2.6);
+  TGraph *grHilbert = FFTtools::getHilbertEnvelope(grInt);
+  delete grInt;
+  return grHilbert;
 }

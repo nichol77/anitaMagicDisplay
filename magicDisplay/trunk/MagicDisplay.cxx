@@ -82,7 +82,8 @@ MagicDisplay::MagicDisplay()
    fAvgSurfPtr=0;
    fSumTurfPtr=0;
    fgInstance=this;
-   fMainOption=MagicDisplayOption::kWavePhiVerticalOnly;
+   fWaveformFormat=MagicDisplayFormatOption::kWaveform;
+   fCanvasLayout=MagicDisplayCanvasLayoutOption::kPhiVerticalOnly;
    fMagicCanvas=0;
    fMagicEventInfoPad=0;
    fMagicMainPad=0;
@@ -128,7 +129,8 @@ MagicDisplay::MagicDisplay(char *baseDir, int run, WaveCalType::WaveCalType_t ca
    fSurfHkEntry=0;
    fSurfHkTree=0;
    fgInstance=this;
-   fMainOption=MagicDisplayOption::kWavePhiVerticalOnly;
+   fWaveformFormat=MagicDisplayFormatOption::kWaveform;
+   fCanvasLayout=MagicDisplayCanvasLayoutOption::kPhiVerticalOnly;
    fMagicCanvas=0;
    fMagicEventInfoPad=0;
    fMagicMainPad=0;
@@ -204,7 +206,7 @@ int MagicDisplay::getEventEntry()
    }
    if(fUsefulEventPtr)
       delete fUsefulEventPtr;
-   fUsefulEventPtr = new UsefulAnitaEvent(fRawEventPtr,fCalType);  
+   fUsefulEventPtr = new UsefulAnitaEvent(fRawEventPtr,fCalType,fHeadPtr);  
   //Need to make configurable at some point
   //This will also need to be modifed to make realEvent accessible outside here
    return 0;
@@ -316,29 +318,12 @@ void MagicDisplay::refreshEventDisplay()
   //This will need to change
   
    fEventCanMaker->getEventInfoCanvas(fUsefulEventPtr,fHeadPtr,fMagicEventInfoPad);
-   switch(fMainOption) {
-   case MagicDisplayOption::kWavePhiVerticalOnly:
-     fEventCanMaker->fPolView=0;
-      fEventCanMaker->getEventViewerCanvas(fUsefulEventPtr,fHeadPtr,fMagicMainPad);
-      break;
-   case MagicDisplayOption::kWavePhiHorizontalOnly:
-     fEventCanMaker->fPolView=1;
-      fEventCanMaker->getEventViewerCanvas(fUsefulEventPtr,fHeadPtr,fMagicMainPad);
-      break;
-   case MagicDisplayOption::kWavePhiCombined:
-     fEventCanMaker->fPolView=2;
-      fEventCanMaker->getEventViewerCanvas(fUsefulEventPtr,fHeadPtr,fMagicMainPad);
-      //      fEventCanMaker->setupPhiPadWithFrames(fMagicMainPad);
-      break;
-   case MagicDisplayOption::kWaveSurfOnly:
-     fEventCanMaker->fPolView=3;
-     fEventCanMaker->getEventViewerCanvas(fUsefulEventPtr,fHeadPtr,fMagicMainPad);
-     break;
-   default:
-     fEventCanMaker->getEventViewerCanvas(fUsefulEventPtr,fHeadPtr,fMagicMainPad);
-     //fEventCanMaker->getVerticalCanvas(fUsefulEventPtr,fHeadPtr,fMagicMainPad);
-      break;
-   }
+   
+   fEventCanMaker->setWaveformFormat(fWaveformFormat);
+   fEventCanMaker->setCanvasLayout(fCanvasLayout);
+
+   fEventCanMaker->getEventViewerCanvas(fUsefulEventPtr,fHeadPtr,fMagicMainPad);
+   
 
   fMagicCanvas->Update();
 }
@@ -469,62 +454,63 @@ void MagicDisplay::drawEventButtons() {
    butStop->SetFillColor(kRed-10);
    butStop->Draw();
 
-   fVertButton = new TButton("Vertical","MagicDisplay::Instance()->setMainCanvasOption(MagicDisplayOption::kWavePhiVerticalOnly); MagicDisplay::Instance()->refreshEventDisplay();",0,0.975,0.05,1);
+   fVertButton = new TButton("Vertical","MagicDisplay::Instance()->setCanvasLayout(MagicDisplayCanvasLayoutOption::kPhiVerticalOnly); MagicDisplay::Instance()->refreshEventDisplay();",0,0.975,0.05,1);
    fVertButton->SetTextSize(0.4);
    fVertButton->SetFillColor(kGray+3);
    fVertButton->Draw();
-   fHorizButton = new TButton("Horizontal","MagicDisplay::Instance()->setMainCanvasOption(MagicDisplayOption::kWavePhiHorizontalOnly); MagicDisplay::Instance()->refreshEventDisplay();",0,0.95,0.05,0.975);
+   fHorizButton = new TButton("Horizontal","MagicDisplay::Instance()->setCanvasLayout(MagicDisplayCanvasLayoutOption::kPhiHorizontalOnly); MagicDisplay::Instance()->refreshEventDisplay();",0,0.95,0.05,0.975);
    fHorizButton->SetTextSize(0.4);
    fHorizButton->SetFillColor(kGray);
    fHorizButton->Draw();
-   fBothButton = new TButton("Both","MagicDisplay::Instance()->setMainCanvasOption(MagicDisplayOption::kWavePhiCombined); MagicDisplay::Instance()->refreshEventDisplay();",0,0.925,0.05,0.95);
+   fBothButton = new TButton("Both","MagicDisplay::Instance()->setCanvasLayout(MagicDisplayCanvasLayoutOption::kPhiCombined); MagicDisplay::Instance()->refreshEventDisplay();",0,0.925,0.05,0.95);
    fBothButton->SetTextSize(0.4);
    fBothButton->SetFillColor(kGray);
    fBothButton->Draw();
-
-   //NEW BUTTONS
-   fWaveformButton = new TButton("Waveform View","MagicDisplay::Instance()->toggleWaveformView(1); MagicDisplay::Instance()->refreshEventDisplay();",0.05,0.95,0.14,1);
-   fWaveformButton->SetTextSize(0.4);
-   fWaveformButton->SetFillColor(kGray+3);
-   fWaveformButton->Draw();
-   fPowerButton = new TButton("FFT View","MagicDisplay::Instance()->toggleWaveformView(0); MagicDisplay::Instance()->refreshEventDisplay();",0.05,0.9,0.14,0.95);
-   fPowerButton->SetTextSize(0.4);
-   fPowerButton->SetFillColor(kGray);
-   fPowerButton->Draw();
-
-   fSurfButton = new TButton("Surf","MagicDisplay::Instance()->setMainCanvasOption(MagicDisplayOption::kWaveSurfOnly); MagicDisplay::Instance()->refreshEventDisplay();",0,0.9,0.05,0.925);
+   fSurfButton = new TButton("SURF","MagicDisplay::Instance()->setCanvasLayout(MagicDisplayCanvasLayoutOption::kSurfOnly); MagicDisplay::Instance()->refreshEventDisplay();",0,0.9,0.05,0.925);
    fSurfButton->SetTextSize(0.4);
    fSurfButton->SetFillColor(kGray);
    fSurfButton->Draw();
+
+   //NEW BUTTONS
+   fWaveformButton = new TButton("Waveform View","MagicDisplay::Instance()->setWaveformFormat(MagicDisplayFormatOption::kWaveform); MagicDisplay::Instance()->refreshEventDisplay();",0.05,0.966,0.14,1);
+   fWaveformButton->SetTextSize(0.4);
+   fWaveformButton->SetFillColor(kGray+3);
+   fWaveformButton->Draw();
+   fPowerButton = new TButton("FFT View","MagicDisplay::Instance()->setWaveformFormat(MagicDisplayFormatOption::kFFT); MagicDisplay::Instance()->refreshEventDisplay();",0.05,0.933,0.14,0.966);
+   fPowerButton->SetTextSize(0.4);
+   fPowerButton->SetFillColor(kGray);
+   fPowerButton->Draw();
+   fHilbertButton = new TButton("Hilbert View","MagicDisplay::Instance()->setWaveformFormat(MagicDisplayFormatOption::kHilbertEnvelope); MagicDisplay::Instance()->refreshEventDisplay();",0.05,0.9,0.14,0.933);
+   fHilbertButton->SetTextSize(0.4);
+   fHilbertButton->SetFillColor(kGray);
+   fHilbertButton->Draw();
+
    
 }
 
-void MagicDisplay::setMainCanvasOption(MagicDisplayOption::MagicDisplayOption_t option)
+void MagicDisplay::setCanvasLayout(MagicDisplayCanvasLayoutOption::MagicDisplayCanvasLayoutOption_t option)
 {
-   fMainOption=option;
+   fCanvasLayout=option;
    switch(option) {
-   case MagicDisplayOption::kWaveSurfOnly:
+   case MagicDisplayCanvasLayoutOption::kSurfOnly:
       fVertButton->SetFillColor(kGray);
       fHorizButton->SetFillColor(kGray);
       fBothButton->SetFillColor(kGray);
       fSurfButton->SetFillColor(kGray+3);
       break;
-   case MagicDisplayOption::kWavePhiVerticalOnly:
-   case MagicDisplayOption::kPowerPhiVerticalOnly:
+   case MagicDisplayCanvasLayoutOption::kPhiVerticalOnly:
       fVertButton->SetFillColor(kGray+3);
       fHorizButton->SetFillColor(kGray);
       fBothButton->SetFillColor(kGray);
       fSurfButton->SetFillColor(kGray);
       break;
-   case MagicDisplayOption::kWavePhiHorizontalOnly:
-   case MagicDisplayOption::kPowerPhiHorizontalOnly:
+   case MagicDisplayCanvasLayoutOption::kPhiHorizontalOnly:
       fHorizButton->SetFillColor(kGray+3);
       fVertButton->SetFillColor(kGray);
       fBothButton->SetFillColor(kGray);
       fSurfButton->SetFillColor(kGray);
       break;
-   case MagicDisplayOption::kWavePhiCombined:
-   case MagicDisplayOption::kPowerPhiCombined:
+   case MagicDisplayCanvasLayoutOption::kPhiCombined:
       fHorizButton->SetFillColor(kGray);
       fVertButton->SetFillColor(kGray);
       fBothButton->SetFillColor(kGray+3);
@@ -540,24 +526,35 @@ void MagicDisplay::setMainCanvasOption(MagicDisplayOption::MagicDisplayOption_t 
 }
 
 
-void MagicDisplay::toggleWaveformView(Int_t surfView)
+void MagicDisplay::setWaveformFormat(MagicDisplayFormatOption::MagicDisplayFormatOption_t waveformOption)
 {
-   
-   if(surfView) {
-      //Turn on fft view off
-      fEventCanMaker->fPowerSpecView=0;
+  fWaveformFormat=waveformOption;
+  if(waveformOption==MagicDisplayFormatOption::kWaveform) {
+      //Turn on fft view off     
       fWaveformButton->SetFillColor(kGray+3);
       fPowerButton->SetFillColor(kGray);
+      fHilbertButton->SetFillColor(kGray);
       fWaveformButton->Modified();
       fPowerButton->Modified();
-   }
-   else {
+      fHilbertButton->Modified();
+  }
+  else if(waveformOption==MagicDisplayFormatOption::kFFT) {
       //Turn fft view on
-      fEventCanMaker->fPowerSpecView=1;
       fWaveformButton->SetFillColor(kGray);
       fPowerButton->SetFillColor(kGray+3);
+      fHilbertButton->SetFillColor(kGray);
       fWaveformButton->Modified();
       fPowerButton->Modified();
+      fHilbertButton->Modified();
+   }
+  else if(waveformOption==MagicDisplayFormatOption::kHilbertEnvelope) {
+      //Turn fft view on
+      fWaveformButton->SetFillColor(kGray);
+      fPowerButton->SetFillColor(kGray);
+      fHilbertButton->SetFillColor(kGray+3);
+      fWaveformButton->Modified();
+      fPowerButton->Modified();
+      fHilbertButton->Modified();
    }
       
 }

@@ -83,13 +83,16 @@ class MagicDisplay
   void refreshEventDisplay(); ///< Refresh the event display and redraw the graphs, this is called everytime a new event is displayed.
   int getEventEntry(); ///< Tries to retrieve the event corresponding to entry <i>fEventEntry</i> from the evnt file. Returns zero on success.
   void drawEventButtons(); ///< Worker function to draw the buttons on the main event display canvas.
-  void setMainCanvasOption(MagicDisplayOption::MagicDisplayOption_t option); ///< Sets the drawing option for the event display see MagicDisplayOption for available options.
   //! Toggles between waveform and FFT view modes
   /*!
-    \param waveformView 1 is waveform, 0 is FFT (will be replaced by an enumeration as other options are added).
-
+    \param option See MagicDisplayCanvasLayoutOption for options.
   */
-  void toggleWaveformView(Int_t waveformView); 
+  void setCanvasLayout(MagicDisplayCanvasLayoutOption::MagicDisplayCanvasLayoutOption_t option); ///< Sets the drawing option for the event display see MagicDisplayCanvasLayoutOption for available options.
+  //! Toggles between waveform and FFT view modes
+  /*!
+    \param waveformView See MagicDisplayFormatOption for options.
+  */
+  void setWaveformFormat(MagicDisplayFormatOption::MagicDisplayFormatOption_t waveformView); 
 
   int loadTurfTree(); ///< Opens the TURF rate file for the current run.
   void startTurfDisplay(); ///< Starts the TURF Rate display window.
@@ -172,7 +175,9 @@ class MagicDisplay
    // protect against multiple instances
 
  private:
-  MagicDisplayOption::MagicDisplayOption_t fMainOption; ///< The event display drawing option.
+  MagicDisplayFormatOption::MagicDisplayFormatOption_t fWaveformFormat; ///< The format for displaying waveforms.
+  MagicDisplayCanvasLayoutOption::MagicDisplayCanvasLayoutOption_t fCanvasLayout; ///< The format for the canvas layout
+
    TCanvas *fMagicCanvas; ///< The main event display canvas.
    TPad *fMagicMainPad; ///< The main event display pad.
    TPad *fMagicEventInfoPad; ///< The event display info pad.
@@ -207,6 +212,7 @@ class MagicDisplay
    TButton *fBothButton; ///< The both polarisations button.
    TButton *fWaveformButton; ///< The waveform view button.
    TButton *fPowerButton; ///< The FFT view button.
+   TButton *fHilbertButton; ///< The Hilbert envelope view button.
    TButton *fSurfButton; ///< The SURF view button.
 
    TButton *fTurfYScaleButton; ///< The TURF rate Y scale button.
