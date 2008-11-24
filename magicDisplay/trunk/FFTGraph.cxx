@@ -14,30 +14,31 @@ ClassImp(FFTGraph);
 
 FFTGraph::FFTGraph()
 
-  : TGraph(),fNewCanvas(0)
+  : TGraph(),fNewCanvas(0),fNumInAverage(1)
     
 {
   this->SetEditable(kFALSE);
+  
 }
 
 
 FFTGraph::FFTGraph(int N, const Int_t *x, const Int_t *y)
 
-  : TGraph(N,x,y),fNewCanvas(0)
+  : TGraph(N,x,y),fNewCanvas(0),fNumInAverage(1)
 {
   this->SetEditable(kFALSE);
 }
 
 FFTGraph::FFTGraph(int N, const Float_t *x, const Float_t *y)
 
-  : TGraph(N,x,y),fNewCanvas(0)
+  : TGraph(N,x,y),fNewCanvas(0),fNumInAverage(1)
 {
   this->SetEditable(kFALSE);
 }
 
 FFTGraph::FFTGraph(int N, const Double_t *x, const Double_t *y)
 
-  : TGraph(N,x,y),fNewCanvas(0)
+  : TGraph(N,x,y),fNewCanvas(0),fNumInAverage(1)
 {  
   this->SetEditable(kFALSE);
 }
@@ -101,6 +102,19 @@ void FFTGraph::drawInNewCanvas()
   can->SetRightMargin(0.1);
   thisCopy->Draw("al");
   //  fNewCanvas=1;
-  
+}
+
+Int_t FFTGraph::AddFFT(FFTGraph *otherGraph)
+{
+  if(otherGraph->GetN()!=this->GetN()) {
+    std::cerr << "Trying to add FFTGraph with different number of points " << otherGraph->GetN() << " instead of " << this->GetN() << "\n";
+    return -1;
+  }
+  Double_t *newY=otherGraph->GetY();
+  for(int bin=0;bin<fNpoints;bin++) {
+    fY[bin]=(fY[bin]*fNumInAverage + newY[bin])/Double_t(fNumInAverage+1);
+  }
+  fNumInAverage++;   
+  return fNumInAverage;
 }
 

@@ -210,10 +210,12 @@ class MagicDisplay
    TButton *fVertButton; ///< The vertical polarisation button.
    TButton *fHorizButton; ///< The horizontal polarisation button.
    TButton *fBothButton; ///< The both polarisations button.
+   TButton *fSurfButton; ///< The SURF view button.
+
    TButton *fWaveformButton; ///< The waveform view button.
    TButton *fPowerButton; ///< The FFT view button.
    TButton *fHilbertButton; ///< The Hilbert envelope view button.
-   TButton *fSurfButton; ///< The SURF view button.
+   TButton *fAverageFFTButton; ///< The average FFT button.
 
    TButton *fTurfYScaleButton; ///< The TURF rate Y scale button.
    TButton *fSurfSurfViewButton; ///< The SURF hk SURF view button.

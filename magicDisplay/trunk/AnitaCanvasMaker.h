@@ -31,6 +31,7 @@ class AnitaCanvasMaker
 
   void setCanvasLayout(MagicDisplayCanvasLayoutOption::MagicDisplayCanvasLayoutOption_t canLay) {fCanvasView=canLay;}
   void setWaveformFormat(MagicDisplayFormatOption::MagicDisplayFormatOption_t waveOption) {fWaveformOption=waveOption;}
+  void resetAverage();
 
    Double_t fMinVoltLimit; ///< The minimum voltage. 
    Double_t fMaxVoltLimit; ///< The maximum voltage.
