@@ -24,6 +24,7 @@ class WaveformGraph : public TGraph
    //!Draws the PSD of the waveform in a new window (NB: It is the *MENU* desigination that ROOT uses to add it to the right click list).   
   void DrawFFT(); // *MENU*   
   void DrawHilbert(); // *MENU* 
+  void AddToCorrelation(); // *MENU*
   TGraph *getFFT(); ///< Returns a pointer to a TGraph containing the PSD of the waveform.
   TGraph *getHilbert(); ///< Returns a pointer to a TGraph containing the hilbert envelope of the waveform.
 
@@ -32,13 +33,15 @@ class WaveformGraph : public TGraph
 				AnitaRing::AnitaRing_t ring) 
      {fSurf=surf; fChan=chan; fPhi=phi; fAnt=ant; fPol=pol; fRing=ring;} ///< These are just used for labelling.
 
- private:
+
   Int_t fSurf; ///< Used in labelling.
   Int_t fChan; ///< Used in labelling.
   Int_t fPhi; ///< Used in labelling.
   Int_t fAnt; ///< Used in labelling.
   AnitaRing::AnitaRing_t fRing; ///< Used in labelling.
   AnitaPol::AnitaPol_t fPol; ///< Used in labelling.
+
+ private:
 
 
   void ExecuteEvent(Int_t event, Int_t px, Int_t py); ///< ROOT function that is called when a user interacts with the graph using the mouse.

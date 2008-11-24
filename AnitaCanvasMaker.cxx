@@ -1037,6 +1037,8 @@ TPad *AnitaCanvasMaker::getSurfChanCanvas(RawAnitaHeader *hdPtr,
 		tempHist->GetYaxis()->SetRangeUser(fMinVertVoltLimit,fMaxVertVoltLimit);
 	      }
 	      else {
+
+		grSurf[surf][chan]->setSurfChanPhiAntPolRing(surf,chan,-1,-1,AnitaPol::kNotAPol,AnitaRing::kNotARing);
 		tempHist->GetYaxis()->SetRangeUser(fMinClockVoltLimit,fMaxClockVoltLimit);
 	      }
 	    }
@@ -1405,7 +1407,7 @@ void AnitaCanvasMaker::setupSurfPadWithFrames(TPad *plotPad)
       paddy1->Draw();
       paddy1->cd();
       TH1F *framey;
-      if(fWaveformOption==MagicDisplayFormatOption::kFFT){
+      if(fWaveformOption==MagicDisplayFormatOption::kFFT || fWaveformOption==MagicDisplayFormatOption::kAveragedFFT){
 	  framey = (TH1F*) paddy1->DrawFrame(fMinFreqLimit,fMinPowerLimit,fMaxFreqLimit,fMaxPowerLimit);
       }
       else if(fWaveformOption==MagicDisplayFormatOption::kWaveform || 
