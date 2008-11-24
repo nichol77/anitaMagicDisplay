@@ -176,8 +176,24 @@ void WaveformGraph::DrawHilbert()
 
 TGraph *WaveformGraph::getFFT()
 {
+  Double_t newX[248],newY[248];
   TGraph *grInt = FFTtools::getInterpolatedGraph(this,1./2.6);
-  TGraph *grFFT = FFTtools::makePowerSpectrumMilliVoltsNanoSecondsdB(grInt);
+  Int_t numSamps=grInt->GetN();
+  Double_t *xVals=grInt->GetX();
+  Double_t *yVals=grInt->GetY();
+  for(int i=0;i<248;i++) {
+    if(i<numSamps) {
+      newX[i]=xVals[i];
+      newY[i]=yVals[i];
+    }
+    else {
+      newX[i]=newX[i-1]+(1./2.6);
+      newY[i]=0;
+    }      
+  }
+  TGraph *grNew = new TGraph(248,newX,newY);
+  TGraph *grFFT = FFTtools::makePowerSpectrumMilliVoltsNanoSecondsdB(grNew);
+  delete grNew;
   delete grInt;
   return grFFT;
 }

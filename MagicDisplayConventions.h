@@ -36,7 +36,11 @@ namespace MagicDisplayOption {
       kHilbertEnvelopePhiVerticalOnly, ///< Hilbert envelope view of vertical polarisation arranged by phi.
       kHilbertEnvelopePhiHorizontalOnly, ///< Hilbert envelope view of horizontal polarisation arranged by phi.
       kHilbertEnvelopePhiCombined, ///< Hilbert envelope view of both polarisations arranged by phi.
-      kHilbertEnvelopeSurfOnly ///<  Hilbert envelope view of all channels arranged by SURF.
+      kHilbertEnvelopeSurfOnly, ///<  Hilbert envelope view of all channels arranged by SURF.
+      kAveragedPowerPhiVerticalOnly, ///< Power spectral density view of vertical polarisation arranged by phi.
+      kAveragedPowerPhiHorizontalOnly, ///< Power spectral density view of horizontal polarisation arranged by phi.
+      kAveragedPowerPhiCombined, ///< Power spectral density view of both polarisations arranged by phi.
+      kAveragedPowerSurfOnly ///< Power spectral density view of all channels arranged by SURF.
    } MagicDisplayOption_t; ///< The event display option enumeration.
 };
 
@@ -60,10 +64,11 @@ namespace MagicDisplayCanvasLayoutOption {
 */
 namespace MagicDisplayFormatOption {
   typedef enum EMagicDisplayFormatOption {
-    kWaveform = 0, ///< View of vertical polarisation arranged by phi.
-    kPowerSpectralDensity = 1, ///< View of horizontal polarisation arranged by phi.
-    kFFT = 1, ///< View of horizontal polarisation arranged by phi.
-    kHilbertEnvelope ///< View of both polarisations arranged by phi.
+    kWaveform = 0, ///< View of waveforms
+    kPowerSpectralDensity = 1, ///< View of FFTs
+    kFFT = 1, ///< View of FFTs
+    kHilbertEnvelope, ///< View of hilbert envelopes
+    kAveragedFFT ///< View of avergaed FFTs
   } MagicDisplayFormatOption_t; ///< Enumeration for plot style.
 };
     

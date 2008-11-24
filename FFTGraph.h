@@ -19,6 +19,7 @@ class FFTGraph : public TGraph
    FFTGraph(int n, const Int_t *x, const Int_t *y); ///< Int_t constructor
    FFTGraph(int n, const Float_t *x, const Float_t *y); ///< Float_t constructor
    FFTGraph(int n, const Double_t *x, const Double_t *y); ///< Double_t constructor
+   int AddFFT(FFTGraph *otherGraph); ///<Adds an FFT to an average
    virtual ~FFTGraph(); ///< Destructor
   
 
@@ -42,6 +43,7 @@ class FFTGraph : public TGraph
   void drawInNewCanvas(); ///< Draws a copy waveform in a new canvas.
 
   Int_t fNewCanvas; ///< Flag to dictate whether the waveform is a copy drawn in a new canvas (if it is then the title is shown).
+  Int_t fNumInAverage; ///<Counts number of FFTs in current rolling average
   
   
   ClassDef(FFTGraph,2)

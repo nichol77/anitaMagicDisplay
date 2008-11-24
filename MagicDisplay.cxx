@@ -453,6 +453,11 @@ void MagicDisplay::drawEventButtons() {
    butStop->SetTextSize(0.5);
    butStop->SetFillColor(kRed-10);
    butStop->Draw();
+   TButton *butReset = new TButton("Reset Avg","AnitaCanvasMaker::Instance()->resetAverage();",0.85,0.975,0.90,1);
+   butReset->SetTextSize(0.5);
+   butReset->SetFillColor(kViolet-10);
+   butReset->Draw();
+
 
    fVertButton = new TButton("Vertical","MagicDisplay::Instance()->setCanvasLayout(MagicDisplayCanvasLayoutOption::kPhiVerticalOnly); MagicDisplay::Instance()->refreshEventDisplay();",0,0.975,0.05,1);
    fVertButton->SetTextSize(0.4);
@@ -472,18 +477,22 @@ void MagicDisplay::drawEventButtons() {
    fSurfButton->Draw();
 
    //NEW BUTTONS
-   fWaveformButton = new TButton("Waveform View","MagicDisplay::Instance()->setWaveformFormat(MagicDisplayFormatOption::kWaveform); MagicDisplay::Instance()->refreshEventDisplay();",0.05,0.966,0.14,1);
+   fWaveformButton = new TButton("Waveform View","MagicDisplay::Instance()->setWaveformFormat(MagicDisplayFormatOption::kWaveform); MagicDisplay::Instance()->refreshEventDisplay();",0.05,0.975,0.14,1);
    fWaveformButton->SetTextSize(0.4);
    fWaveformButton->SetFillColor(kGray+3);
    fWaveformButton->Draw();
-   fPowerButton = new TButton("FFT View","MagicDisplay::Instance()->setWaveformFormat(MagicDisplayFormatOption::kFFT); MagicDisplay::Instance()->refreshEventDisplay();",0.05,0.933,0.14,0.966);
+   fPowerButton = new TButton("FFT View","MagicDisplay::Instance()->setWaveformFormat(MagicDisplayFormatOption::kFFT); MagicDisplay::Instance()->refreshEventDisplay();",0.05,0.95,0.14,0.975);
    fPowerButton->SetTextSize(0.4);
    fPowerButton->SetFillColor(kGray);
    fPowerButton->Draw();
-   fHilbertButton = new TButton("Hilbert View","MagicDisplay::Instance()->setWaveformFormat(MagicDisplayFormatOption::kHilbertEnvelope); MagicDisplay::Instance()->refreshEventDisplay();",0.05,0.9,0.14,0.933);
+   fHilbertButton = new TButton("Hilbert View","MagicDisplay::Instance()->setWaveformFormat(MagicDisplayFormatOption::kHilbertEnvelope); MagicDisplay::Instance()->refreshEventDisplay();",0.05,0.925,0.14,0.95);
    fHilbertButton->SetTextSize(0.4);
    fHilbertButton->SetFillColor(kGray);
    fHilbertButton->Draw();
+   fAverageFFTButton = new TButton("Average FFT","MagicDisplay::Instance()->setWaveformFormat(MagicDisplayFormatOption::kAveragedFFT); MagicDisplay::Instance()->refreshEventDisplay();",0.05,0.9,0.14,0.925);
+   fAverageFFTButton->SetTextSize(0.4);
+   fAverageFFTButton->SetFillColor(kGray);
+   fAverageFFTButton->Draw();
 
    
 }
@@ -534,27 +543,44 @@ void MagicDisplay::setWaveformFormat(MagicDisplayFormatOption::MagicDisplayForma
       fWaveformButton->SetFillColor(kGray+3);
       fPowerButton->SetFillColor(kGray);
       fHilbertButton->SetFillColor(kGray);
+      fAverageFFTButton->SetFillColor(kGray);
       fWaveformButton->Modified();
       fPowerButton->Modified();
       fHilbertButton->Modified();
+      fAverageFFTButton->Modified();
   }
   else if(waveformOption==MagicDisplayFormatOption::kFFT) {
       //Turn fft view on
       fWaveformButton->SetFillColor(kGray);
       fPowerButton->SetFillColor(kGray+3);
       fHilbertButton->SetFillColor(kGray);
+      fAverageFFTButton->SetFillColor(kGray);
       fWaveformButton->Modified();
       fPowerButton->Modified();
       fHilbertButton->Modified();
+      fAverageFFTButton->Modified();
    }
   else if(waveformOption==MagicDisplayFormatOption::kHilbertEnvelope) {
       //Turn fft view on
       fWaveformButton->SetFillColor(kGray);
       fPowerButton->SetFillColor(kGray);
       fHilbertButton->SetFillColor(kGray+3);
+      fAverageFFTButton->SetFillColor(kGray);
       fWaveformButton->Modified();
       fPowerButton->Modified();
       fHilbertButton->Modified();
+      fAverageFFTButton->Modified();
+   }
+  else if(waveformOption==MagicDisplayFormatOption::kAveragedFFT) {
+      //Turn fft view on
+      fWaveformButton->SetFillColor(kGray);
+      fPowerButton->SetFillColor(kGray);
+      fHilbertButton->SetFillColor(kGray);
+      fAverageFFTButton->SetFillColor(kGray+3);
+      fWaveformButton->Modified();
+      fPowerButton->Modified();
+      fHilbertButton->Modified();
+      fAverageFFTButton->Modified();
    }
       
 }
