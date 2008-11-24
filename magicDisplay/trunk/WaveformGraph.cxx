@@ -1,4 +1,5 @@
 #include "WaveformGraph.h"
+#include "CorrelationFactory.h"
 #include "TButton.h"
 #include "TList.h"
 #include "TCanvas.h"
@@ -49,20 +50,33 @@ WaveformGraph::~WaveformGraph()
 
 void WaveformGraph::ExecuteEvent(Int_t event, Int_t px, Int_t py)
 {
+  static int keyWasPressed=0;
    switch (event) {
+   case kKeyPress:
+     //     std::cout << "kKeyPress" << std::endl;
+     keyWasPressed=1;
+     break;
    case kButtonPress:
      //     cout << "kButtonPress" << endl;
      break;
      
-   case kButtonDoubleClick:
+   case kButton1Double:
      //     std::cout << "kButtonDoubleClick" << std::endl;
-     new TCanvas();
+     //     new TCanvas();
      break;
 
    case kButton1Down:
      //     std::cout << "kButton1Down" << std::endl;
-     if(!fNewCanvas) drawInNewCanvas();
-     else this->TGraph::ExecuteEvent(event,px,py);
+     if(!keyWasPressed) {
+       if(!fNewCanvas) drawInNewCanvas();
+       else this->TGraph::ExecuteEvent(event,px,py);
+     }
+     else {
+       //       std::cout << "ctrl + click\n";
+       CorrelationFactory::Instance()->addWaveformToCorrelation(this);
+       keyWasPressed=0;
+     }
+
      break;
           
    default:
@@ -90,9 +104,16 @@ void WaveformGraph::drawInNewCanvas()
   thisCopy->GetYaxis()->SetTitleSize(0.06);
   thisCopy->GetXaxis()->SetTitle("Time (ns)");
   thisCopy->GetYaxis()->SetTitle("Voltage (mV-ish)");
-  sprintf(graphTitle,"Ant %d%c (%s Ring --  Phi %d -- SURF %d -- Chan %d)",
-	  fAnt+1,AnitaPol::polAsChar(fPol),AnitaRing::ringAsString(fRing),
-	  fPhi+1,fSurf+1,fChan+1);
+
+  if(fChan!=8) {
+    sprintf(graphTitle,"Ant %d%c (%s Ring --  Phi %d -- SURF %d -- Chan %d)",
+	    fAnt+1,AnitaPol::polAsChar(fPol),AnitaRing::ringAsString(fRing),
+	    fPhi+1,fSurf+1,fChan+1);
+  }
+  else {
+    sprintf(graphTitle,"Clock SURF %d -- Chan %d",fSurf+1,fChan+1);
+  }
+
   thisCopy->SetTitle(graphTitle);
   TCanvas *can = new TCanvas();
   can->SetLeftMargin(0.15);
@@ -130,9 +151,16 @@ void WaveformGraph::DrawFFT()
   grFFT->GetYaxis()->SetTitleSize(0.06);
   grFFT->GetXaxis()->SetTitle("Frequency (MHz)");
   grFFT->GetYaxis()->SetTitle("dB (m maybe)");
-  sprintf(graphTitle,"Ant %d%c (%s Ring --  Phi %d -- SURF %d -- Chan %d)",
-	  fAnt+1,AnitaPol::polAsChar(fPol),AnitaRing::ringAsString(fRing),
-	  fPhi+1,fSurf+1,fChan+1);
+
+  if(fChan!=8) {
+    sprintf(graphTitle,"Ant %d%c (%s Ring --  Phi %d -- SURF %d -- Chan %d)",
+	    fAnt+1,AnitaPol::polAsChar(fPol),AnitaRing::ringAsString(fRing),
+	    fPhi+1,fSurf+1,fChan+1);
+  }
+  else {
+    sprintf(graphTitle,"Clock SURF %d -- Chan %d",fSurf+1,fChan+1);
+  }
+
   grFFT->SetTitle(graphTitle);
   grFFT->Draw("al");
   
@@ -165,9 +193,14 @@ void WaveformGraph::DrawHilbert()
   grHilbert->GetYaxis()->SetTitleSize(0.06);
   grHilbert->GetXaxis()->SetTitle("Time (ns)");
   grHilbert->GetYaxis()->SetTitle("Voltage^2 (mv^2) ");
-  sprintf(graphTitle,"Ant %d%c (%s Ring --  Phi %d -- SURF %d -- Chan %d)",
-	  fAnt+1,AnitaPol::polAsChar(fPol),AnitaRing::ringAsString(fRing),
-	  fPhi+1,fSurf+1,fChan+1);
+  if(fChan!=8) {
+    sprintf(graphTitle,"Ant %d%c (%s Ring --  Phi %d -- SURF %d -- Chan %d)",
+	    fAnt+1,AnitaPol::polAsChar(fPol),AnitaRing::ringAsString(fRing),
+	    fPhi+1,fSurf+1,fChan+1);
+  }
+  else {
+    sprintf(graphTitle,"Clock SURF %d -- Chan %d",fSurf+1,fChan+1);
+  }
   grHilbert->SetTitle(graphTitle);
   grHilbert->Draw("al");
   
@@ -205,4 +238,9 @@ TGraph *WaveformGraph::getHilbert()
   TGraph *grHilbert = FFTtools::getHilbertEnvelope(grInt);
   delete grInt;
   return grHilbert;
+}
+
+void WaveformGraph::AddToCorrelation()
+{
+  CorrelationFactory::Instance()->addWaveformToCorrelation(this);
 }

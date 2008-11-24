@@ -9,6 +9,7 @@
 #pragma link C++ class FFTGraph+;
 #pragma link C++ class MagicDisplay+;
 #pragma link C++ class MagicControlPanel+;
+#pragma link C++ class CorrelationFactory+;
 
 #pragma link C++ namespace     MagicDisplayOption;
 #pragma link C++ enum          MagicDisplayOption::EMagicDisplayOption;
