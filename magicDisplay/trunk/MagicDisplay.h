@@ -111,6 +111,9 @@ class MagicDisplay
   int getSurfEntry(); ///< Attempts to load the entry corresponding to <i>fSurfHkEntry</i>.
   void drawSurfButtons(); ///< Draws the buttons on the SURF hk display.
   void toggleSurfSurfView(Int_t surfView); ///< Toggles between surf and phi views.
+  void toggleSurfRfPowerView(Int_t kelvinView); ///< Toggles betweem adc and Kelvin views.
+  void toggleSurfLogView(); ///<Toggles between log and linear
+  
 
   int loadAvgSurfTree(); ///< Opens the averaged SURF hk file for the current rune.
   void startAvgSurfDisplay(); ///< Starts the averaged SURF hk display window.
@@ -120,6 +123,9 @@ class MagicDisplay
   int getAvgSurfEntry(); ///< Attempts to load get the entry corresponding to <i>fAvgSurfHkEntry</i>.
   void drawAvgSurfButtons(); ///< Draws the buttons on the averaged SURF hk display.
   void toggleAvgSurfSurfView(Int_t surfView); ///< Toggles between surf and phi views.
+  void toggleAvgSurfRfPowerView(Int_t kelvinView); ///< Toggles betweem adc and Kelvin views.
+  void toggleAvgSurfLogView(); ///<Toggles between log and linear
+
 
   int loadSumTurfTree(); ///< Opens the summed TURF rate file for the current run.
   void startSumTurfDisplay(); ///< Starts the summed TURF rate display program.
@@ -220,10 +226,16 @@ class MagicDisplay
    TButton *fTurfYScaleButton; ///< The TURF rate Y scale button.
    TButton *fSurfSurfViewButton; ///< The SURF hk SURF view button.
    TButton *fSurfPhiViewButton; ///< The SURF hk phi view button.
+   TButton *fSurfAdcViewButton; ///< The SURF RF power ADC view button.
+   TButton *fSurfKelvinViewButton; ///< The SURF RF power kelvin view button.
+   TButton *fSurfLogButton; ///< The Surf log/linear button
 
    TButton *fSumTurfYScaleButton; ///< The summed TURF rate Y scale button.
    TButton *fAvgSurfSurfViewButton; ///< The averaged SURF hk SURF view button.
    TButton *fAvgSurfPhiViewButton; ///< The averaged SURF hk phi view button.
+   TButton *fAvgSurfAdcViewButton; ///< The averaged SURF RF power ADC view button.
+   TButton *fAvgSurfKelvinViewButton; ///< The averaged SURF RF power kelvin view button.
+   TButton *fAvgSurfLogButton; ///< The averaged SURF log/linear button
 
    Int_t fInEventPlayMode; ///< Flag that indicates playback mode
    Int_t fEventPlaySleepMs; ///< Length of sleep between events in playback mode.

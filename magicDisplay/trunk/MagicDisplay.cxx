@@ -838,19 +838,58 @@ void MagicDisplay::drawSurfButtons()
    butPrev->SetFillColor(kBlue-10);
    butPrev->Draw();
 
-   fSurfSurfViewButton = new TButton("SURF View","MagicDisplay::Instance()->toggleSurfSurfView(1); MagicDisplay::Instance()->refreshSurfDisplay();",0,0.96,0.1,1);
+   fSurfSurfViewButton = new TButton("SURF View","MagicDisplay::Instance()->toggleSurfSurfView(1); MagicDisplay::Instance()->refreshSurfDisplay();",0,0.955,0.1,1);
    fSurfSurfViewButton->SetTextSize(0.4);
    fSurfSurfViewButton->SetFillColor(kGray+3);
    fSurfSurfViewButton->Draw();
 
 
-   fSurfPhiViewButton = new TButton("PHI View","MagicDisplay::Instance()->toggleSurfSurfView(0); MagicDisplay::Instance()->refreshSurfDisplay();",0,0.92,0.1,0.96);
+   fSurfPhiViewButton = new TButton("PHI View","MagicDisplay::Instance()->toggleSurfSurfView(0); MagicDisplay::Instance()->refreshSurfDisplay();",0,0.91,0.1,0.96);
    fSurfPhiViewButton->SetTextSize(0.4);
    fSurfPhiViewButton->SetFillColor(kGray);
    fSurfPhiViewButton->Draw();
 
+   fSurfAdcViewButton  = new TButton("ADC","MagicDisplay::Instance()->toggleSurfRfPowerView(0); MagicDisplay::Instance()->refreshSurfDisplay();",0.1,0.91,0.2,0.94);
+   fSurfAdcViewButton->SetTextSize(0.4);
+   fSurfAdcViewButton->SetFillColor(kGray);
+   fSurfAdcViewButton->Draw();
+
+   fSurfKelvinViewButton  = new TButton("Kelvin","MagicDisplay::Instance()->toggleSurfRfPowerView(1); MagicDisplay::Instance()->refreshSurfDisplay();",0.1,0.94,0.2,0.97);
+   fSurfKelvinViewButton->SetTextSize(0.4);
+   fSurfKelvinViewButton->SetFillColor(kGray+3);
+   fSurfKelvinViewButton->Draw();
+   
+   fSurfLogButton  = new TButton("Log Scale","MagicDisplay::Instance()->toggleSurfLogView(); MagicDisplay::Instance()->refreshSurfDisplay();",0.1,0.97,0.2,1);
+   fSurfLogButton->SetTextSize(0.4);
+   fSurfLogButton->SetFillColor(kGray);
+   fSurfLogButton->Draw();
+
+
 }
 
+
+void MagicDisplay::toggleSurfLogView()
+{
+  Int_t nextState=0;
+  if(fSurfLogButton->GetFillColor()==kGray) {
+    nextState=1;
+  }
+  else {
+    nextState=0;
+  }
+  std::cout << nextState << "\n";
+  if(nextState) {
+    fRFCanMaker->setSurfLogFlag(1);
+    fSurfLogButton->SetFillColor(kGray+3);
+    fSurfLogButton->Modified();
+  }
+  else {
+    fRFCanMaker->setSurfLogFlag(0);
+    fSurfLogButton->SetFillColor(kGray);
+    fSurfLogButton->Modified();
+  }
+   refreshSurfDisplay();
+}
 
 void MagicDisplay::toggleSurfSurfView(Int_t surfView)
 {
@@ -871,8 +910,32 @@ void MagicDisplay::toggleSurfSurfView(Int_t surfView)
       fSurfSurfViewButton->Modified();
       fSurfPhiViewButton->Modified();
    }
+ 
+}
+
+
+void MagicDisplay::toggleSurfRfPowerView(Int_t kelvinView)
+{
+   
+   if(kelvinView) {
+      //Turn on 
+      fRFCanMaker->fSurfKelvinView=1;
+      fSurfKelvinViewButton->SetFillColor(kGray+3);
+      fSurfAdcViewButton->SetFillColor(kGray);
+      fSurfKelvinViewButton->Modified();
+      fSurfAdcViewButton->Modified();
+   }
+   else {
+      //Turn phi view on
+      fRFCanMaker->fSurfKelvinView=0;
+      fSurfKelvinViewButton->SetFillColor(kGray);
+      fSurfAdcViewButton->SetFillColor(kGray+3);
+      fSurfKelvinViewButton->Modified();
+      fSurfAdcViewButton->Modified();
+   }
       
 }
+
 
 
 
@@ -987,19 +1050,61 @@ void MagicDisplay::drawAvgSurfButtons()
    butPrev->SetFillColor(kBlue-10);
    butPrev->Draw();
 
-   fAvgSurfSurfViewButton = new TButton("SURF View","MagicDisplay::Instance()->toggleAvgSurfSurfView(1); MagicDisplay::Instance()->refreshAvgSurfDisplay();",0,0.96,0.1,1);
+  
+
+   fAvgSurfAdcViewButton  = new TButton("ADC","MagicDisplay::Instance()->toggleAvgSurfRfPowerView(0); MagicDisplay::Instance()->refreshSurfDisplay();",0.1,0.91,0.2,0.94);
+   fAvgSurfAdcViewButton->SetTextSize(0.4);
+   fAvgSurfAdcViewButton->SetFillColor(kGray);
+   fAvgSurfAdcViewButton->Draw();
+
+   fAvgSurfKelvinViewButton  = new TButton("Kelvin","MagicDisplay::Instance()->toggleAvgSurfRfPowerView(1); MagicDisplay::Instance()->refreshSurfDisplay();",0.1,0.94,0.2,0.97);
+   fAvgSurfKelvinViewButton->SetTextSize(0.4);
+   fAvgSurfKelvinViewButton->SetFillColor(kGray+3);
+   fAvgSurfKelvinViewButton->Draw();
+   
+   fAvgSurfLogButton  = new TButton("Log Scale","MagicDisplay::Instance()->toggleAvgSurfLogView(); MagicDisplay::Instance()->refreshSurfDisplay();",0.1,0.97,0.2,1);
+   fAvgSurfLogButton->SetTextSize(0.4);
+   fAvgSurfLogButton->SetFillColor(kGray);
+   fAvgSurfLogButton->Draw();
+
+
+
+   fAvgSurfSurfViewButton = new TButton("SURF View","MagicDisplay::Instance()->toggleAvgSurfSurfView(1); MagicDisplay::Instance()->refreshAvgSurfDisplay();",0,0.955,0.1,1);
    fAvgSurfSurfViewButton->SetTextSize(0.4);
    fAvgSurfSurfViewButton->SetFillColor(kGray+3);
    fAvgSurfSurfViewButton->Draw();
 
 
-   fAvgSurfPhiViewButton = new TButton("PHI View","MagicDisplay::Instance()->toggleAvgSurfSurfView(0); MagicDisplay::Instance()->refreshAvgSurfDisplay();",0,0.92,0.1,0.96);
+   fAvgSurfPhiViewButton = new TButton("PHI View","MagicDisplay::Instance()->toggleAvgSurfSurfView(0); MagicDisplay::Instance()->refreshAvgSurfDisplay();",0,0.91,0.1,0.955);
    fAvgSurfPhiViewButton->SetTextSize(0.4);
    fAvgSurfPhiViewButton->SetFillColor(kGray);
    fAvgSurfPhiViewButton->Draw();
 
 }
 
+
+void MagicDisplay::toggleAvgSurfLogView()
+{
+  Int_t nextState=0;
+  if(fAvgSurfLogButton->GetFillColor()==kGray) {
+    nextState=1;
+  }
+  else {
+    nextState=0;
+  }
+  //  std::cout << nextState << "\n";
+  if(nextState) {
+    fRFCanMaker->setAvgSurfLogFlag(1);
+    fAvgSurfLogButton->SetFillColor(kGray+3);
+    fAvgSurfLogButton->Modified();
+  }
+  else {
+    fRFCanMaker->setAvgSurfLogFlag(0);
+    fAvgSurfLogButton->SetFillColor(kGray);
+    fAvgSurfLogButton->Modified();
+  }
+   refreshAvgSurfDisplay();
+}
 
 void MagicDisplay::toggleAvgSurfSurfView(Int_t surfView)
 {
@@ -1022,6 +1127,31 @@ void MagicDisplay::toggleAvgSurfSurfView(Int_t surfView)
    }
       
 }
+
+
+void MagicDisplay::toggleAvgSurfRfPowerView(Int_t kelvinView)
+{
+   
+   if(kelvinView) {
+      //Turn on 
+     //     std::cout << "setting fAvgSurfKelvinView " << 1 << "\n";
+      fRFCanMaker->fAvgSurfKelvinView=1;
+      fAvgSurfKelvinViewButton->SetFillColor(kGray+3);
+      fAvgSurfAdcViewButton->SetFillColor(kGray);
+      fAvgSurfKelvinViewButton->Modified();
+      fAvgSurfAdcViewButton->Modified();
+   }
+   else {
+      //Turn phi view on
+      fRFCanMaker->fAvgSurfKelvinView=0;
+      fAvgSurfKelvinViewButton->SetFillColor(kGray);
+      fAvgSurfAdcViewButton->SetFillColor(kGray+3);
+      fAvgSurfKelvinViewButton->Modified();
+      fAvgSurfAdcViewButton->Modified();
+   }
+      
+}
+
 
 int MagicDisplay::loadSumTurfTree()
 {

@@ -42,8 +42,10 @@ class AnitaRFCanvasMaker
   TPad *getAvgSurfHkCanvas(AveragedSurfHk *avgSurfPtr, TPad *useCan=0); ///<Returns the averaged SURF hk histogram canvas, the canvas can be provided in <i>useCan</i>
   TPad *getAvgSurfInfoCanvas(AveragedSurfHk *avgSurfPtr,TPad *useCan); ///<Returns the averaged SURF hk info canvas, the canvas can be provided in <i>useCan</i>
 
-  void setLogFlag(Int_t logFlag)
-     {fUseLog=logFlag;} ///< Log or linear scale?
+  void setSurfLogFlag(Int_t logFlag)
+     {fSurfUseLog=logFlag;} ///< Log or linear scale?
+  void setAvgSurfLogFlag(Int_t logFlag)
+     {fAvgSurfUseLog=logFlag;} ///< Log or linear scale?
 
   Int_t fTurfL1Max; ///< Maximum TURF L1
   Int_t fTurfL1Min; ///< Minimum TURF L1
@@ -57,13 +59,20 @@ class AnitaRFCanvasMaker
   Int_t fSumTurfL2Min; ///< Minimum summed TURF L2
   Int_t fSumTurfL3Max; ///< Maximum summed TURF L3
   Int_t fSumTurfL3Min; ///< Minimum summed TURF L3
-  Int_t fUseLog; ///< Log or linear?
+  Int_t fSurfUseLog; ///< Log or linear?
+  Int_t fAvgSurfUseLog; ///< Log or linear?
+
   Int_t fFixTurfYScale; ///< Fixed or autoscaling TURF
   Int_t fFixSurfYScale; ///< Fixed or autoscaling SURF
+
   Int_t fSurfPhiView; ///< Phi or SURF view
+  Int_t fSurfKelvinView; ///< ADC or Kelvin view
+
+  Int_t fFixSumTurfYScale; ///< Fixed or autoscaling summed TURF.
+
   Int_t fFixAvgSurfYScale; ///< Fixed or autoscaling averaged SURF
   Int_t fAvgSurfPhiView; ///< Phi or SURF view (for Averaged SURF hk)
-  Int_t fFixSumTurfYScale; ///< Fixed or autoscaling summed TURF.
+  Int_t fAvgSurfKelvinView; ///< ADC or Kelvin view
   
   
 
