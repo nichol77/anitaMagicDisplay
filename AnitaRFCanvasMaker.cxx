@@ -81,10 +81,13 @@ AnitaRFCanvasMaker::AnitaRFCanvasMaker()
   fSumTurfL2Min=0;
   fSumTurfL3Max=0;
   fSumTurfL3Min=0;
-  fUseLog=0;
+  fSurfUseLog=0;
+  fAvgSurfUseLog=0;
   fFixTurfYScale=0;
   fFixSurfYScale=0;
   fSurfPhiView=0;
+  fSurfKelvinView=1;
+  fAvgSurfPhiView=0;
   fgInstance=this;
   
 }
@@ -412,8 +415,14 @@ void AnitaRFCanvasMaker::getSurfHkSurfCanvas(SurfHk *surfPtr,TPad *plotPad) {
 	 
     }
     for(int chan=0;chan<RFCHAN_PER_SURF;chan++) {
-      histSurfHk[2][surf]->Fill(chan+surf*RFCHAN_PER_SURF,
-				surfPtr->rfPower[surf][chan]);
+      if(fSurfKelvinView) {
+	histSurfHk[2][surf]->Fill(chan+surf*RFCHAN_PER_SURF,
+				  surfPtr->getRFPowerInK(surf,chan));
+      }
+      else {
+	histSurfHk[2][surf]->Fill(chan+surf*RFCHAN_PER_SURF,
+				  surfPtr->rfPower[surf][chan]);
+      }
 
     }
     histSurfHk[0][surf]->SetFillColor(getNiceColour(surf%2));
@@ -464,12 +473,19 @@ void AnitaRFCanvasMaker::getSurfHkSurfCanvas(SurfHk *surfPtr,TPad *plotPad) {
       surfHkFramey[i]=paddy->DrawFrame(0,0,ACTIVE_SURFS*RFCHAN_PER_SURF,maxVal*1.05);
     }
 
+
     if(i==0)
       surfHkFramey[i]->GetYaxis()->SetTitle("Rate (kHz)");
     if(i==1)
       surfHkFramey[i]->GetYaxis()->SetTitle("Threshold (DAC)");
-    if(i==2)
-      surfHkFramey[i]->GetYaxis()->SetTitle("RF Power (ADC)");
+    if(i==2) {
+      if(fSurfKelvinView) {
+	surfHkFramey[i]->GetYaxis()->SetTitle("RF Power (K)");
+      }
+      else {
+	surfHkFramey[i]->GetYaxis()->SetTitle("RF Power (ADC)");
+      }
+    }
     surfHkFramey[i]->GetXaxis()->SetTitle("Logical Channel");
     surfHkFramey[i]->GetYaxis()->SetNoExponent(1);
     surfHkFramey[i]->GetXaxis()->SetLabelSize(0.08);
@@ -488,6 +504,12 @@ void AnitaRFCanvasMaker::getSurfHkSurfCanvas(SurfHk *surfPtr,TPad *plotPad) {
       if(!fFixSurfYScale) {
 	surfHkFramey[i]->GetYaxis()->SetRangeUser(0,maxVal*1.05);
       }
+      gPad->SetLogy(0);
+      if(fSurfUseLog) {
+	surfHkFramey[i]->GetYaxis()->SetRangeUser(0.1,maxVal*2);
+	gPad->SetLogy(1);
+      }
+      
     }
     for(int surf=0;surf<ACTIVE_SURFS;surf++) {
       histSurfHk[i][surf]->Draw("same");
@@ -514,7 +536,7 @@ void AnitaRFCanvasMaker::getSurfHkPhiCanvas(SurfHk *surfPtr,TPad *plotPad) {
   if(!fARFCGeomTool)
     fARFCGeomTool=AnitaGeomTool::Instance();
   char actualName[180];
-  char *histNames[3]={"histScaler","histThreshold","histRFPower"};
+  char *histNames[3]={"histScalerPhi","histThresholdPhi","histRFPowerPhi"};
   char *histTitles[3]={"Scaler","Threshold","RF Power"};
 
   if(histBadThreshold)
@@ -592,8 +614,15 @@ void AnitaRFCanvasMaker::getSurfHkPhiCanvas(SurfHk *surfPtr,TPad *plotPad) {
 	  fARFCGeomTool->getChanIndexFromRingPhiPol((AnitaRing::AnitaRing_t)ring,phi,(AnitaPol::AnitaPol_t)pol);
 	fARFCGeomTool->getSurfChanFromChanIndex(chanIndex,surf,rfChan);
 	Int_t index=pol + 2 *phi + 32*ring;
-	histSurfHkPhi[2][phi]->Fill(index,
-				 surfPtr->rfPower[surf][rfChan]);
+
+	if(fSurfKelvinView) {
+	  histSurfHkPhi[2][surf]->Fill(index,
+				    surfPtr->getRFPowerInK(surf,rfChan));
+	}
+	else {
+	  histSurfHkPhi[2][surf]->Fill(index,
+				    surfPtr->rfPower[surf][rfChan]);
+	}
 	 
       }
     }
@@ -645,13 +674,20 @@ void AnitaRFCanvasMaker::getSurfHkPhiCanvas(SurfHk *surfPtr,TPad *plotPad) {
       else {
 	surfHkFramey[i]=paddy->DrawFrame(0,0,3*PHI_SECTORS*2,maxVal*1.05);
       }
+
       
       if(i==0)
 	surfHkFramey[i]->GetYaxis()->SetTitle("Rate (kHz)");
       if(i==1)
 	surfHkFramey[i]->GetYaxis()->SetTitle("Threshold (DAC)");
-      if(i==2)
-	surfHkFramey[i]->GetYaxis()->SetTitle("RF Power (ADC)");
+      if(i==2) {
+	if(fSurfKelvinView) {
+	  surfHkFramey[i]->GetYaxis()->SetTitle("RF Power (K)");
+	}
+	else {
+	  surfHkFramey[i]->GetYaxis()->SetTitle("RF Power (ADC)");
+	}
+      }
       surfHkFramey[i]->GetXaxis()->SetTitle("Phi Sector");
       if(i<2) {
 	//      surfHkFramey[i]->GetXaxis()->SetNdivisions(-16);
@@ -695,6 +731,11 @@ void AnitaRFCanvasMaker::getSurfHkPhiCanvas(SurfHk *surfPtr,TPad *plotPad) {
     else {
       if(!fFixSurfYScale) {
 	surfHkFramey[i]->GetYaxis()->SetRangeUser(0,maxVal*1.05);
+      }      
+      gPad->SetLogy(0);
+      if(fSurfUseLog) {
+	surfHkFramey[i]->GetYaxis()->SetRangeUser(0.1,maxVal*2);
+	gPad->SetLogy(1);
       }
     }
     for(int phi=0;phi<PHI_SECTORS;phi++) {
@@ -712,7 +753,7 @@ void AnitaRFCanvasMaker::getSurfHkPhiCanvas(SurfHk *surfPtr,TPad *plotPad) {
       histBandMask->Draw("same");
     }
   }
-   
+  
 
    
 
@@ -732,8 +773,9 @@ TPad *AnitaRFCanvasMaker::getSurfInfoCanvas(SurfHk *surfPtr,TPad *useCan)
   } 
   topPad->Clear();
   topPad->SetTopMargin(0.05);
-  topPad->cd();
-  TPaveText *leftPave = new TPaveText(0.05,0,0.5,0.9);
+  topPad->Divide(2,1);
+  topPad->cd(1);
+  TPaveText *leftPave = new TPaveText(0.05,0,0.95,0.9);
   leftPave->SetBorderSize(0);
   leftPave->SetFillColor(0);
   leftPave->SetTextAlign(13);
@@ -749,8 +791,8 @@ TPad *AnitaRFCanvasMaker::getSurfInfoCanvas(SurfHk *surfPtr,TPad *useCan)
   msText->SetTextColor(1);
   leftPave->Draw();
 
-
-  TPaveText *rightPave = new TPaveText(0.55,0,0.9,0.9);
+  topPad->cd(2);
+  TPaveText *rightPave = new TPaveText(0.05,0,0.95,0.9);
   rightPave->SetBorderSize(0);
   rightPave->SetFillColor(0);
   rightPave->SetTextAlign(13);
@@ -1088,6 +1130,7 @@ void AnitaRFCanvasMaker::getAvgSurfHkSurfCanvas(AveragedSurfHk *avgSurfPtr,TPad 
 	error1=avgSurfPtr->rmsScaler[surf][scl];///sqrt(avgSurfPtr->numHks);
 	error2=avgSurfPtr->rmsThresh[surf][scl];///sqrt(avgSurfPtr->numHks);
       }
+      //      std::cout << error1 << "\t" << error2 << "\n";
       histAvgSurfHk[0][surf]->SetBinError(1+scl+surf*SCALERS_PER_SURF,
 					     error1);
       histAvgSurfHk[1][surf]->Fill(scl+surf*SCALERS_PER_SURF,
@@ -1105,14 +1148,27 @@ void AnitaRFCanvasMaker::getAvgSurfHkSurfCanvas(AveragedSurfHk *avgSurfPtr,TPad 
     for(int chan=0;chan<RFCHAN_PER_SURF;chan++) {
       Float_t error=0;
       if(avgSurfPtr->numHks>0) {
-	error=avgSurfPtr->rmsRFPower[surf][chan];///sqrt(avgSurfPtr->numHks);
+	if(fAvgSurfKelvinView) {
+	  error=avgSurfPtr->getRMSRFPowerInK(surf,chan);///sqrt(avgSurfPtr->numHks);
+	}
+	else {
+	  error=avgSurfPtr->rmsRFPower[surf][chan];///sqrt(avgSurfPtr->numHks);
+	}
       }
-      histAvgSurfHk[2][surf]->Fill(chan+surf*RFCHAN_PER_SURF,
-				      avgSurfPtr->avgRFPower[surf][chan]);
+      if(fAvgSurfKelvinView) {
+	histAvgSurfHk[2][surf]->Fill(chan+surf*RFCHAN_PER_SURF,
+				     avgSurfPtr->getRFPowerInK(surf,chan));
+	if(maxVals[2]<avgSurfPtr->getRFPowerInK(surf,chan)+error)
+	  maxVals[2]=avgSurfPtr->getRFPowerInK(surf,chan)+error;
+      }
+      else {
+	histAvgSurfHk[2][surf]->Fill(chan+surf*RFCHAN_PER_SURF,
+				     avgSurfPtr->avgRFPower[surf][chan]);
+	if(maxVals[2]<avgSurfPtr->avgRFPower[surf][chan]+error)
+	  maxVals[2]=avgSurfPtr->avgRFPower[surf][chan]+error;
+      }
       histAvgSurfHk[2][surf]->SetBinError(1+chan+surf*RFCHAN_PER_SURF,
 					     error);      
-      if(maxVals[2]<avgSurfPtr->avgRFPower[surf][chan]+error)
-	maxVals[2]=avgSurfPtr->avgRFPower[surf][chan]+error;
     }
     histAvgSurfHk[0][surf]->SetFillColor(getNiceColour(surf%2));
     histAvgSurfHk[1][surf]->SetFillColor(getNiceColour(surf%2));
@@ -1164,12 +1220,21 @@ void AnitaRFCanvasMaker::getAvgSurfHkSurfCanvas(AveragedSurfHk *avgSurfPtr,TPad 
       avgSurfHkFramey[i]=paddy->DrawFrame(0,0,ACTIVE_SURFS*RFCHAN_PER_SURF,maxVal*1.05);
     }
 
+
+  
+
     if(i==0)
       avgSurfHkFramey[i]->GetYaxis()->SetTitle("Rate (kHz)");
     if(i==1)
       avgSurfHkFramey[i]->GetYaxis()->SetTitle("Threshold (DAC)");
-    if(i==2)
-      avgSurfHkFramey[i]->GetYaxis()->SetTitle("RF Power (ADC)");
+    if(i==2) {
+      if(fAvgSurfKelvinView) {
+	avgSurfHkFramey[i]->GetYaxis()->SetTitle("RF Power (K)");
+      }
+      else {
+	avgSurfHkFramey[i]->GetYaxis()->SetTitle("RF Power (ADC)");
+      }
+    }
     avgSurfHkFramey[i]->GetXaxis()->SetTitle("Logical Channel");
     avgSurfHkFramey[i]->GetYaxis()->SetNoExponent(1);
     avgSurfHkFramey[i]->GetXaxis()->SetLabelSize(0.08);
@@ -1188,11 +1253,15 @@ void AnitaRFCanvasMaker::getAvgSurfHkSurfCanvas(AveragedSurfHk *avgSurfPtr,TPad 
       if(!fFixAvgSurfYScale) {
 	avgSurfHkFramey[i]->GetYaxis()->SetRangeUser(0,maxVal*1.05);
       }
+      gPad->SetLogy(0);
+      if(fAvgSurfUseLog) {
+	avgSurfHkFramey[i]->GetYaxis()->SetRangeUser(0.1,maxVal*2);
+	gPad->SetLogy(1);
+      }
     }
     for(int surf=0;surf<ACTIVE_SURFS;surf++) {
       histAvgSurfHk[i][surf]->SetMarkerStyle(0);
-
-      histAvgSurfHk[i][surf]->Draw("same bar");
+      histAvgSurfHk[i][surf]->Draw("same bar e1");
     }
     if(i==0) {
       maxVal*=1.1;
@@ -1216,7 +1285,7 @@ void AnitaRFCanvasMaker::getAvgSurfHkPhiCanvas(AveragedSurfHk *avgSurfPtr,TPad *
   if(!fARFCGeomTool)
     fARFCGeomTool=AnitaGeomTool::Instance();
   char actualName[180];
-  char *histNames[3]={"histAvgScaler","histAvgThreshold","histAvgRFPower"};
+  char *histNames[3]={"histAvgScalerPhi","histAvgThresholdPhi","histAvgRFPowerPhi"};
   char *histTitles[3]={"Scaler","Threshold","RF Power"};
 
   if(histAvgSurfBadThreshold)
@@ -1261,6 +1330,7 @@ void AnitaRFCanvasMaker::getAvgSurfHkPhiCanvas(AveragedSurfHk *avgSurfPtr,TPad *
     }
   }
 
+  Float_t maxVals[3]={0};
    
   for(int ring=0;ring<3;ring++) {
     for(int phi=0;phi<PHI_SECTORS;phi++) {     
@@ -1276,9 +1346,18 @@ void AnitaRFCanvasMaker::getAvgSurfHkPhiCanvas(AveragedSurfHk *avgSurfPtr,TPad *
 	  avgSurfPtr->isBandMasked(phi,(AnitaRing::AnitaRing_t)ring,(AnitaBand::AnitaBand_t)band);
 	 
 	histAvgSurfHkPhi[0][phi]->Fill(index,avgSurfPtr->getScaler(phi,(AnitaRing::AnitaRing_t)ring,(AnitaBand::AnitaBand_t)band));
+	histAvgSurfHkPhi[0][phi]->SetBinError(index+1,avgSurfPtr->getScalerRMS(phi,(AnitaRing::AnitaRing_t)ring,(AnitaBand::AnitaBand_t)band));
 	 
+	if(avgSurfPtr->getScaler(phi,(AnitaRing::AnitaRing_t)ring,(AnitaBand::AnitaBand_t)band)>maxVals[0])
+	  maxVals[0]=avgSurfPtr->getScaler(phi,(AnitaRing::AnitaRing_t)ring,(AnitaBand::AnitaBand_t)band);
+
 	histAvgSurfHkPhi[1][phi]->Fill(index,avgSurfPtr->getThreshold(phi,(AnitaRing::AnitaRing_t)ring,(AnitaBand::AnitaBand_t)band));
-	 
+	histAvgSurfHkPhi[1][phi]->SetBinError(index+1,avgSurfPtr->getThresholdRMS(phi,(AnitaRing::AnitaRing_t)ring,(AnitaBand::AnitaBand_t)band));
+	
+
+	if(avgSurfPtr->getThreshold(phi,(AnitaRing::AnitaRing_t)ring,(AnitaBand::AnitaBand_t)band)>maxVals[1])
+	  maxVals[1]=avgSurfPtr->getThreshold(phi,(AnitaRing::AnitaRing_t)ring,(AnitaBand::AnitaBand_t)band);
+	
 	 
       }
        
@@ -1290,9 +1369,34 @@ void AnitaRFCanvasMaker::getAvgSurfHkPhiCanvas(AveragedSurfHk *avgSurfPtr,TPad *
 	  fARFCGeomTool->getChanIndexFromRingPhiPol((AnitaRing::AnitaRing_t)ring,phi,(AnitaPol::AnitaPol_t)pol);
 	fARFCGeomTool->getSurfChanFromChanIndex(chanIndex,surf,rfChan);
 	Int_t index=pol + 2 *phi + 32*ring;
-	histAvgSurfHkPhi[2][phi]->Fill(index,
-				 avgSurfPtr->avgRFPower[surf][rfChan]);
+
+	Float_t error=0;
+	if(avgSurfPtr->numHks>0) {
+	  if(fAvgSurfKelvinView) {
+	    error=avgSurfPtr->getRMSRFPowerInK(surf,rfChan);///sqrt(avgSurfPtr->numHks);
+	  }
+	  else {
+	    error=avgSurfPtr->rmsRFPower[surf][rfChan];///sqrt(avgSurfPtr->numHks);
+	  }
+	}
+	if(fAvgSurfKelvinView) {
+	  histAvgSurfHkPhi[2][phi]->Fill(index,
+					 avgSurfPtr->getRFPowerInK(surf,rfChan));
+	  if(maxVals[2]<avgSurfPtr->getRFPowerInK(surf,rfChan)+error)
+	    maxVals[2]=avgSurfPtr->getRFPowerInK(surf,rfChan)+error;
+	}
+	else {
+	  histAvgSurfHkPhi[2][phi]->Fill(index,
+					 avgSurfPtr->avgRFPower[surf][rfChan]);
+	  if(maxVals[2]<avgSurfPtr->avgRFPower[surf][rfChan]+error)
+	    maxVals[2]=avgSurfPtr->avgRFPower[surf][rfChan]+error;
+	}
+	histAvgSurfHkPhi[2][phi]->SetBinError(index+1,
+					       error);  	
+	//	histAvgSurfHkPhi[2][phi]->Fill(index,
+	//				 avgSurfPtr->avgRFPower[surf][rfChan]);
 	 
+	
       }
     }
   }
@@ -1328,7 +1432,8 @@ void AnitaRFCanvasMaker::getAvgSurfHkPhiCanvas(AveragedSurfHk *avgSurfPtr,TPad *
 
   char label[10];
   for(int i=0;i<3;i++) {
-    Double_t maxVal=histAvgSurfHkPhiStack[i]->GetMaximum("nostack");
+    //    Double_t maxVal=histAvgSurfHkPhiStack[i]->GetMaximum("nostack");
+    Double_t maxVal=maxVals[i];
     TPad* paddy = (TPad*)plotPad->cd(i+1);      
     if(!avgSurfHkFramey[i]) {      
       paddy->SetBottomMargin(0.15);
@@ -1344,12 +1449,22 @@ void AnitaRFCanvasMaker::getAvgSurfHkPhiCanvas(AveragedSurfHk *avgSurfPtr,TPad *
 	avgSurfHkFramey[i]=paddy->DrawFrame(0,0,3*PHI_SECTORS*2,maxVal*1.05);
       }
       
+
+      
+
       if(i==0)
 	avgSurfHkFramey[i]->GetYaxis()->SetTitle("Rate (kHz)");
       if(i==1)
 	avgSurfHkFramey[i]->GetYaxis()->SetTitle("Threshold (DAC)");
-      if(i==2)
-	avgSurfHkFramey[i]->GetYaxis()->SetTitle("RF Power (ADC)");
+      if(i==2) {
+	if(fAvgSurfKelvinView) {
+	  avgSurfHkFramey[i]->GetYaxis()->SetTitle("RF Power (K)");
+	}
+	else {
+	  avgSurfHkFramey[i]->GetYaxis()->SetTitle("RF Power (ADC)");
+	}
+      }
+    
       avgSurfHkFramey[i]->GetXaxis()->SetTitle("Phi Sector");
       if(i<2) {
 	//      avgSurfHkFramey[i]->GetXaxis()->SetNdivisions(-16);
@@ -1394,9 +1509,15 @@ void AnitaRFCanvasMaker::getAvgSurfHkPhiCanvas(AveragedSurfHk *avgSurfPtr,TPad *
       if(!fFixAvgSurfYScale) {
 	avgSurfHkFramey[i]->GetYaxis()->SetRangeUser(0,maxVal*1.05);
       }
+      gPad->SetLogy(0);
+      if(fAvgSurfUseLog) {
+	avgSurfHkFramey[i]->GetYaxis()->SetRangeUser(0.1,maxVal*2);
+	gPad->SetLogy(1);
+      }
     }
     for(int phi=0;phi<PHI_SECTORS;phi++) {
-      histAvgSurfHkPhi[i][phi]->Draw("same");
+      histAvgSurfHkPhi[i][phi]->SetMarkerStyle(0);
+      histAvgSurfHkPhi[i][phi]->Draw("same bar e1");
     }
     if(i==0) {
       maxVal*=1.1;
@@ -1430,8 +1551,9 @@ TPad *AnitaRFCanvasMaker::getAvgSurfInfoCanvas(AveragedSurfHk *avgSurfPtr,TPad *
   } 
   topPad->Clear();
   topPad->SetTopMargin(0.05);
-  topPad->cd();
-  TPaveText *leftPave = new TPaveText(0.05,0,0.5,0.9);
+  topPad->Divide(2,1);
+  topPad->cd(1);
+  TPaveText *leftPave = new TPaveText(0.05,0,0.95,0.9);
   leftPave->SetBorderSize(0);
   leftPave->SetFillColor(0);
   leftPave->SetTextAlign(13);
@@ -1448,8 +1570,8 @@ TPad *AnitaRFCanvasMaker::getAvgSurfInfoCanvas(AveragedSurfHk *avgSurfPtr,TPad *
   leftPave->AddText(textLabel);
   leftPave->Draw();
 
-
-  TPaveText *rightPave = new TPaveText(0.55,0,0.9,0.9);
+  topPad->cd(2);
+  TPaveText *rightPave = new TPaveText(0.05,0,0.95,0.9);
   rightPave->SetBorderSize(0);
   rightPave->SetFillColor(0);
   rightPave->SetTextAlign(13);
