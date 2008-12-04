@@ -933,7 +933,7 @@ TPad *AnitaRFCanvasMaker::getSumTurfRateCanvas(SummedTurfRate *sumTurfPtr, TPad 
   for(int ring=0;ring<2;ring++) {
     for(int phi=0;phi<PHI_SECTORS;phi++) {
       if(maskedAnts[ring][phi]) {
-	std::cout << ring << "\t" << phi << "\t" << maskedAnts[ring][phi] << std::endl;
+	//	std::cout << ring << "\t" << phi << "\t" << maskedAnts[ring][phi] << std::endl;
 	histSumAntMask[ring]->Fill(phi+1,l1Max);
       }
     }    
