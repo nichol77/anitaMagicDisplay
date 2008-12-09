@@ -21,11 +21,11 @@ void runMagicDisplay() {
 void runMagicDisplayRun(int run) {
   MagicDisplay *magicPtr = new MagicDisplay("/TBdata/anita/antarctica08/root/",run,WaveCalType::kVTLabAG);
 
-  //  magicPtr->startSurfDisplay();
+  magicPtr->startSurfDisplay();
   //  magicPtr->startAvgSurfDisplay();
   //   magicPtr->startTurfDisplay();
   //  magicPtr->startSumTurfDisplay();
-  magicPtr->startEventDisplay();
+  //  magicPtr->startEventDisplay();
   //  magicPtr->startControlPanel();
 
 }

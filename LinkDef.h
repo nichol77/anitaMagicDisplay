@@ -5,6 +5,7 @@
 #pragma link off all functions;
 
 #pragma link C++ class AnitaCanvasMaker+;
+#pragma link C++ class AnitaRFCanvasMaker+;
 #pragma link C++ class WaveformGraph+;
 #pragma link C++ class FFTGraph+;
 #pragma link C++ class MagicDisplay+;
@@ -22,6 +23,11 @@
 #pragma link C++ namespace     MagicDisplayFormatOption;
 #pragma link C++ enum          MagicDisplayFormatOption::EMagicDisplayFormatOption;
 #pragma link C++ nestedtypedef MagicDisplayFormatOption::MagicDisplayFormatOption_t;
+
+
+#pragma link C++ namespace     MagicDisplaySurfHkDisplay;
+#pragma link C++ enum          MagicDisplaySurfHkDisplay::EMagicDisplaySurfHkDisplay;
+#pragma link C++ nestedtypedef MagicDisplaySurfHkDisplay::MagicDisplaySurfHkDisplay_t;
 
 #endif
 
