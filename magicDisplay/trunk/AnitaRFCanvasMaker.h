@@ -16,6 +16,7 @@
 #include <TVector3.h>
 
 #include "AnitaConventions.h"
+#include "MagicDisplayConventions.h"
 
 class SurfHk;
 class AveragedSurfHk;
