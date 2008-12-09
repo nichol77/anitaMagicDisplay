@@ -93,7 +93,7 @@ AnitaRFCanvasMaker::AnitaRFCanvasMaker()
   fFixTurfYScale=0;
   fFixSurfYScale=0;
   fSurfKelvinView=1;
-  fAvgSurfPhiView=0;
+  fAvgSurfKelvinView=1;
   fNumSurfHks=0;
   fgInstance=this;
   
@@ -316,6 +316,7 @@ TPad *AnitaRFCanvasMaker::getTurfInfoCanvas(TurfRate *turfPtr,TPad *useCan)
 TPad *AnitaRFCanvasMaker::getSurfHkCanvas(SurfHk *surfPtr, TPad *useCan)
 {
   static MagicDisplaySurfHkDisplay::MagicDisplaySurfHkDisplay_t lastView=MagicDisplaySurfHkDisplay::kNotAView;
+  static int lastKelvinView=1;
   gStyle->SetOptTitle(0);
   TPad *canSurfHk;
   TPad *plotPad;
@@ -335,13 +336,14 @@ TPad *AnitaRFCanvasMaker::getSurfHkCanvas(SurfHk *surfPtr, TPad *useCan)
   plotPad->cd();
   //  std::cout << fSurfPhiView << "\t" << lastView << std::endl;
   static int callCounter=0;
-  if(fSurfDisplay!=lastView) {
+  if(fSurfDisplay!=lastView  || lastKelvinView!=fSurfKelvinView) {
     plotPad->Clear();
     surfHkFramey[0]=0;
     surfHkFramey[1]=0;
     surfHkFramey[2]=0;    
   }
   lastView=fSurfDisplay;
+  lastKelvinView=fSurfKelvinView;
   callCounter++;
 
   addToTimePlots(surfPtr);
@@ -1160,7 +1162,8 @@ TPad *AnitaRFCanvasMaker::getSumTurfInfoCanvas(SummedTurfRate *sumTurfPtr,TPad *
 
 TPad *AnitaRFCanvasMaker::getAvgSurfHkCanvas(AveragedSurfHk *avgSurfPtr, TPad *useCan)
 {
-  static int lastView=0;
+  static MagicDisplaySurfHkDisplay::MagicDisplaySurfHkDisplay_t lastView=MagicDisplaySurfHkDisplay::kNotAView;
+  static int lastKelvinView=1;
   gStyle->SetOptTitle(0);
   TPad *canAvgSurfHk;
   TPad *plotPad;
@@ -1179,17 +1182,19 @@ TPad *AnitaRFCanvasMaker::getAvgSurfHkCanvas(AveragedSurfHk *avgSurfPtr, TPad *u
   }
   plotPad->cd();
   //  std::cout << fAvgSurfPhiView << "\t" << lastView << std::endl;
-  if(fAvgSurfPhiView!=lastView) {
+  if(fAvgSurfDisplay!=lastView || lastKelvinView!=fAvgSurfKelvinView) {
     plotPad->Clear();
     avgSurfHkFramey[0]=0;
     avgSurfHkFramey[1]=0;
     avgSurfHkFramey[2]=0;    
-    lastView=fAvgSurfPhiView;
   }
+  lastView=fAvgSurfDisplay;
+  lastKelvinView=fAvgSurfKelvinView;
+
     
-  if(fAvgSurfPhiView)
+  if(fAvgSurfDisplay==MagicDisplaySurfHkDisplay::kPhiView)
     getAvgSurfHkPhiCanvas(avgSurfPtr,plotPad);
-  else 
+  else if(fAvgSurfDisplay==MagicDisplaySurfHkDisplay::kSurfView)
     getAvgSurfHkSurfCanvas(avgSurfPtr,plotPad);
   if(useCan)
     return plotPad;

@@ -1069,41 +1069,49 @@ void MagicDisplay::refreshAvgSurfDisplay()
 
 void MagicDisplay::drawAvgSurfButtons()
 {
-   TButton *butNext = new TButton("Next AvgSurfHk","MagicDisplay::Instance()->displayNextAvgSurf();",0.85,0.95,1,1);
+   TButton *butNext = new TButton("Next.","MagicDisplay::Instance()->displayNextAvgSurf();",0.9,0.95,1,1);
    butNext->SetTextSize(0.4);
    butNext->SetFillColor(kGreen-10);
    butNext->Draw();
-   TButton *butPrev = new TButton("Prev. AvgSurfHk","MagicDisplay::Instance()->displayPreviousAvgSurf();",0.85,0.90,1,0.95);
+   TButton *butPrev = new TButton("Prev.","MagicDisplay::Instance()->displayPreviousAvgSurf();",0.9,0.90,1,0.95);
    butPrev->SetTextSize(0.4);
    butPrev->SetFillColor(kBlue-10);
    butPrev->Draw();
+   TButton *butPlay = new TButton("Play","MagicDisplay::Instance()->startAvgSurfHkPlaying();",0.85,0.95,0.9,1);
+   butPlay->SetTextSize(0.4);
+   butPlay->SetFillColor(kGreen-10);
+   butPlay->Draw();
+   TButton *butStop = new TButton("Stop","MagicDisplay::Instance()->stopAvgSurfHkPlaying();",0.85,0.90,0.9,0.95);
+   butStop->SetTextSize(0.4);
+   butStop->SetFillColor(kRed-10);
+   butStop->Draw();
 
   
 
-   fAvgSurfAdcViewButton  = new TButton("ADC","MagicDisplay::Instance()->toggleAvgSurfRfPowerView(0); MagicDisplay::Instance()->refreshSurfDisplay();",0.1,0.91,0.2,0.94);
+   fAvgSurfAdcViewButton  = new TButton("ADC","MagicDisplay::Instance()->toggleAvgSurfRfPowerView(0); MagicDisplay::Instance()->refreshAvgSurfDisplay();",0.1,0.91,0.2,0.94);
    fAvgSurfAdcViewButton->SetTextSize(0.4);
    fAvgSurfAdcViewButton->SetFillColor(kGray);
    fAvgSurfAdcViewButton->Draw();
 
-   fAvgSurfKelvinViewButton  = new TButton("Kelvin","MagicDisplay::Instance()->toggleAvgSurfRfPowerView(1); MagicDisplay::Instance()->refreshSurfDisplay();",0.1,0.94,0.2,0.97);
+   fAvgSurfKelvinViewButton  = new TButton("Kelvin","MagicDisplay::Instance()->toggleAvgSurfRfPowerView(1); MagicDisplay::Instance()->refreshAvgSurfDisplay();",0.1,0.94,0.2,0.97);
    fAvgSurfKelvinViewButton->SetTextSize(0.4);
    fAvgSurfKelvinViewButton->SetFillColor(kGray+3);
    fAvgSurfKelvinViewButton->Draw();
    
-   fAvgSurfLogButton  = new TButton("Log Scale","MagicDisplay::Instance()->toggleAvgSurfLogView(); MagicDisplay::Instance()->refreshSurfDisplay();",0.1,0.97,0.2,1);
+   fAvgSurfLogButton  = new TButton("Log Scale","MagicDisplay::Instance()->toggleAvgSurfLogView(); MagicDisplay::Instance()->refreshAvgSurfDisplay();",0.1,0.97,0.2,1);
    fAvgSurfLogButton->SetTextSize(0.4);
    fAvgSurfLogButton->SetFillColor(kGray);
    fAvgSurfLogButton->Draw();
 
 
 
-   fAvgSurfSurfViewButton = new TButton("SURF View","MagicDisplay::Instance()->toggleAvgSurfSurfView(1); MagicDisplay::Instance()->refreshAvgSurfDisplay();",0,0.955,0.1,1);
+   fAvgSurfSurfViewButton = new TButton("SURF View","MagicDisplay::Instance()->setAvgSurfHkDisplay(MagicDisplaySurfHkDisplay::kSurfView); MagicDisplay::Instance()->refreshAvgSurfDisplay();",0,0.955,0.1,1);
    fAvgSurfSurfViewButton->SetTextSize(0.4);
    fAvgSurfSurfViewButton->SetFillColor(kGray+3);
    fAvgSurfSurfViewButton->Draw();
 
 
-   fAvgSurfPhiViewButton = new TButton("PHI View","MagicDisplay::Instance()->toggleAvgSurfSurfView(0); MagicDisplay::Instance()->refreshAvgSurfDisplay();",0,0.91,0.1,0.955);
+   fAvgSurfPhiViewButton = new TButton("PHI View","MagicDisplay::Instance()->setAvgSurfHkDisplay(MagicDisplaySurfHkDisplay::kPhiView); MagicDisplay::Instance()->refreshAvgSurfDisplay();",0,0.91,0.1,0.955);
    fAvgSurfPhiViewButton->SetTextSize(0.4);
    fAvgSurfPhiViewButton->SetFillColor(kGray);
    fAvgSurfPhiViewButton->Draw();
@@ -1134,20 +1142,20 @@ void MagicDisplay::toggleAvgSurfLogView()
    refreshAvgSurfDisplay();
 }
 
-void MagicDisplay::toggleAvgSurfSurfView(Int_t surfView)
+void MagicDisplay::setAvgSurfHkDisplay(MagicDisplaySurfHkDisplay::MagicDisplaySurfHkDisplay_t surfDisplay)
 {
-   
-   if(surfView) {
+  
+  fRFCanMaker->setAvgSurfHkDisplay(surfDisplay);
+ 
+  if(surfDisplay==MagicDisplaySurfHkDisplay::kSurfView) {
       //Turn on phi view off
-      fRFCanMaker->fAvgSurfPhiView=0;
       fAvgSurfSurfViewButton->SetFillColor(kGray+3);
       fAvgSurfPhiViewButton->SetFillColor(kGray);
       fAvgSurfSurfViewButton->Modified();
       fAvgSurfPhiViewButton->Modified();
    }
-   else {
+  else if(surfDisplay==MagicDisplaySurfHkDisplay::kPhiView) {
       //Turn phi view on
-      fRFCanMaker->fAvgSurfPhiView=1;
       fAvgSurfSurfViewButton->SetFillColor(kGray);
       fAvgSurfPhiViewButton->SetFillColor(kGray+3);
       fAvgSurfSurfViewButton->Modified();
@@ -1335,6 +1343,24 @@ void MagicDisplay::startSurfHkPlaying()
 void MagicDisplay::stopSurfHkPlaying()
 {
   fInSurfPlayMode=0;
+}
+
+
+void MagicDisplay::startAvgSurfHkPlaying()
+{
+  fInAvgSurfPlayMode=1;
+  do {
+    gSystem->ProcessEvents();
+    if(!fInAvgSurfPlayMode) break;
+    if(fEventPlaySleepMs>0)
+      gSystem->Sleep(fEventPlaySleepMs);
+  }
+  while(this->displayNextAvgSurf()==0);  
+}
+
+void MagicDisplay::stopAvgSurfHkPlaying()
+{
+  fInAvgSurfPlayMode=0;
 }
 
 
