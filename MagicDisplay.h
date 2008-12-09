@@ -123,9 +123,11 @@ class MagicDisplay
   void refreshAvgSurfDisplay(); ///< Refreshes the averaged SURF hk display.
   int getAvgSurfEntry(); ///< Attempts to load get the entry corresponding to <i>fAvgSurfHkEntry</i>.
   void drawAvgSurfButtons(); ///< Draws the buttons on the averaged SURF hk display.
-  void toggleAvgSurfSurfView(Int_t surfView); ///< Toggles between surf and phi views.
   void toggleAvgSurfRfPowerView(Int_t kelvinView); ///< Toggles betweem adc and Kelvin views.
   void toggleAvgSurfLogView(); ///<Toggles between log and linear
+  void setAvgSurfHkDisplay(MagicDisplaySurfHkDisplay::MagicDisplaySurfHkDisplay_t surfDisplay); ///< Toggles between surf and phi views.
+  void startAvgSurfHkPlaying(); ///< Starts Average SURF Hk Play mode
+  void stopAvgSurfHkPlaying(); ///< Stops Average SURF Hk Play mode
 
 
   int loadSumTurfTree(); ///< Opens the summed TURF rate file for the current run.
@@ -242,6 +244,7 @@ class MagicDisplay
    Int_t fInEventPlayMode; ///< Flag that indicates playback mode
    Int_t fEventPlaySleepMs; ///< Length of sleep between events in playback mode.
    Int_t fInSurfPlayMode; ///< Flag that indicates surfhk play mode
+   Int_t fInAvgSurfPlayMode; ///< Flag that indicates surfhk play mode
 
    WaveCalType::WaveCalType_t fCalType; ///< The waveform calibration type.
 

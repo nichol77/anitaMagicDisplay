@@ -53,6 +53,8 @@ class AnitaRFCanvasMaker
      {fAvgSurfUseLog=logFlag;} ///< Log or linear scale?
   
   void setSurfHkDisplay(MagicDisplaySurfHkDisplay::MagicDisplaySurfHkDisplay_t surfOpt) {fSurfDisplay=surfOpt;} ///<Phi, surf or time
+  void setAvgSurfHkDisplay(MagicDisplaySurfHkDisplay::MagicDisplaySurfHkDisplay_t surfOpt) {fAvgSurfDisplay=surfOpt;} ///<Phi, surf or time
+
 
   Int_t fTurfL1Max; ///< Maximum TURF L1
   Int_t fTurfL1Min; ///< Minimum TURF L1
@@ -83,6 +85,7 @@ class AnitaRFCanvasMaker
   Int_t fAvgSurfKelvinView; ///< ADC or Kelvin view
   
   MagicDisplaySurfHkDisplay::MagicDisplaySurfHkDisplay_t fSurfDisplay;
+  MagicDisplaySurfHkDisplay::MagicDisplaySurfHkDisplay_t fAvgSurfDisplay;
 
  protected:
   static AnitaRFCanvasMaker *fgInstance; ///< Protect against multiple instances.
