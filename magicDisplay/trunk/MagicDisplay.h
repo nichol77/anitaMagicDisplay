@@ -110,10 +110,11 @@ class MagicDisplay
   void refreshSurfDisplay(); ///< Refreshes the SURF Hk display.
   int getSurfEntry(); ///< Attempts to load the entry corresponding to <i>fSurfHkEntry</i>.
   void drawSurfButtons(); ///< Draws the buttons on the SURF hk display.
-  void toggleSurfSurfView(Int_t surfView); ///< Toggles between surf and phi views.
+  void setSurfHkDisplay(MagicDisplaySurfHkDisplay::MagicDisplaySurfHkDisplay_t surfDisplay); ///< Toggles between surf and phi views.
   void toggleSurfRfPowerView(Int_t kelvinView); ///< Toggles betweem adc and Kelvin views.
   void toggleSurfLogView(); ///<Toggles between log and linear
-  
+  void startSurfHkPlaying(); ///< Starts SURF Hk Play mode
+  void stopSurfHkPlaying(); ///< Stops SURF Hk Play mode
 
   int loadAvgSurfTree(); ///< Opens the averaged SURF hk file for the current rune.
   void startAvgSurfDisplay(); ///< Starts the averaged SURF hk display window.
@@ -226,6 +227,7 @@ class MagicDisplay
    TButton *fTurfYScaleButton; ///< The TURF rate Y scale button.
    TButton *fSurfSurfViewButton; ///< The SURF hk SURF view button.
    TButton *fSurfPhiViewButton; ///< The SURF hk phi view button.
+   TButton *fSurfTimeViewButton; ///< The SURF hk phi view button.
    TButton *fSurfAdcViewButton; ///< The SURF RF power ADC view button.
    TButton *fSurfKelvinViewButton; ///< The SURF RF power kelvin view button.
    TButton *fSurfLogButton; ///< The Surf log/linear button
@@ -239,6 +241,7 @@ class MagicDisplay
 
    Int_t fInEventPlayMode; ///< Flag that indicates playback mode
    Int_t fEventPlaySleepMs; ///< Length of sleep between events in playback mode.
+   Int_t fInSurfPlayMode; ///< Flag that indicates surfhk play mode
 
    WaveCalType::WaveCalType_t fCalType; ///< The waveform calibration type.
 

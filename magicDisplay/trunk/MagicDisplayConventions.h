@@ -71,8 +71,22 @@ namespace MagicDisplayFormatOption {
     kAveragedFFT ///< View of avergaed FFTs
   } MagicDisplayFormatOption_t; ///< Enumeration for plot style.
 };
+
+//!  SURF hk display format option
+/*!
+  A simple enumeration to enumerate the different ways to display the SURF hk data.
+*/
+namespace MagicDisplaySurfHkDisplay {
+  typedef enum EMagicDisplaySurfHkDisplay {
+    kSurfView = 0,
+    kPhiView =  1,
+    kTimeView = 2,
+    kNotAView = 3
+  } MagicDisplaySurfHkDisplay_t; ///< Enumeration for plot style
+};
     
 
 int getNiceColour(int ind); ///< Simple fucntion to return some of my favourite colours.
+int getMarker(int ind);///< Returns a maker number
 
 #endif //MAGICDISPLAYCONVENTIONS_H

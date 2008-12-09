@@ -18,3 +18,10 @@ int getNiceColour(int index)
 ,kGreen-2,12,40,20,41};
     return niceColours[index];
 }
+
+int getMarker(int index)
+{
+  if(index>10) return index;
+  Int_t markers[11]={29,23,22,21,30,3,28,27,26,25,24};
+  return markers[index];
+}

@@ -829,25 +829,42 @@ void MagicDisplay::refreshSurfDisplay()
 
 void MagicDisplay::drawSurfButtons()
 {
-   TButton *butNext = new TButton("Next SurfHk","MagicDisplay::Instance()->displayNextSurf();",0.85,0.95,1,1);
-   butNext->SetTextSize(0.5);
+   TButton *butNext = new TButton("Next","MagicDisplay::Instance()->displayNextSurf();",0.9,0.95,1,1);
+   butNext->SetTextSize(0.4);
    butNext->SetFillColor(kGreen-10);
    butNext->Draw();
-   TButton *butPrev = new TButton("Prev. SurfHk","MagicDisplay::Instance()->displayPreviousSurf();",0.85,0.90,1,0.95);
-   butPrev->SetTextSize(0.5);
+   TButton *butPrev = new TButton("Prev.","MagicDisplay::Instance()->displayPreviousSurf();",0.9,0.90,1,0.95);
+   butPrev->SetTextSize(0.4);
    butPrev->SetFillColor(kBlue-10);
    butPrev->Draw();
 
-   fSurfSurfViewButton = new TButton("SURF View","MagicDisplay::Instance()->toggleSurfSurfView(1); MagicDisplay::Instance()->refreshSurfDisplay();",0,0.955,0.1,1);
+
+   TButton *butPlay = new TButton("Play","MagicDisplay::Instance()->startSurfHkPlaying();",0.8,0.95,0.9,1);
+   butPlay->SetTextSize(0.5);
+   butPlay->SetFillColor(kGreen-10);
+   butPlay->Draw();
+
+   TButton *butStop = new TButton("Stop","MagicDisplay::Instance()->stopSurfHkPlaying();",0.8,0.90,0.9,0.95);
+   butStop->SetTextSize(0.5);
+   butStop->SetFillColor(kRed-10);
+   butStop->Draw();
+
+   fSurfSurfViewButton = new TButton("SURF View","MagicDisplay::Instance()->setSurfHkDisplay(MagicDisplaySurfHkDisplay::kSurfView); MagicDisplay::Instance()->refreshSurfDisplay();",0,0.97,0.1,1);
    fSurfSurfViewButton->SetTextSize(0.4);
    fSurfSurfViewButton->SetFillColor(kGray+3);
    fSurfSurfViewButton->Draw();
 
 
-   fSurfPhiViewButton = new TButton("PHI View","MagicDisplay::Instance()->toggleSurfSurfView(0); MagicDisplay::Instance()->refreshSurfDisplay();",0,0.91,0.1,0.96);
+   fSurfPhiViewButton = new TButton("PHI View","MagicDisplay::Instance()->setSurfHkDisplay(MagicDisplaySurfHkDisplay::kPhiView); MagicDisplay::Instance()->refreshSurfDisplay();",0,0.94,0.1,0.97);
    fSurfPhiViewButton->SetTextSize(0.4);
    fSurfPhiViewButton->SetFillColor(kGray);
    fSurfPhiViewButton->Draw();
+
+
+   fSurfTimeViewButton = new TButton("Time View","MagicDisplay::Instance()->setSurfHkDisplay(MagicDisplaySurfHkDisplay::kTimeView); MagicDisplay::Instance()->refreshSurfDisplay();",0,0.91,0.1,0.94);
+   fSurfTimeViewButton->SetTextSize(0.4);
+   fSurfTimeViewButton->SetFillColor(kGray);
+   fSurfTimeViewButton->Draw();
 
    fSurfAdcViewButton  = new TButton("ADC","MagicDisplay::Instance()->toggleSurfRfPowerView(0); MagicDisplay::Instance()->refreshSurfDisplay();",0.1,0.91,0.2,0.94);
    fSurfAdcViewButton->SetTextSize(0.4);
@@ -877,7 +894,7 @@ void MagicDisplay::toggleSurfLogView()
   else {
     nextState=0;
   }
-  std::cout << nextState << "\n";
+  //  std::cout << nextState << "\an";
   if(nextState) {
     fRFCanMaker->setSurfLogFlag(1);
     fSurfLogButton->SetFillColor(kGray+3);
@@ -891,24 +908,35 @@ void MagicDisplay::toggleSurfLogView()
    refreshSurfDisplay();
 }
 
-void MagicDisplay::toggleSurfSurfView(Int_t surfView)
+void MagicDisplay::setSurfHkDisplay(MagicDisplaySurfHkDisplay::MagicDisplaySurfHkDisplay_t surfDisplay)
 {
-   
-   if(surfView) {
+  fRFCanMaker->setSurfHkDisplay(surfDisplay);
+  if(surfDisplay==MagicDisplaySurfHkDisplay::kSurfView) {
       //Turn on phi view off
-      fRFCanMaker->fSurfPhiView=0;
       fSurfSurfViewButton->SetFillColor(kGray+3);
       fSurfPhiViewButton->SetFillColor(kGray);
+      fSurfTimeViewButton->SetFillColor(kGray);
       fSurfSurfViewButton->Modified();
       fSurfPhiViewButton->Modified();
+      fSurfTimeViewButton->Modified();
    }
-   else {
+  else if(surfDisplay==MagicDisplaySurfHkDisplay::kPhiView) {
       //Turn phi view on
-      fRFCanMaker->fSurfPhiView=1;
       fSurfSurfViewButton->SetFillColor(kGray);
       fSurfPhiViewButton->SetFillColor(kGray+3);
+      fSurfTimeViewButton->SetFillColor(kGray);
       fSurfSurfViewButton->Modified();
       fSurfPhiViewButton->Modified();
+      fSurfTimeViewButton->Modified();
+   }
+  else if(surfDisplay==MagicDisplaySurfHkDisplay::kPhiView) {
+      //Turn phi view on
+      fSurfSurfViewButton->SetFillColor(kGray);
+      fSurfPhiViewButton->SetFillColor(kGray);
+      fSurfTimeViewButton->SetFillColor(kGray+3);
+      fSurfSurfViewButton->Modified();
+      fSurfPhiViewButton->Modified();
+      fSurfTimeViewButton->Modified();
    }
  
 }
@@ -1290,6 +1318,23 @@ UInt_t MagicDisplay::getCurrentEvent()
 {
   if(fHeadPtr) return fHeadPtr->eventNumber; 
   return 0;
+}
+
+void MagicDisplay::startSurfHkPlaying()
+{
+  fInSurfPlayMode=1;
+  do {
+    gSystem->ProcessEvents();
+    if(!fInSurfPlayMode) break;
+    if(fEventPlaySleepMs>0)
+      gSystem->Sleep(fEventPlaySleepMs);
+  }
+  while(this->displayNextSurf()==0);  
+}
+
+void MagicDisplay::stopSurfHkPlaying()
+{
+  fInSurfPlayMode=0;
 }
 
 

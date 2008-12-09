@@ -15,11 +15,15 @@
 #include <TMath.h>
 #include <TVector3.h>
 
+#include "AnitaConventions.h"
+
 class SurfHk;
 class AveragedSurfHk;
 class TurfRate;
 class SummedTurfRate;
 class TPad;
+
+#define MAX_SURF_HK_TIME_POINTS 1000
 
 //!  The SURF and TURF hk display canvas maker.
 /*!
@@ -46,6 +50,8 @@ class AnitaRFCanvasMaker
      {fSurfUseLog=logFlag;} ///< Log or linear scale?
   void setAvgSurfLogFlag(Int_t logFlag)
      {fAvgSurfUseLog=logFlag;} ///< Log or linear scale?
+  
+  void setSurfHkDisplay(MagicDisplaySurfHkDisplay::MagicDisplaySurfHkDisplay_t surfOpt) {fSurfDisplay=surfOpt;} ///<Phi, surf or time
 
   Int_t fTurfL1Max; ///< Maximum TURF L1
   Int_t fTurfL1Min; ///< Minimum TURF L1
@@ -65,7 +71,8 @@ class AnitaRFCanvasMaker
   Int_t fFixTurfYScale; ///< Fixed or autoscaling TURF
   Int_t fFixSurfYScale; ///< Fixed or autoscaling SURF
 
-  Int_t fSurfPhiView; ///< Phi or SURF view
+/*   Int_t fSurfTimeView; ///< Time view enabled? */
+/*   Int_t fSurfPhiView; ///< Phi or SURF view */
   Int_t fSurfKelvinView; ///< ADC or Kelvin view
 
   Int_t fFixSumTurfYScale; ///< Fixed or autoscaling summed TURF.
@@ -74,15 +81,23 @@ class AnitaRFCanvasMaker
   Int_t fAvgSurfPhiView; ///< Phi or SURF view (for Averaged SURF hk)
   Int_t fAvgSurfKelvinView; ///< ADC or Kelvin view
   
-  
+  MagicDisplaySurfHkDisplay::MagicDisplaySurfHkDisplay_t fSurfDisplay;
 
  protected:
   static AnitaRFCanvasMaker *fgInstance; ///< Protect against multiple instances.
   void getSurfHkSurfCanvas(SurfHk *surfPtr,TPad *plotPad); ///< Worker function
   void getSurfHkPhiCanvas(SurfHk *surfPtr,TPad *plotPad); ///< Worker function
+  void getSurfHkTimeCanvas(TPad *plotPad); ///< Worker function
   void getAvgSurfHkSurfCanvas(AveragedSurfHk *avgSurfPtr,TPad *plotPad); ///< Worker function
   void getAvgSurfHkPhiCanvas(AveragedSurfHk *avgSurfPtr,TPad *plotPad); ///< Worker function
-  // protect against multiple instances
+  void addToTimePlots(SurfHk *surfPtr);
+  
+  Int_t  fNumSurfHks;
+  Double_t fScalerVals[NUM_SURF][SCALERS_PER_SURF][MAX_SURF_HK_TIME_POINTS];
+  Double_t fThreshVals[NUM_SURF][SCALERS_PER_SURF][MAX_SURF_HK_TIME_POINTS];
+  Double_t fRfPowVals[NUM_SURF][RFCHAN_PER_SURF][MAX_SURF_HK_TIME_POINTS];
+  Double_t fTimeVals[MAX_SURF_HK_TIME_POINTS];
+
 
 
 };
