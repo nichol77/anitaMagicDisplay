@@ -38,6 +38,7 @@
 #include "WaveformGraph.h"
 #include "AnitaCanvasMaker.h"
 #include "AnitaRFCanvasMaker.h"
+#include "AnitaGpsCanvasMaker.h"
 #include "MagicControlPanel.h"
 
 //Event Reader Includes
@@ -49,12 +50,19 @@
 #include "SurfHk.h"
 #include "SummedTurfRate.h"
 #include "AveragedSurfHk.h"
+#include "G12Pos.h"
+#include "G12Sat.h"
+#include "Adu5Pat.h"
+#include "Adu5Sat.h"
+#include "Adu5Vtg.h"
 
 //ROOT Includes
 #include "TROOT.h"
 #include "TCanvas.h"
 #include "TTree.h"
 #include "TFile.h"
+#include "TTree.h"
+#include "TTreeIndex.h"
 #include "TButton.h"
 #include "TGroupButton.h"
 #include "TThread.h"
@@ -65,52 +73,12 @@ using namespace std;
 MagicDisplay*  MagicDisplay::fgInstance = 0;
 AnitaCanvasMaker *fEventCanMaker=0;
 AnitaRFCanvasMaker *fRFCanMaker=0;
+AnitaGpsCanvasMaker *fGpsCanMaker=0;
 MagicControlPanel *fControlPanel=0;
 //Leave these as global variables for now
 
-MagicDisplay::MagicDisplay()
+void MagicDisplay::zeroPointers() 
 {
-  //Default constructor
-  fInEventPlayMode=0;
-  fEventPlaySleepMs=0;
-   fRawEventPtr=0;
-   fHeadPtr=0;
-   fHkPtr=0;
-   fUsefulEventPtr=0;
-   fSurfPtr=0;
-   fTurfPtr=0;
-   fAvgSurfPtr=0;
-   fSumTurfPtr=0;
-   fgInstance=this;
-   fWaveformFormat=MagicDisplayFormatOption::kWaveform;
-   fCanvasLayout=MagicDisplayCanvasLayoutOption::kPhiVerticalOnly;
-   fMagicCanvas=0;
-   fMagicEventInfoPad=0;
-   fMagicMainPad=0;
-   fCurrentRun=0;
-   fEventTree=0;
-   fSurfHkTree=0;
-   fTurfRateTree=0;
-   fAvgSurfHkTree=0;
-   fSumTurfRateTree=0;
-   fHeadFile=0;
-   fEventFile=0;
-   fTurfRateFile=0;
-   fSumTurfRateFile=0;
-   fSurfHkFile=0;
-   fAvgSurfHkFile=0;
-   fCalType=WaveCalType::kVoltageTime;
-}
-
-MagicDisplay::~MagicDisplay()
-{
-   //Default destructor
-}
-
-
-MagicDisplay::MagicDisplay(char *baseDir, int run, WaveCalType::WaveCalType_t calType)
-{
-  //Offline constructor
    fHeadFile=0;
    fEventFile=0;
    fTurfRateFile=0;
@@ -128,33 +96,92 @@ MagicDisplay::MagicDisplay(char *baseDir, int run, WaveCalType::WaveCalType_t ca
    fSurfPtr=0;
    fSurfHkEntry=0;
    fSurfHkTree=0;
-   fgInstance=this;
-   fWaveformFormat=MagicDisplayFormatOption::kWaveform;
-   fCanvasLayout=MagicDisplayCanvasLayoutOption::kPhiVerticalOnly;
+   
+   //GPS stuff
+   fGpsFile=0;
+   fG12PosTree=0;
+   fG12SatTree=0;
+   fAdu5aPatTree=0;
+   fAdu5aSatTree=0;
+   fAdu5aVtgTree=0;
+   fAdu5bPatTree=0;
+   fAdu5bSatTree=0;
+   fAdu5bVtgTree=0;
+   fG12PosEntry=0;
+   fG12SatEntry=0;
+   fAdu5aPatEntry=0;
+   fAdu5aSatEntry=0;
+   fAdu5aVtgEntry=0;
+   fAdu5bPatEntry=0;
+   fAdu5bSatEntry=0;
+   fAdu5bVtgEntry=0;
+   fG12PosPtr=0;
+   fG12SatPtr=0;
+   fAdu5APatPtr=0;
+   fAdu5ASatPtr=0;
+   fAdu5AVtgPtr=0;
+   fAdu5BPatPtr=0;
+   fAdu5BSatPtr=0;
+   fAdu5BVtgPtr=0;
+   fGpsCanvas=0;
+   fGpsMainPad=0;
+   fGpsInfoPad=0;
+
    fMagicCanvas=0;
    fMagicEventInfoPad=0;
    fMagicMainPad=0;
-   cout << "MagicDisplay::MagicDisplay(" << baseDir << " , " << run
-       << ")" << endl;
-   fCurrentRun=run;
-   strncpy(fCurrentBaseDir,baseDir,179);
+
+   fTurfCanvas=0;
+   fTurfMainPad=0;
+   fTurfInfoPad=0;
+   
+   fSumTurfCanvas=0;
+   fSumTurfMainPad=0;
+   fSumTurfInfoPad=0;
+   
+   fSurfCanvas=0;
+   fSurfMainPad=0;
+   fSurfInfoPad=0;
+
+   fAvgSurfCanvas=0;
+   fAvgSurfMainPad=0;
+   fAvgSurfInfoPad=0;
+
+   fgInstance=this;
    fEventTree=0;
    fSurfHkTree=0;
    fTurfRateTree=0;
    fAvgSurfHkTree=0;
    fSumTurfRateTree=0;
-   fCalType=calType;
+   fEventPlaySleepMs=0;
+
+   fWaveformFormat=MagicDisplayFormatOption::kWaveform;
+   fCanvasLayout=MagicDisplayCanvasLayoutOption::kPhiVerticalOnly;
+
+}
+
+MagicDisplay::MagicDisplay()
+{
+  //Default constructor
+  zeroPointers();
+}
+
+MagicDisplay::~MagicDisplay()
+{
+   //Default destructor
+}
 
 
-
-
-  //  char hkName[FILENAME_MAX];
-
-  //  sprintf(hkName,"/unix/anita2/testing/rootFiles/run%d/prettyHkFile%d.root",run,run);
-  //  TFile *fpHk = TFile::Open(hkName);
-  //  TTree *prettyHkTree = (TTree*) fpHk->Get("prettyHkTree");
-  //  prettyHkTree->SetBranchAddress("hk",&hk);  
-  //  startEventDisplay();
+MagicDisplay::MagicDisplay(char *baseDir, int run, WaveCalType::WaveCalType_t calType)
+{
+  //Offline constructor
+  zeroPointers();
+  cout << "MagicDisplay::MagicDisplay(" << baseDir << " , " << run
+       << ")" << endl;
+  fCurrentRun=run;
+  strncpy(fCurrentBaseDir,baseDir,179);
+  fCalType=calType;
+  
 }
 
 
@@ -1435,3 +1462,353 @@ void MagicDisplay::startSummaryDisplay()
 
   }
 */
+
+int MagicDisplay::loadGpsTrees()
+{
+  char gpsName[FILENAME_MAX];
+  sprintf(gpsName,"%s/run%d/gpsFile%d.root",fCurrentBaseDir,
+	  fCurrentRun,fCurrentRun);
+  fGpsFile = TFile::Open(gpsName);
+  if(!fGpsFile) {
+    cout << "Couldn't open: " << gpsName << "\n";
+    return -1;
+  }
+  fG12PosTree = (TTree*) fGpsFile->Get("g12PosTree");
+  if(!fG12PosTree) {
+    cout << "Couldn't get g12PosTree\n";
+  }
+  else {
+    fG12PosTree->SetBranchAddress("pos",&fG12PosPtr);
+  }
+  fG12SatTree = (TTree*) fGpsFile->Get("g12SatTree");
+  if(!fG12SatTree) {
+    cout << "Couldn't get g12SatTree\n";
+  }
+  else {
+    fG12SatTree->SetBranchAddress("sat",&fG12SatPtr);
+  }
+  fAdu5aPatTree = (TTree*) fGpsFile->Get("adu5PatTree");
+  if(!fAdu5aPatTree) {
+    cout << "Couldn't get adu5aPatTree\n";
+  }
+  else {
+    fAdu5aPatTree->SetBranchAddress("pat",&fAdu5APatPtr);
+  }
+  fAdu5aSatTree = (TTree*) fGpsFile->Get("adu5SatTree");
+  if(!fAdu5aSatTree) {
+    cout << "Couldn't get adu5aSatTree\n";
+  }
+  else {
+    fAdu5aSatTree->SetBranchAddress("sat",&fAdu5ASatPtr);
+    fAdu5aSatTree->BuildIndex("realTime");
+    fAdu5aSatIndex=(TTreeIndex*)fAdu5aSatTree->GetTreeIndex();
+  }
+  fAdu5aVtgTree = (TTree*) fGpsFile->Get("adu5VtgTree");
+  if(!fAdu5aVtgTree) {
+    cout << "Couldn't get adu5aVtgTree\n";
+  }
+  else {
+    fAdu5aVtgTree->SetBranchAddress("vtg",&fAdu5AVtgPtr);
+  }
+  fAdu5bPatTree = (TTree*) fGpsFile->Get("adu5bPatTree");
+  if(!fAdu5bPatTree) {
+    cout << "Couldn't get adu5bPatTree\n";
+  }
+  else {
+    fAdu5bPatTree->SetBranchAddress("pat",&fAdu5BPatPtr);
+  }
+  fAdu5bSatTree = (TTree*) fGpsFile->Get("adu5bSatTree");
+  if(!fAdu5bSatTree) {
+    cout << "Couldn't get adu5bSatTree\n";
+  }
+  else {
+    fAdu5bSatTree->SetBranchAddress("sat",&fAdu5BSatPtr);
+    fAdu5bSatTree->BuildIndex("realTime");
+    fAdu5bSatIndex=(TTreeIndex*)fAdu5bSatTree->GetTreeIndex();
+  }
+  fAdu5bVtgTree = (TTree*) fGpsFile->Get("adu5bVtgTree");
+  if(!fAdu5bVtgTree) {
+    cout << "Couldn't get adu5bVtgTree\n";
+  }
+  else {
+    fAdu5bVtgTree->SetBranchAddress("vtg",&fAdu5BVtgPtr);
+  }
+  fG12PosEntry=0;
+  fG12SatEntry=0;
+  fAdu5aPatEntry=0;
+  fAdu5aSatEntry=0;
+  fAdu5aVtgEntry=0;
+  fAdu5bPatEntry=0;
+  fAdu5bSatEntry=0;
+  fAdu5bVtgEntry=0;
+  return 0;
+}
+
+void MagicDisplay::startGpsDisplay()
+{
+  if(!fGpsCanMaker)
+    fGpsCanMaker=AnitaGpsCanvasMaker::Instance();
+  int retVal=getGpsEntry();
+  if(retVal==0)
+    refreshGpsDisplay();
+
+
+}
+
+int MagicDisplay::displayNextGps()
+{
+  Int_t retVal=0;
+  switch(fGpsCanMaker->getGpsDisplayOpt()) {
+  case MagicDisplayGpsDisplay::kMapView:
+    break;
+  case MagicDisplayGpsDisplay::kSatView:
+    fG12SatEntry++;
+    if(fG12SatTree) {
+      if(fG12SatEntry>=fG12SatTree->GetEntries())
+	return -1;
+    }
+    getGpsEntry();
+    if(fAdu5aSatIndex) {
+      fAdu5aSatEntry=fAdu5aSatIndex->GetEntryNumberWithBestIndex(fG12SatPtr->realTime,0);
+      if(fAdu5aSatEntry<0) fAdu5aSatEntry=0;
+    }
+    if(fAdu5bSatIndex) {
+      fAdu5bSatEntry=fAdu5bSatIndex->GetEntryNumberWithBestIndex(fG12SatPtr->realTime,0);
+      if(fAdu5bSatEntry<0) fAdu5aSatEntry=0;
+    }
+    break;
+  case MagicDisplayGpsDisplay::kTimeView:
+    break;
+  default:
+    break;
+  }
+  retVal=getGpsEntry();
+  if(retVal==0)
+    refreshGpsDisplay();
+  return retVal;
+
+}
+
+int MagicDisplay::displayPreviousGps()
+{
+  Int_t retVal=0;
+  switch(fGpsCanMaker->getGpsDisplayOpt()) {
+  case MagicDisplayGpsDisplay::kMapView:
+    break;
+  case MagicDisplayGpsDisplay::kSatView:
+    if(fG12SatEntry>0)
+      fG12SatEntry--;
+    if(fAdu5aSatEntry>0)
+      fAdu5aSatEntry--;
+    if(fAdu5bSatEntry>0)
+      fAdu5bSatEntry--;
+    break;
+  case MagicDisplayGpsDisplay::kTimeView:
+    break;
+  default:
+    break;
+  }
+  retVal=getGpsEntry();
+  if(retVal==0)
+    refreshGpsDisplay();
+  return retVal;
+}
+
+void MagicDisplay::refreshGpsDisplay()
+{
+  if(!fGpsCanvas) {
+      fGpsCanvas = new TCanvas("canMagicGps","canMagicGps",800,700);
+      fGpsCanvas->cd();
+      drawGpsButtons();
+   }
+   if(!fGpsMainPad) {
+      fGpsCanvas->cd();
+      fGpsMainPad= new TPad("canMagicGpsMain","canMagicGpsMain",0,0,1,0.9);
+      fGpsMainPad->Draw();
+      fGpsCanvas->Update();
+   }
+   if(!fGpsInfoPad) {
+      fGpsCanvas->cd();
+      fGpsInfoPad= new TPad("canMagicGpsInfo","canMagicGpsInfo",0.2,0.91,0.8,0.99);
+      fGpsInfoPad->Draw();
+      fGpsCanvas->Update();
+   }  
+  //This will need to change
+   fGpsCanMaker->getGpsInfoCanvas(fAdu5ASatPtr,fAdu5BSatPtr,fG12SatPtr,
+				  fAdu5APatPtr,fAdu5BPatPtr,fG12PosPtr,
+				  fGpsInfoPad);
+   fGpsCanMaker->getGpsMainCanvas(fAdu5ASatPtr,fAdu5BSatPtr,fG12SatPtr,
+				fAdu5APatPtr,fAdu5BPatPtr,fG12PosPtr,
+				fGpsMainPad);
+
+   fGpsCanvas->Update();
+   fGpsCanvas->Modified();
+
+}
+
+int MagicDisplay::getGpsEntry()
+{
+  if(!fGpsFile) {
+    if(loadGpsTrees()<0) {
+      cout << "Couldn't open GPS file\n";
+      return -1;
+    }
+  }
+  
+  //Now have to decide which tree to move on in
+  Int_t newData=0;
+  if(fG12PosTree) {
+    //    cout << "Got g12PosTree\n";
+    if(fG12PosEntry<fG12PosTree->GetEntries()) {
+      fG12PosTree->GetEntry(fG12PosEntry);
+      newData++;
+    }
+    else {
+      std::cout << "Now more entries in g12PosTree\n";
+    }
+  }
+  if(fG12SatTree) {
+    //    cout << "Got g12SatTree\n";
+    if(fG12SatEntry<fG12SatTree->GetEntries()) {
+      fG12SatTree->GetEntry(fG12SatEntry);
+      newData++;
+    }
+    else {
+      std::cout << "Now more entries in g12SatTree\n";
+    }
+  }
+  if(fAdu5aSatTree) {
+    //    cout << "Got adu5SatTree\n";
+    if(fAdu5aSatEntry<fAdu5aSatTree->GetEntries()) {
+      fAdu5aSatTree->GetEntry(fAdu5aSatEntry);
+      newData++;
+    }
+    else {
+      std::cout << "Now more entries in adu5aSatTree\n";
+    }
+  }
+  if(fAdu5bSatTree) {
+    //    cout << "Got adu5bSatTree\n";
+    if(fAdu5bSatEntry<fAdu5bSatTree->GetEntries()) {
+      fAdu5bSatTree->GetEntry(fAdu5bSatEntry);
+      newData++;
+    }
+    else {
+      std::cout << "Now more entries in adu5bSatTree\n";
+    }
+  }
+  
+  if(fAdu5aPatTree) {
+    //    cout << "Got adu5PatTree\n";
+    if(fAdu5aPatEntry<fAdu5aPatTree->GetEntries()) {
+      fAdu5aPatTree->GetEntry(fAdu5aPatEntry);
+      newData++;
+    }
+    else {
+      std::cout << "Now more entries in adu5aPatTree\n";
+    }
+  }
+
+  if(fAdu5bPatTree) {
+    //    cout << "Got adu5bPatTree\n";
+    if(fAdu5bPatEntry<fAdu5bPatTree->GetEntries()) {
+      fAdu5bPatTree->GetEntry(fAdu5bPatEntry);
+      newData++;
+    }
+    else {
+      std::cout << "Now more entries in adu5bPatTree\n";
+    }
+  }
+  if(fAdu5aVtgTree) {
+    //    cout << "Got adu5VtgTree\n";
+    if(fAdu5aVtgEntry<fAdu5aVtgTree->GetEntries()) {
+      fAdu5aVtgTree->GetEntry(fAdu5aVtgEntry);
+      newData++;
+    }
+    else {
+    std::cout << "Now more entries in adu5aVtgTree\n";
+    }
+  }
+  if(fAdu5bVtgTree) {
+    //    cout << "Got adu5bVtgTree\n";
+    if(fAdu5bVtgEntry<fAdu5bVtgTree->GetEntries()) {
+      fAdu5bVtgTree->GetEntry(fAdu5bVtgEntry);
+      newData++;
+    }
+    else {
+      std::cout << "Now more entries in adu5bVtgTree\n";
+    }
+  }
+
+
+  if(newData==0)
+    return -1;
+  return 0;
+}
+
+void MagicDisplay::setGpsView(MagicDisplayGpsDisplay::MagicDisplayGpsDisplay_t theDisplay)
+{
+  if(theDisplay==MagicDisplayGpsDisplay::kSatView) {
+    fGpsCanMaker->setGpsDisplayOpt(theDisplay);
+    fGpsSatViewButton->SetFillColor(kGray+3);
+    fGpsMapViewButton->SetFillColor(kGray);
+    fGpsSatViewButton->Modified();
+    fGpsMapViewButton->Modified();
+  }
+  else if(theDisplay==MagicDisplayGpsDisplay::kMapView) {
+    fGpsCanMaker->setGpsDisplayOpt(theDisplay);
+    fGpsSatViewButton->SetFillColor(kGray);
+    fGpsMapViewButton->SetFillColor(kGray+3);
+    fGpsSatViewButton->Modified();
+    fGpsMapViewButton->Modified();
+  }
+  refreshGpsDisplay();
+}
+
+void MagicDisplay::drawGpsButtons()
+{
+  TButton *butNext = new TButton("Next.","MagicDisplay::Instance()->displayNextGps();",0.9,0.95,1,1);
+   butNext->SetTextSize(0.4);
+   butNext->SetFillColor(kGreen-10);
+   butNext->Draw();
+   TButton *butPrev = new TButton("Prev.","MagicDisplay::Instance()->displayPreviousGps();",0.9,0.90,1,0.95);
+   butPrev->SetTextSize(0.4);
+   butPrev->SetFillColor(kBlue-10);
+   butPrev->Draw();
+   TButton *butPlay = new TButton("Play","MagicDisplay::Instance()->startGpsPlaying();",0.85,0.95,0.9,1);
+   butPlay->SetTextSize(0.4);
+   butPlay->SetFillColor(kGreen-10);
+   butPlay->Draw();
+   TButton *butStop = new TButton("Stop","MagicDisplay::Instance()->stopGpsPlaying();",0.85,0.90,0.9,0.95);
+   butStop->SetTextSize(0.4);
+   butStop->SetFillColor(kRed-10);
+   butStop->Draw();
+
+   fGpsSatViewButton = new TButton("Satellite","MagicDisplay::Instance()->setGpsView(MagicDisplayGpsDisplay::kSatView);",0.,0.95,0.1,1);
+   fGpsSatViewButton->SetTextSize(0.4);
+   fGpsSatViewButton->SetFillColor(kGray+3);
+   fGpsSatViewButton->Draw();
+
+   fGpsMapViewButton = new TButton("Map View","MagicDisplay::Instance()->setGpsView(MagicDisplayGpsDisplay::kMapView);",0.,0.9,0.1,0.95);
+   fGpsMapViewButton->SetTextSize(0.4);
+   fGpsMapViewButton->SetFillColor(kGray);
+   fGpsMapViewButton->Draw();
+
+}
+
+
+void MagicDisplay::startGpsPlaying()
+{
+  fInGpsPlayMode=1;
+  do {
+    gSystem->ProcessEvents();
+    if(!fInGpsPlayMode) break;
+  }
+  while(this->displayNextGps()==0);
+
+} 
+ 
+void MagicDisplay::stopGpsPlaying()
+ {
+   fInGpsPlayMode=0;
+ }
