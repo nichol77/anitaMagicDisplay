@@ -272,6 +272,7 @@ class MagicDisplay
    TButton *fHorizButton; ///< The horizontal polarisation button.
    TButton *fBothButton; ///< The both polarisations button.
    TButton *fSurfButton; ///< The SURF view button.
+   TButton *fPayloadButton; ///< The payload view button.
 
    TButton *fWaveformButton; ///< The waveform view button.
    TButton *fPowerButton; ///< The FFT view button.
