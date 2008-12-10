@@ -31,8 +31,12 @@
 #include "TAxis.h"
 #include "TH1.h"
 #include "TList.h"
+#include "TFile.h"
 #include "TObject.h"
 #include "TTimeStamp.h"
+#include "TGeoManager.h"
+#include "TGeoVolume.h"
+#include "TView3D.h"
 
 #include "FFTtools.h"
 
@@ -69,6 +73,7 @@ AnitaCanvasMaker::AnitaCanvasMaker(WaveCalType::WaveCalType_t calType)
   fACMGeomTool=AnitaGeomTool::Instance();
   fMinVoltLimit=-60;
   fMaxVoltLimit=60;
+  fPhiMax=0;
   fMinVertVoltLimit=-60;
   fMaxVertVoltLimit=60;
   fMinClockVoltLimit=-200;
@@ -93,7 +98,8 @@ AnitaCanvasMaker::AnitaCanvasMaker(WaveCalType::WaveCalType_t calType)
   memset(grSurfHilbert,0,sizeof(WaveformGraph*)*ACTIVE_SURFS*CHANNELS_PER_SURF);
   memset(grSurfFFT,0,sizeof(FFTGraph*)*ACTIVE_SURFS*CHANNELS_PER_SURF);
   memset(grSurfAveragedFFT,0,sizeof(FFTGraph*)*ACTIVE_SURFS*CHANNELS_PER_SURF);
-  
+  fAnitaGeomFile=0;
+  fAnitaGeomManager=0;
   switch(fCalType) {
   case WaveCalType::kNoCalib:
   case WaveCalType::kJustUnwrap:
@@ -258,6 +264,7 @@ TPad *AnitaCanvasMaker::quickGetEventViewerCanvasForWebPlottter(UsefulAnitaEvent
     fMaxClockVoltLimit=0;
   }
 
+
   for(int surf=0;surf<ACTIVE_SURFS;surf++){
     for(int chan=0;chan<CHANNELS_PER_SURF;chan++){
       
@@ -281,7 +288,7 @@ TPad *AnitaCanvasMaker::quickGetEventViewerCanvasForWebPlottter(UsefulAnitaEvent
 	    int ant=0;
 	    AnitaPol::AnitaPol_t pol;
 	    AnitaGeomTool::getAntPolFromSurfChan(surf,chan,ant,pol);
-	    
+
 	    for(int i=0;i<numPoints;i++) {
 	      
 	      if(yVals[i]<fMinVoltLimit)
@@ -292,8 +299,10 @@ TPad *AnitaCanvasMaker::quickGetEventViewerCanvasForWebPlottter(UsefulAnitaEvent
 	      if(pol==AnitaPol::kVertical) {
 		if(yVals[i]<fMinVertVoltLimit)
 		  fMinVertVoltLimit=yVals[i];
-		if(yVals[i]>fMaxVertVoltLimit)
+		if(yVals[i]>fMaxVertVoltLimit) {
 		  fMaxVertVoltLimit=yVals[i];
+		}
+
 	      }	      
 	    }
 	  }
@@ -368,6 +377,7 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr,
       fMaxClockVoltLimit=0;
     }
     
+    Double_t maxVal=0;
 
     for(int surf=0;surf<ACTIVE_SURFS;surf++){
       for(int chan=0;chan<CHANNELS_PER_SURF;chan++){
@@ -387,15 +397,16 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr,
 	}
 
 	TGraph *grTemp = evPtr->getGraphFromSurfAndChan(surf,chan);
-	if(fAutoScale) {
+	if(fAutoScale || fCanvasView==MagicDisplayCanvasLayoutOption::kPayloadView) {
 	  Int_t numPoints=grTemp->GetN();
 	  Double_t *yVals=grTemp->GetY();
 	  
 	  if(chan<8) {
 	    int ant=0;
 	    AnitaPol::AnitaPol_t pol;
-	    AnitaGeomTool::getAntPolFromSurfChan(surf,chan,ant,pol);
-	    
+	    AnitaGeomTool::getAntPolFromSurfChan(surf,chan,ant,pol);	    
+	    Int_t phi=AnitaGeomTool::getPhiFromAnt(ant);
+
 	    for(int i=0;i<numPoints;i++) {
 	      
 	      if(yVals[i]<fMinVoltLimit)
@@ -408,6 +419,10 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr,
 		  fMinVertVoltLimit=yVals[i];
 		if(yVals[i]>fMaxVertVoltLimit)
 		  fMaxVertVoltLimit=yVals[i];
+		if(yVals[i]>maxVal) {
+		  maxVal=yVals[i];
+		  fPhiMax=phi;
+		}
 	      }	      
 	    }
 	  }
@@ -482,6 +497,7 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr,
   else if(fCanvasView==MagicDisplayCanvasLayoutOption::kPhiHorizontalOnly) retCan=AnitaCanvasMaker::getHorizontalCanvas(hdPtr,useCan);
   else if(fCanvasView==MagicDisplayCanvasLayoutOption::kPhiCombined) retCan=AnitaCanvasMaker::getCombinedCanvas(hdPtr,useCan);
   else if(fCanvasView==MagicDisplayCanvasLayoutOption::kSurfOnly) retCan=AnitaCanvasMaker::getSurfChanCanvas(hdPtr,useCan);
+  else if(fCanvasView==MagicDisplayCanvasLayoutOption::kPayloadView) retCan=AnitaCanvasMaker::getPayloadCanvas(hdPtr,useCan);
 
   fLastWaveformFormat=fWaveformOption;
   fLastCanvasView=fCanvasView;
@@ -1057,9 +1073,220 @@ TPad *AnitaCanvasMaker::getSurfChanCanvas(RawAnitaHeader *hdPtr,
   else 
     return plotPad;
   
+}
+
+
+TPad *AnitaCanvasMaker::getPayloadCanvas(RawAnitaHeader *hdPtr,
+					 TPad *useCan)
+{
+   //  gStyle->SetTitleH(0.1);
+  gStyle->SetOptTitle(0); 
+
+  if(!fACMGeomTool)
+    fACMGeomTool=AnitaGeomTool::Instance();
+  char textLabel[180];
+  char padName[180];
+  TPad *canPayload;
+  TPad *plotPad;
+  if(!useCan) {
+    canPayload = (TPad*) gROOT->FindObject("canPayload");
+    if(!canPayload) {
+      canPayload = new TCanvas("canPayload","canPayload",1000,600);
+    }
+    canPayload->Clear();
+    canPayload->SetTopMargin(0);
+    TPaveText *leftPave = new TPaveText(0.05,0.92,0.95,0.98);
+    leftPave->SetBorderSize(0);
+    sprintf(textLabel,"Event %d",hdPtr->eventNumber);
+    TText *eventText = leftPave->AddText(textLabel);
+    eventText->SetTextColor(50);
+    leftPave->Draw();
+    plotPad = new TPad("canPayloadMain","canPayloadMain",0,0,1,0.9);
+    plotPad->Draw();
+  }
+  else {
+    plotPad=useCan;
+  }
+  plotPad->cd();
+  setupPayloadViewWithFrames(plotPad);
+
+  loadPayloadViewSutff();
+
+  Int_t leftPhi=(fPhiMax+1)-1;
+  if(leftPhi<1) leftPhi+=16;
+  Int_t maxPhi=(fPhiMax+1);
+  Int_t rightPhi=(fPhiMax+1)+1;
+  if(rightPhi>16) rightPhi-=16;
+
+  Int_t phiArray[3]={fPhiMax-1,fPhiMax,fPhiMax+1};
+  if(phiArray[0]<0) phiArray[0]+=16;
+  if(phiArray[2]>15) phiArray[2]-=16;
+  
+  //  std::cout << fPhiMax << "\n";
+
+  if(fAnitaGeomManager) {
+    TPad *payloadPadLeft = (TPad*) plotPad->FindObject("payloadPadLeft");
+    payloadPadLeft->cd();
+    payloadPadLeft->Clear();
+    
+    //Draw anita
+    TGeoVolume *anita = fAnitaGeomManager->GetMasterVolume();
+    
+    int n_ant[4]={8,8,16,8};
+    int i_node=0;
+    
+    Int_t phiNums[4][16]={{1,3,5,7,9,11,13,15,0,0,0,0,0,0,0,0},
+			 {0,2,4,6,8,10,12,14,16,0,0,0,0,0,0},
+			 {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15},
+			 {0,2,4,6,8,10,12,14,16,0,0,0,0,0,0}};
+    AnitaRing::AnitaRing_t littleRingMap[4]={AnitaRing::kUpperRing,
+					     AnitaRing::kUpperRing,
+					     AnitaRing::kLowerRing,
+					     AnitaRing::kNadirRing};
+
+    
+    for (int i_layer=0;i_layer<4;i_layer++){
+      for (int i_ant=0;i_ant<n_ant[i_layer];i_ant++){    
+	//	std::cout << anita->GetNode(i_node)->GetName() << "\t" << phiNums[i_layer][i_ant] << std::endl;
+	anita->GetNode(i_node)->GetVolume()->GetNode(4)->GetVolume()->SetLineColor(kWhite); //change color of Horn
+	
+	anita->GetNode(i_node)->GetVolume()->GetNode(0)->GetVolume()->SetLineColor(kWhite); //change color of h-pol
+
+	anita->GetNode(i_node)->GetVolume()->GetNode(1)->GetVolume()->SetLineColor(kWhite); // change color of v-pol
+	
+	if(hdPtr->isInL1Pattern(phiNums[i_layer][i_ant],littleRingMap[i_layer])) {
+	    anita->GetNode(i_node)->GetVolume()->GetNode(1)->GetVolume()->SetLineColor(kBlue-2); // change color of v-pol
+	    anita->GetNode(i_node)->GetVolume()->GetNode(4)->GetVolume()->SetLineColor(kBlue-2); 
+	  }
+	if(hdPtr->isInL2Pattern(phiNums[i_layer][i_ant],littleRingMap[i_layer])) {
+	    anita->GetNode(i_node)->GetVolume()->GetNode(1)->GetVolume()->SetLineColor(kGreen-2); // change color of v-pol
+	    anita->GetNode(i_node)->GetVolume()->GetNode(4)->GetVolume()->SetLineColor(kGreen-2); 
+	  }
+	if(hdPtr->isInL3Pattern(phiNums[i_layer][i_ant])) {
+	    anita->GetNode(i_node)->GetVolume()->GetNode(1)->GetVolume()->SetLineColor(kRed-3); // change color of v-pol
+	    anita->GetNode(i_node)->GetVolume()->GetNode(4)->GetVolume()->SetLineColor(kRed-3); 
+	  }
+
+	i_node++;
+      }
+    }
+
+
+    Double_t rmin[3]={-400,-400,-400};
+    Double_t rmax[3]={400,400,400};
+    
+    TView3D *my3dView = new TView3D(1,rmin,rmax);
+    my3dView->Draw();
+    
+    anita->GetNode(40)->GetVolume()->SetLineColor(kGray); //change color EMI Box
+    anita->GetNode(41)->GetVolume()->SetLineColor(kGray); //change color SIP Box
+    anita->GetNode(42)->GetVolume()->SetLineColor(kGray); //change color Batt Box
+    gGeoManager->GetTopVolume()->Draw(); //draw line only
+    //  gGeoManager->GetGeomPainter()->SetRaytracing(1); //ray tracing (but it's slow_
+    my3dView->ZoomIn();
+    my3dView->ZoomIn();
+    Int_t iRep;
+    Double_t phiDeg=(maxPhi-1)*22.5;
+    my3dView->SetView(phiDeg,90,0,iRep);
+    
+    gPad->Modified();
+    gPad->Update();
+
+  }
+
+
+  AnitaRing::AnitaRing_t payloadRingMap[3]={AnitaRing::kUpperRing,
+					    AnitaRing::kLowerRing,
+					    AnitaRing::kNadirRing};
+
+  static Int_t lastSurf[3][3]={{-1,-1,-1},{-1,-1,-1},{-1,-1,-1}};
+  static Int_t lastChan[3][3]={{-1,-1,-1},{-1,-1,-1},{-1,-1,-1}};
+
+  for(int row=0;row<3;row++) {
+    for(int phiInd=0;phiInd<3;phiInd++) {
+
+      plotPad->cd();
+      sprintf(padName,"payloadPad%d_%d",row,phiInd);
+      TPad *paddy1 = (TPad*) plotPad->FindObject(padName);
+      paddy1->SetEditable(kTRUE);
+      if(lastSurf[row][phiInd]>=0)
+	deleteTGraphsFromPad(paddy1,lastSurf[row][phiInd],lastChan[row][phiInd]);
+      paddy1->cd();
+
+      Int_t surf,chan,ant;
+      Int_t phi=phiArray[phiInd];
+      AnitaPol::AnitaPol_t pol=AnitaPol::kVertical;
+      AnitaRing::AnitaRing_t ring=payloadRingMap[row];
+      if(ring==AnitaRing::kNadirRing &&
+	 phiArray[phiInd]%2==1) {
+	lastSurf[row][phiInd]=-1;
+	continue;
+      }
+      fACMGeomTool->getSurfChanAntFromRingPhiPol(payloadRingMap[row],
+						 phiArray[phiInd],
+						 AnitaPol::kVertical,
+						 surf,chan,ant);
+      lastSurf[row][phiInd]=surf;
+      lastChan[row][phiInd]=chan;
+
+      if(hdPtr->isInL1Pattern(phi,ring))
+	grSurf[surf][chan]->SetLineColor(kBlue-2);
+      if(hdPtr->isInL2Pattern(phi,ring))
+	grSurf[surf][chan]->SetLineColor(kGreen-2);
+      if(hdPtr->isInL3Pattern(phi))
+	grSurf[surf][chan]->SetLineColor(kRed-3);
+      
+      if(fWaveformOption==MagicDisplayFormatOption::kPowerSpectralDensity){
+	grSurfFFT[surf][chan]->setSurfChanPhiAntPolRing(surf,chan,phi,ant,
+							pol,ring);
+	grSurfFFT[surf][chan]->Draw("l");
+      }
+      else if(fWaveformOption==MagicDisplayFormatOption::kAveragedFFT){
+	grSurfAveragedFFT[surf][chan]->setSurfChanPhiAntPolRing(surf,chan,phi,ant,
+							pol,ring);
+	grSurfAveragedFFT[surf][chan]->Draw("l");
+      }
+      else if(fWaveformOption==MagicDisplayFormatOption::kHilbertEnvelope) {
+	grSurfHilbert[surf][chan]->setSurfChanPhiAntPolRing(surf,chan,phi,ant,
+							    pol,ring);
+	grSurfHilbert[surf][chan]->Draw("l");
+      }
+      else if(fWaveformOption==MagicDisplayFormatOption::kWaveform) {
+	grSurf[surf][chan]->Draw("l");
+
+	if(fAutoScale) {
+	  TList *listy = gPad->GetListOfPrimitives();
+	  for(int i=0;i<listy->GetSize();i++) {
+	    TObject *fred = listy->At(i);
+	    TH1F *tempHist = (TH1F*) fred;
+	    if(tempHist->InheritsFrom("TH1")) {
+	      if(chan<8) {
+		tempHist->GetYaxis()->SetRangeUser(fMinVertVoltLimit,fMaxVertVoltLimit);
+	      }
+	      else {
+
+		grSurf[surf][chan]->setSurfChanPhiAntPolRing(surf,chan,-1,-1,AnitaPol::kNotAPol,AnitaRing::kNotARing);
+		tempHist->GetYaxis()->SetRangeUser(fMinClockVoltLimit,fMaxClockVoltLimit);
+	      }
+	    }
+	  }
+	}
+      }
+
+      paddy1->SetEditable(kFALSE);
+    }
+  }
+
   
 
+  if(!useCan)
+    return canPayload;
+  else 
+    return plotPad;
+  
 }
+
+
 
 TPad *AnitaCanvasMaker::getCombinedCanvas(RawAnitaHeader *hdPtr,
 					  TPad *useCan)
@@ -1432,7 +1659,109 @@ void AnitaCanvasMaker::setupSurfPadWithFrames(TPad *plotPad)
       count++;
     }
   }
+}
 
+
+
+
+void AnitaCanvasMaker::setupPayloadViewWithFrames(TPad *plotPad)
+{
+  static int payloadPadsDone=0;
+  char textLabel[180];
+  char padName[180];
+  plotPad->cd();
+  if(fLastCanvasView!=MagicDisplayCanvasLayoutOption::kPayloadView) {
+    plotPad->Clear();
+  }
+
+  if(fRedoEventCanvas && payloadPadsDone){
+    plotPad->Clear();
+  }
+
+  fLastCanvasView=MagicDisplayCanvasLayoutOption::kPayloadView;
+
+  if(payloadPadsDone && !fRedoEventCanvas) {
+    int errors=0;
+    sprintf(padName,"payloadPadLeft");
+    TPad *paddy = (TPad*) plotPad->FindObject(padName);
+    if(!paddy)
+      errors++;
+
+    for(int ring=0;ring<3;ring++) {
+      for(int phi=0;phi<3;phi++) {
+	sprintf(padName,"payloadPad%d_%d",ring,phi);
+	TPad *paddy = (TPad*) plotPad->FindObject(padName);
+	if(!paddy)
+	  errors++;
+      }
+    }
+    if(!errors)
+      return;
+  }
+
+
+  payloadPadsDone=1;
+      
+
+  Double_t left[3]={0.53,0.7,0.85};
+  Double_t right[10]={0.7,0.85,0.99};
+  Double_t top[3]={0.95,0.65,0.35};
+  Double_t bottom[3]={0.65,0.35,0.03};
+  
+  //Now add some labels around the plot
+  TLatex texy;
+  texy.SetTextSize(0.03); 
+  texy.SetTextAlign(12);  
+ 
+  int count=0;
+
+
+  //  std::cout << hdPtr->eventNumber << "\t" << hdPtr->l3TrigPattern << std::endl;
+  sprintf(padName,"payloadPadLeft");
+  TPad *padLeft =new TPad(padName,padName,0.05,0.05,0.5,0.95);
+  padLeft->SetFillColor(kBlack);
+  padLeft->Draw();
+
+
+  for(int column=0;column<3;column++) {
+    for(int row=0;row<3;row++) {
+      plotPad->cd();
+      //      int surf=surfMap[row][column];
+      sprintf(padName,"payloadPad%d_%d",row,column);
+      TPad *paddy1 = new TPad(padName,padName,left[column],bottom[row],right[column],top[row]);   
+      paddy1->SetTopMargin(0);
+      paddy1->SetBottomMargin(0);
+      paddy1->SetLeftMargin(0);
+      paddy1->SetRightMargin(0);
+      if(column==2)
+	paddy1->SetRightMargin(0.01);
+      if(column==0)
+	paddy1->SetLeftMargin(0.1);
+      if(row==2)
+	paddy1->SetBottomMargin(0.1);
+      paddy1->Draw();
+      paddy1->cd();
+      TH1F *framey;
+      if(fWaveformOption==MagicDisplayFormatOption::kFFT || fWaveformOption==MagicDisplayFormatOption::kAveragedFFT){
+	  framey = (TH1F*) paddy1->DrawFrame(fMinFreqLimit,fMinPowerLimit,fMaxFreqLimit,fMaxPowerLimit);
+      }
+      else if(fWaveformOption==MagicDisplayFormatOption::kWaveform || 
+	      fWaveformOption==MagicDisplayFormatOption::kHilbertEnvelope) {
+	framey = (TH1F*) paddy1->DrawFrame(fMinTimeLimit,fMinVoltLimit,fMaxTimeLimit,fMaxVoltLimit);
+      }
+
+      framey->GetYaxis()->SetLabelSize(0.1);
+      framey->GetYaxis()->SetTitleSize(0.1);
+      framey->GetYaxis()->SetTitleOffset(0.5);
+      if(row==8) {
+	framey->GetXaxis()->SetLabelSize(0.09);
+	framey->GetXaxis()->SetTitleSize(0.09);
+	framey->GetYaxis()->SetLabelSize(0.09);
+	framey->GetYaxis()->SetTitleSize(0.09);
+      }
+      count++;
+    }
+  }
 }
 
 
@@ -1486,3 +1815,26 @@ void AnitaCanvasMaker::resetAverage()
 
 
 
+void AnitaCanvasMaker::loadPayloadViewSutff()
+{
+  if(fAnitaGeomManager) return;
+  char fileName[FILENAME_MAX];
+  char *dirName=getenv("ANITA_UTIL_INSTALL_DIR");
+  if(dirName) {
+    sprintf(fileName,"%s/share/anitaMap/anitageom.root",dirName);
+  }
+  else
+    sprintf(fileName,"anitageom.root");
+  
+  fAnitaGeomFile = new TFile(fileName);
+  if(!fAnitaGeomFile) {
+    std::cerr << "Couldn't open: " << fileName << "\n";
+    return;
+  }
+  
+  fAnitaGeomManager= (TGeoManager*) fAnitaGeomFile->Get("anita");
+  if(!fAnitaGeomManager) {
+    std::cerr << "Couldn't find anita geometry\n";
+  }
+
+}

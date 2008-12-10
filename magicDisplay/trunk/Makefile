@@ -40,7 +40,7 @@ endif
 CXXFLAGS     += $(ROOTCFLAGS) $(FFTFLAG) $(SYSINCLUDES) $(INC_ANITA_UTIL)
 LDFLAGS      += -g $(ROOTLDFLAGS) 
 
-LIBS          = $(ROOTLIBS) -lMathMore -lMinuit $(SYSLIBS) $(LD_ANITA_UTIL) $(FFTLIBS)
+LIBS          = $(ROOTLIBS) -lMathMore -lMinuit -lGeom $(SYSLIBS) $(LD_ANITA_UTIL) $(FFTLIBS)
 GLIBS         = $(ROOTGLIBS) $(SYSLIBS)
 
 #Now the bits we're actually compiling
@@ -93,6 +93,7 @@ endif
 	install -c -m 644  $(CLASS_HEADERS) $(ANITA_UTIL_INC_DIR)
 	install -d $(ANITA_UTIL_MAP_DIR)
 	install -c -m 644 antarcticaIceMap.png $(ANITA_UTIL_MAP_DIR)
+	install -c -m 644 anitageom.root $(ANITA_UTIL_MAP_DIR)
 
 clean:
 	@rm -f *Dict*

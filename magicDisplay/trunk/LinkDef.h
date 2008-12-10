@@ -13,9 +13,6 @@
 #pragma link C++ class MagicControlPanel+;
 #pragma link C++ class CorrelationFactory+;
 
-#pragma link C++ namespace     MagicDisplayOption;
-#pragma link C++ enum          MagicDisplayOption::EMagicDisplayOption;
-#pragma link C++ nestedtypedef MagicDisplayOption::MagicDisplayOption_t;
 
 #pragma link C++ namespace     MagicDisplayCanvasLayoutOption;
 #pragma link C++ enum          MagicDisplayCanvasLayoutOption::EMagicDisplayCanvasLayoutOption;

@@ -20,6 +20,8 @@
 class UsefulAnitaEvent;
 class RawAnitaHeader;
 class TPad;
+class TFile;
+class TGeoManager;
 
 //!  The event display canvas maker.
 /*!
@@ -86,6 +88,7 @@ class AnitaCanvasMaker
    
    void setupPhiPadWithFrames(TPad *plotPad); ///< Worker function to setup the phi view canvas.
    void setupSurfPadWithFrames(TPad *plotPad); ///< Worker function to setup the surf view canvas.
+   void setupPayloadViewWithFrames(TPad *plotPad); ///< Worker function to setup the payload view canvas.
    //void deleteTGraphsFromPad(TPad *paddy); ///< Deprecated.
    void deleteTGraphsFromPad(TPad *paddy,int surf,int chan); ///< Worker fucntion to delete a specific graph from a pad.
    void deleteTGraphsFromPad(TPad *paddy,int surf,int chan,int chan2); ///< Worker fucntion to delete specific graphs from a pad.
@@ -108,7 +111,9 @@ class AnitaCanvasMaker
    static AnitaCanvasMaker *fgInstance; ///< To protect against multiple instances.
 
  private:
-
+   Int_t fPhiMax;
+   TFile *fAnitaGeomFile;
+   TGeoManager *fAnitaGeomManager;
    //!  A worker function to draw the horizontal canvas -- shouldn't be called directly.
    /*!
      /param hdPtr Pointer to the header of the event we want to draw.
@@ -140,7 +145,13 @@ class AnitaCanvasMaker
    */
    TPad *getVerticalCanvasForWebPlotter(RawAnitaHeader *hdPtr, TPad *useCan=0);
 
-
+   //!  A worker function to draw the Payload view canvas -- shouldn't be called directly.
+   /*!
+     /param hdPtr Pointer to the header of the event we want to draw.
+     /param useCan Optional pointer to a canvas to draw the squiggly ines in (if zero a canvas will be created).
+   */
+   TPad *getPayloadCanvas(RawAnitaHeader *hdPtr, TPad *useCan=0);
+   void loadPayloadViewSutff(); ///<Loads the anita geometry
 };
 
 
