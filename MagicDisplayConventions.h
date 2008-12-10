@@ -85,6 +85,19 @@ namespace MagicDisplaySurfHkDisplay {
   } MagicDisplaySurfHkDisplay_t; ///< Enumeration for plot style
 };
     
+//!  GPS display format option
+/*!
+  A simple enumeration to enumerate the different ways to display the GPS data.
+*/
+namespace MagicDisplayGpsDisplay {
+  typedef enum EMagicDisplayGpsDisplay {
+    kMapView = 0,
+    kSatView =  1,
+    kTimeView = 2,
+    kNotAView = 3
+  } MagicDisplayGpsDisplay_t; ///< Enumeration for plot style
+};
+
 
 int getNiceColour(int ind); ///< Simple fucntion to return some of my favourite colours.
 int getMarker(int ind);///< Returns a maker number

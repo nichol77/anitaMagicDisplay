@@ -24,10 +24,19 @@ class RawAnitaHeader;
 class PrettyAnitaHk;
 class RawAnitaEvent;
 class UsefulAnitaEvent;
+
 class TurfRate;
 class SummedTurfRate;
 class AveragedSurfHk;
 class SurfHk;
+
+class Adu5Pat;
+class Adu5Sat;
+class Adu5Vtg;
+class G12Pos;
+class G12Sat;
+class GpsGga;
+
 class TButton;
 class TTreeIndex;
 class TFile;
@@ -114,7 +123,7 @@ class MagicDisplay
   void toggleSurfRfPowerView(Int_t kelvinView); ///< Toggles betweem adc and Kelvin views.
   void toggleSurfLogView(); ///<Toggles between log and linear
   void startSurfHkPlaying(); ///< Starts SURF Hk Play mode
-  void stopSurfHkPlaying(); ///< Stops SURF Hk Play mode
+  void stopSurfHkPlaying(); ///< Stops SURF Hk Play modes
 
   int loadAvgSurfTree(); ///< Opens the averaged SURF hk file for the current rune.
   void startAvgSurfDisplay(); ///< Starts the averaged SURF hk display window.
@@ -139,6 +148,17 @@ class MagicDisplay
   void drawSumTurfButtons(); ///< Draws the buttons on the summed TURF rate display.
   void toggleSumTurfYScale(); ///< Toggles between fixed and auto-scaling y-axis on the summed TURF display.
 
+  int loadGpsTrees(); ///< Opens the GPS file for the current run.
+  void startGpsDisplay(); ///< Starts the GPS display window.
+  int displayNextGps(); ///< Displays the next event in the GPS tree.
+  int displayPreviousGps(); ///< Displays the previous event in the GPS tree.
+  void refreshGpsDisplay(); ///< Refreshs the GPS display. 
+  int getGpsEntry(); ///< Attempts to load the entries.
+  void drawGpsButtons(); ///< Draws the buttons on the GPS rate display
+  void startGpsPlaying(); ///< Starts GPS Play mode
+  void stopGpsPlaying(); ///< Stops GPS Play mode
+  void setGpsView(MagicDisplayGpsDisplay::MagicDisplayGpsDisplay_t theDisplay);
+
 
   //! Returns a pointer to the active MagicDisplay. This is very useful if you want to access the TTree's directly or if you want to explicitly call one of the methods.
   /*!
@@ -154,6 +174,7 @@ class MagicDisplay
   TFile *fSumTurfRateFile; ///< A pointer to the current summed TURF rate file.
   TFile *fSurfHkFile; ///< A pointer to the current SURF hk file.
   TFile *fAvgSurfHkFile; ///< A pointer to the current averaged SURF hk file.
+  TFile *fGpsFile; ///<A pointer to the current GPS file.
 
   //Here are the data managers
   TTree *fHeadTree; ///< A pointer to the current header tree.
@@ -163,6 +184,14 @@ class MagicDisplay
   TTree *fSurfHkTree; ///< A pointer to the current SURF hk tree.
   TTree *fSumTurfRateTree; ///< A pointer to the current summed TURF rate tree.
   TTree *fAvgSurfHkTree;///< A pointer to the current averaged SURF hk tree.
+  TTree *fG12PosTree;///< A pointer to the current G12 position tree.
+  TTree *fG12SatTree;///< A pointer to the current G12 satellite tree.
+  TTree *fAdu5aPatTree; ///< A pointer to the current ADU5 A position tree.
+  TTree *fAdu5aSatTree; ///< A pointer to the current ADU5 A satellite tree.
+  TTree *fAdu5aVtgTree; ///< A pointer to the current ADU5 A velocity tree.
+  TTree *fAdu5bPatTree; ///< A pointer to the current ADU5 B position tree.
+  TTree *fAdu5bSatTree; ///< A pointer to the current ADU5 B satellite tree.
+  TTree *fAdu5bVtgTree; ///< A pointer to the current ADU5 B velocity tree.
 
   //And some useful info to keep track of what is where
   Long64_t fEventEntry; ///< The current event+header entry.
@@ -171,9 +200,19 @@ class MagicDisplay
   Long64_t fSurfHkEntry; ///< The current SURF hk entry.
   Long64_t fSumTurfRateEntry; ///< The current summed TURF rate entry.
   Long64_t fAvgSurfHkEntry; ///< The current averaged SURF hk entry.
+  Long64_t fG12PosEntry; ///< The current G12 position entry;
+  Long64_t fG12SatEntry; ///< The current G12 satellite entry;
+  Long64_t fAdu5aPatEntry; ///< The current ADU5 A position entry.
+  Long64_t fAdu5aSatEntry; ///< The current ADU5 A satellite entry.
+  Long64_t fAdu5aVtgEntry; ///< The current ADU5 A velocity entry.
+  Long64_t fAdu5bPatEntry; ///< The current ADU5 B position entry.
+  Long64_t fAdu5bSatEntry; ///< The current ADU5 B satellite entry.
+  Long64_t fAdu5bVtgEntry; ///< The current ADU5 B velocity entry.
 
   //And something to help with the indexing
   TTreeIndex *fHeadIndex; ///< Disused.
+  TTreeIndex *fAdu5aSatIndex; ///< Index for ADU5 satellite fun.
+  TTreeIndex *fAdu5bSatIndex; ///< Inde for ADU5B satellite fun.
 
   UInt_t fCurrentRun; ///< The current run number.
   Char_t fCurrentBaseDir[180]; ///< The base directory for the ROOT files.
@@ -184,6 +223,7 @@ class MagicDisplay
    // protect against multiple instances
 
  private:
+  void zeroPointers();
   MagicDisplayFormatOption::MagicDisplayFormatOption_t fWaveformFormat; ///< The format for displaying waveforms.
   MagicDisplayCanvasLayoutOption::MagicDisplayCanvasLayoutOption_t fCanvasLayout; ///< The format for the canvas layout
 
@@ -207,6 +247,10 @@ class MagicDisplay
    TPad *fAvgSurfMainPad; ///< The averaged SURF hk pad.
    TPad *fAvgSurfInfoPad; ///< The averaged SURF hk info pad.
 
+   TCanvas *fGpsCanvas; ///< The GPS canvas.
+   TPad *fGpsMainPad; ///< The GPS pad.
+   TPad *fGpsInfoPad; ///< The GPS info pad.
+
    RawAnitaHeader *fHeadPtr; ///< Pointer to the header.
    PrettyAnitaHk *fHkPtr; ///< Pointer to the pretty hk.
    RawAnitaEvent *fRawEventPtr; ///< Pointer to the raw event.
@@ -215,6 +259,14 @@ class MagicDisplay
    SurfHk *fSurfPtr; ///< Pointer to the SURF hk.
    SummedTurfRate *fSumTurfPtr; ///< Pointer to the summed TURF rate.
    AveragedSurfHk *fAvgSurfPtr; ///< Pointer to the averaged SURF hk.
+   G12Pos *fG12PosPtr; ///< Pointer to the G12 position data.
+   G12Sat *fG12SatPtr; ///< Pointer to the G12 satellite data.
+   Adu5Pat *fAdu5APatPtr; ///< Pointer to the ADU5 position data.
+   Adu5Sat *fAdu5ASatPtr; ///< Pointer to the ADU5 satellite data.
+   Adu5Vtg *fAdu5AVtgPtr; ///< Pointer to the ADU5 velocity data.
+   Adu5Pat *fAdu5BPatPtr; ///< Pointer to the ADU5 position data.
+   Adu5Sat *fAdu5BSatPtr; ///< Pointer to the ADU5 satellite data.
+   Adu5Vtg *fAdu5BVtgPtr; ///< Pointer to the ADU5 velocity data.
 
    TButton *fVertButton; ///< The vertical polarisation button.
    TButton *fHorizButton; ///< The horizontal polarisation button.
@@ -241,10 +293,15 @@ class MagicDisplay
    TButton *fAvgSurfKelvinViewButton; ///< The averaged SURF RF power kelvin view button.
    TButton *fAvgSurfLogButton; ///< The averaged SURF log/linear button
 
+
+   TButton *fGpsSatViewButton; ///< The GPS satellite view button.
+   TButton *fGpsMapViewButton; ///< The GPS map view button.
+
    Int_t fInEventPlayMode; ///< Flag that indicates playback mode
    Int_t fEventPlaySleepMs; ///< Length of sleep between events in playback mode.
    Int_t fInSurfPlayMode; ///< Flag that indicates surfhk play mode
    Int_t fInAvgSurfPlayMode; ///< Flag that indicates surfhk play mode
+   Int_t fInGpsPlayMode; ///< Flag that indicates GPS play mode.
 
    WaveCalType::WaveCalType_t fCalType; ///< The waveform calibration type.
 

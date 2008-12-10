@@ -14,9 +14,11 @@ ANITA_UTIL_LIB_DIR=${ANITA_UTIL_INSTALL_DIR}/lib
 ANITA_UTIL_INC_DIR=${ANITA_UTIL_INSTALL_DIR}/include
 LD_ANITA_UTIL=-L$(ANITA_UTIL_LIB_DIR)
 INC_ANITA_UTIL=-I$(ANITA_UTIL_INC_DIR)
+ANITA_UTIL_MAP_DIR=$(ANITA_UTIL_INSTALL_DIR)/share/anitaMap
 else
 ANITA_UTIL_LIB_DIR=/usr/local/lib
 ANITA_UTIL_INC_DIR=/usr/local/include
+ANITA_UTIL_MAP_DIR=/usr/local/share/anitaMap
 ifdef EVENT_READER_DIR
 LD_ANITA_UTIL=-L$(EVENT_READER_DIR)
 INC_ANITA_UTIL=-I$(EVENT_READER_DIR)
@@ -43,8 +45,8 @@ GLIBS         = $(ROOTGLIBS) $(SYSLIBS)
 
 #Now the bits we're actually compiling
 ROOT_LIBRARY = libMagicDisplay.${DLLSUF}
-LIB_OBJS =  AnitaCanvasMaker.o WaveformGraph.o MagicDisplay.o MagicDisplayConventions.o AnitaRFCanvasMaker.o MagicControlPanel.o FFTGraph.o CorrelationFactory.o  magicDict.o
-CLASS_HEADERS = AnitaCanvasMaker.h AnitaRFCanvasMaker.h WaveformGraph.h MagicDisplay.h MagicDisplayConventions.h MagicControlPanel.h FFTGraph.h CorrelationFactory.h
+LIB_OBJS =  AnitaCanvasMaker.o WaveformGraph.o MagicDisplay.o MagicDisplayConventions.o AnitaRFCanvasMaker.o MagicControlPanel.o FFTGraph.o CorrelationFactory.o  AnitaGpsCanvasMaker.o magicDict.o
+CLASS_HEADERS = AnitaCanvasMaker.h AnitaRFCanvasMaker.h WaveformGraph.h MagicDisplay.h MagicDisplayConventions.h MagicControlPanel.h FFTGraph.h CorrelationFactory.h AnitaGpsCanvasMaker.h
 
 
 all : $(ROOT_LIBRARY)
@@ -89,6 +91,8 @@ else
 	install -c -m 755 $(ROOT_LIBRARY) $(ANITA_UTIL_LIB_DIR)
 endif
 	install -c -m 644  $(CLASS_HEADERS) $(ANITA_UTIL_INC_DIR)
+	install -d $(ANITA_UTIL_MAP_DIR)
+	install -c -m 644 antarcticaIceMap.png $(ANITA_UTIL_MAP_DIR)
 
 clean:
 	@rm -f *Dict*
