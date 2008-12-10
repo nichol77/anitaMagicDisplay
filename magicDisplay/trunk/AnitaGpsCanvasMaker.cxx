@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////////////////////////
-/////  AnitaGpsCanvasMaker.cxx        ANITA Event Canvas make               /////
+/////  AnitaGpsCanvasMaker.cxx        ANITA GPS Canvas maker             /////
 /////                                                                    /////
 /////  Description:                                                      /////
-/////     Class for making pretty event canvases for ANITA-II            /////
+/////     Class for making pretty GPS canvases for ANITA-II              /////
 /////  Author: Ryan Nichol (rjn@hep.ucl.ac.uk)                           /////
 //////////////////////////////////////////////////////////////////////////////
 #include <fstream>
@@ -148,14 +148,36 @@ TPad *AnitaGpsCanvasMaker::getGpsInfoCanvas(Adu5Sat *adu5ASatPtr, Adu5Sat *adu5B
   leftPave->SetBorderSize(0);
   leftPave->SetFillColor(0);
   leftPave->SetTextAlign(13);
-  sprintf(textLabel,"Run:    %d",g12PosPtr->run);
-  TText *runText = leftPave->AddText(textLabel);
-  runText->SetTextColor(50);
-  TTimeStamp g12PosTime((time_t)g12PosPtr->realTime,0);
-  sprintf(textLabel,"Time: %s",g12PosTime.AsString("s"));
-  TText *timeText = leftPave->AddText(textLabel);
-  timeText->SetTextColor(1);
-  leftPave->Draw();
+  if(adu5APatPtr) {
+    sprintf(textLabel,"Run:    %d",adu5APatPtr->run);
+    TText *runText = leftPave->AddText(textLabel);
+    runText->SetTextColor(50);
+    TTimeStamp g12PosTime((time_t)adu5APatPtr->realTime,0);
+    sprintf(textLabel,"Time: %s",g12PosTime.AsString("s"));  
+    TText *timeText = leftPave->AddText(textLabel);
+    timeText->SetTextColor(1);
+  }
+  else if(adu5BPatPtr) {
+    sprintf(textLabel,"Run:    %d",adu5BPatPtr->run);
+    TText *runText = leftPave->AddText(textLabel);
+    runText->SetTextColor(50);
+    TTimeStamp g12PosTime((time_t)adu5BPatPtr->realTime,0);
+    sprintf(textLabel,"Time: %s",g12PosTime.AsString("s"));  
+    TText *timeText = leftPave->AddText(textLabel);
+    timeText->SetTextColor(1);
+
+  }
+  else if(g12PosPtr) {
+    sprintf(textLabel,"Run:    %d",g12PosPtr->run);
+    TText *runText = leftPave->AddText(textLabel);
+    runText->SetTextColor(50);
+    TTimeStamp g12PosTime((time_t)g12PosPtr->realTime,0);
+    sprintf(textLabel,"Time: %s",g12PosTime.AsString("s"));  
+    TText *timeText = leftPave->AddText(textLabel);
+    timeText->SetTextColor(1);
+
+  }
+    leftPave->Draw();
 
   topPad->cd(2);
   TPaveText *rightPave = new TPaveText(0.05,0,0.95,0.9);
