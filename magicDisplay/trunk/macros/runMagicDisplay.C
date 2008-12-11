@@ -8,24 +8,26 @@ void runMagicDisplay() {
   gSystem->Load("libfftw3.so");
 
   gSystem->Load("libMathMore.so");
+  gSystem->Load("libGeom.so");;
+  gSystem->Load("libGraf3d.so");
   gSystem->Load("libPhysics.so");  
   gSystem->Load("libRootFftwWrapper.so");     	  
   gSystem->Load("libAnitaEvent.so");   	  
   gSystem->Load("libMagicDisplay.so");
 
   TChain *fred=0; //Will this work?
-  runMagicDisplayRun(7);
+  runMagicDisplayRun(708);
 }
 
 
 void runMagicDisplayRun(int run) {
-  MagicDisplay *magicPtr = new MagicDisplay("/TBdata/anita/antarctica08/root/",run,WaveCalType::kVTLabAG);
+  MagicDisplay *magicPtr = new MagicDisplay("/TBdata/anita/antarctica08/root/",run,WaveCalType::kVTFullAGCrossCorClock);
 
-  magicPtr->startSurfDisplay();
+  //magicPtr->startSurfDisplay();
   //  magicPtr->startAvgSurfDisplay();
   //   magicPtr->startTurfDisplay();
   //  magicPtr->startSumTurfDisplay();
-  //  magicPtr->startEventDisplay();
+   magicPtr->startEventDisplay();
   //  magicPtr->startControlPanel();
 
 }
