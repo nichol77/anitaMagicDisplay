@@ -170,6 +170,7 @@ TPad *AnitaCanvasMaker::getEventInfoCanvas(UsefulAnitaEvent *evPtr, RawAnitaHead
 
 
      topPad->cd(2);
+     gPad->SetRightMargin(0);
      if(midLeftPave) delete midLeftPave;
      midLeftPave = new TPaveText(0,0,1,0.9);
      midLeftPave->SetName("midLeftPave");
@@ -186,32 +187,20 @@ TPad *AnitaCanvasMaker::getEventInfoCanvas(UsefulAnitaEvent *evPtr, RawAnitaHead
      midLeftPave->AddText(textLabel);
      //      sprintf(textLabel,"Lab Chip %d",labChip);
      //      midLeftPave->AddText(textLabel);
-     sprintf(textLabel,"Trig Num: %d -- Trig Type: %s",hdPtr->trigNum,hdPtr->trigTypeAsString());
-     midLeftPave->AddText(textLabel);
-     if(hdPtr->errorFlag&0x1) {
-       TText *slipText = midLeftPave->AddText("Possible Sync Slip");
-	 slipText->SetTextColor(6);   
-     }
-     char labLetter[4]={'A','B','C','D'};
-     sprintf(textLabel,"Labrador ");
-     
-     int good=1;
-     for(int surf=0;surf<ACTIVE_SURFS;surf++) {
-       sprintf(textLabel,"%s%c",textLabel,labLetter[evPtr->getLabChip(1+ 9*surf)]);
-       if(evPtr->getLabChip(10) != evPtr->getLabChip(9*surf + 1))
-	 good=0;
-     }
-     TText *labText=midLeftPave->AddText(textLabel);
-     if(!good)
-       labText->SetTextColor(6);
      midLeftPave->Draw();
-
+     gPad->Modified();
      
      topPad->cd(3);
      if(midRightPave) delete midRightPave;
      midRightPave = new TPaveText(0,0,1,0.95);
      midRightPave->SetBorderSize(0);
      midRightPave->SetTextAlign(13);
+     sprintf(textLabel,"Trig Num: %d -- Trig Type: %s",hdPtr->trigNum,hdPtr->trigTypeAsString());
+     midRightPave->AddText(textLabel);
+     if(hdPtr->errorFlag&0x1) {
+       TText *slipText = midRightPave->AddText("Possible Sync Slip");
+	 slipText->SetTextColor(6);   
+     }
      sprintf(textLabel,"TURF: %d",hdPtr->turfEventId&0xfffff);
      midRightPave->AddText(textLabel);
      for(int surf=0;surf<ACTIVE_SURFS;surf++) {
@@ -234,6 +223,20 @@ TPad *AnitaCanvasMaker::getEventInfoCanvas(UsefulAnitaEvent *evPtr, RawAnitaHead
      rightPave->AddText(textLabel);
      sprintf(textLabel,"TURF Active Holds: %#x",(hdPtr->reserved[0]&0xf0)>>4);
      rightPave->AddText(textLabel);
+
+     char labLetter[4]={'A','B','C','D'};
+     sprintf(textLabel,"Labrador ");
+     
+     int good=1;
+     for(int surf=0;surf<ACTIVE_SURFS;surf++) {
+       sprintf(textLabel,"%s%c",textLabel,labLetter[evPtr->getLabChip(1+ 9*surf)]);
+       if(evPtr->getLabChip(10) != evPtr->getLabChip(9*surf + 1))
+	 good=0;
+     }
+     TText *labText=rightPave->AddText(textLabel);
+     if(!good)
+       labText->SetTextColor(6);
+
      sprintf(textLabel,"Phi Mask: %#x",(hdPtr->phiTrigMask));
      rightPave->AddText(textLabel);     
      rightPave->Draw();

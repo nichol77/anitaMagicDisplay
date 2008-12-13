@@ -1159,7 +1159,7 @@ void MagicDisplay::drawAvgSurfButtons()
 
    fAvgSurfMeasuredKelvinViewButton  = new TButton("T_meas","MagicDisplay::Instance()->toggleAvgSurfRfPowerView(2); MagicDisplay::Instance()->refreshAvgSurfDisplay();",0.15,0.94,0.2,0.97);
    fAvgSurfMeasuredKelvinViewButton->SetTextSize(0.4);
-   fAvgSurfMeasuredKelvinViewButton->SetFillColor(kGray+3);
+   fAvgSurfMeasuredKelvinViewButton->SetFillColor(kGray);
    fAvgSurfMeasuredKelvinViewButton->Draw();
    
    fAvgSurfLogButton  = new TButton("Log Scale","MagicDisplay::Instance()->toggleAvgSurfLogView(); MagicDisplay::Instance()->refreshAvgSurfDisplay();",0.1,0.97,0.2,1);
