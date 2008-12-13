@@ -914,10 +914,15 @@ void MagicDisplay::drawSurfButtons()
    fSurfAdcViewButton->SetFillColor(kGray);
    fSurfAdcViewButton->Draw();
 
-   fSurfKelvinViewButton  = new TButton("Kelvin","MagicDisplay::Instance()->toggleSurfRfPowerView(1); MagicDisplay::Instance()->refreshSurfDisplay();",0.1,0.94,0.2,0.97);
+   fSurfKelvinViewButton  = new TButton("T_inp","MagicDisplay::Instance()->toggleSurfRfPowerView(1); MagicDisplay::Instance()->refreshSurfDisplay();",0.1,0.94,0.15,0.97);
    fSurfKelvinViewButton->SetTextSize(0.4);
    fSurfKelvinViewButton->SetFillColor(kGray+3);
    fSurfKelvinViewButton->Draw();
+
+   fSurfMeasuredKelvinViewButton  = new TButton("T_meas","MagicDisplay::Instance()->toggleSurfRfPowerView(2); MagicDisplay::Instance()->refreshSurfDisplay();",0.15,0.94,0.2,0.97);
+   fSurfMeasuredKelvinViewButton->SetTextSize(0.4);
+   fSurfMeasuredKelvinViewButton->SetFillColor(kGray);
+   fSurfMeasuredKelvinViewButton->Draw();
    
    fSurfLogButton  = new TButton("Log Scale","MagicDisplay::Instance()->toggleSurfLogView(); MagicDisplay::Instance()->refreshSurfDisplay();",0.1,0.97,0.2,1);
    fSurfLogButton->SetTextSize(0.4);
@@ -990,19 +995,29 @@ void MagicDisplay::toggleSurfRfPowerView(Int_t kelvinView)
    
    if(kelvinView) {
       //Turn on 
-      fRFCanMaker->fSurfKelvinView=1;
-      fSurfKelvinViewButton->SetFillColor(kGray+3);
-      fSurfAdcViewButton->SetFillColor(kGray);
-      fSurfKelvinViewButton->Modified();
-      fSurfAdcViewButton->Modified();
+     fRFCanMaker->fSurfKelvinView=kelvinView;
+     if(kelvinView==1) {
+       fSurfKelvinViewButton->SetFillColor(kGray+3);
+       fSurfMeasuredKelvinViewButton->SetFillColor(kGray);
+     }
+     else if(kelvinView==2) {
+       fSurfKelvinViewButton->SetFillColor(kGray);
+       fSurfMeasuredKelvinViewButton->SetFillColor(kGray+3);
+     }
+     fSurfAdcViewButton->SetFillColor(kGray);
+     fSurfKelvinViewButton->Modified();
+     fSurfAdcViewButton->Modified();
+     fSurfMeasuredKelvinViewButton->Modified();
    }
    else {
       //Turn phi view on
       fRFCanMaker->fSurfKelvinView=0;
       fSurfKelvinViewButton->SetFillColor(kGray);
+      fSurfMeasuredKelvinViewButton->SetFillColor(kGray);
       fSurfAdcViewButton->SetFillColor(kGray+3);
       fSurfKelvinViewButton->Modified();
       fSurfAdcViewButton->Modified();
+      fSurfMeasuredKelvinViewButton->Modified();
    }
       
 }
@@ -1136,10 +1151,16 @@ void MagicDisplay::drawAvgSurfButtons()
    fAvgSurfAdcViewButton->SetFillColor(kGray);
    fAvgSurfAdcViewButton->Draw();
 
-   fAvgSurfKelvinViewButton  = new TButton("Kelvin","MagicDisplay::Instance()->toggleAvgSurfRfPowerView(1); MagicDisplay::Instance()->refreshAvgSurfDisplay();",0.1,0.94,0.2,0.97);
+   fAvgSurfKelvinViewButton  = new TButton("T_inp","MagicDisplay::Instance()->toggleAvgSurfRfPowerView(1); MagicDisplay::Instance()->refreshAvgSurfDisplay();",0.1,0.94,0.15,0.97);
    fAvgSurfKelvinViewButton->SetTextSize(0.4);
    fAvgSurfKelvinViewButton->SetFillColor(kGray+3);
    fAvgSurfKelvinViewButton->Draw();
+
+
+   fAvgSurfMeasuredKelvinViewButton  = new TButton("T_meas","MagicDisplay::Instance()->toggleAvgSurfRfPowerView(2); MagicDisplay::Instance()->refreshAvgSurfDisplay();",0.15,0.94,0.2,0.97);
+   fAvgSurfMeasuredKelvinViewButton->SetTextSize(0.4);
+   fAvgSurfMeasuredKelvinViewButton->SetFillColor(kGray+3);
+   fAvgSurfMeasuredKelvinViewButton->Draw();
    
    fAvgSurfLogButton  = new TButton("Log Scale","MagicDisplay::Instance()->toggleAvgSurfLogView(); MagicDisplay::Instance()->refreshAvgSurfDisplay();",0.1,0.97,0.2,1);
    fAvgSurfLogButton->SetTextSize(0.4);
@@ -1214,19 +1235,30 @@ void MagicDisplay::toggleAvgSurfRfPowerView(Int_t kelvinView)
    if(kelvinView) {
       //Turn on 
      //     std::cout << "setting fAvgSurfKelvinView " << 1 << "\n";
-      fRFCanMaker->fAvgSurfKelvinView=1;
-      fAvgSurfKelvinViewButton->SetFillColor(kGray+3);
+      fRFCanMaker->fAvgSurfKelvinView=kelvinView;
+      if(kelvinView==2) {
+	fAvgSurfMeasuredKelvinViewButton->SetFillColor(kGray+3);
+	fAvgSurfKelvinViewButton->SetFillColor(kGray);
+      }
+      else if(kelvinView==1){
+	fAvgSurfMeasuredKelvinViewButton->SetFillColor(kGray);
+	fAvgSurfKelvinViewButton->SetFillColor(kGray+3);
+      }
+	
       fAvgSurfAdcViewButton->SetFillColor(kGray);
       fAvgSurfKelvinViewButton->Modified();
       fAvgSurfAdcViewButton->Modified();
+      fAvgSurfMeasuredKelvinViewButton->Modified();
    }
    else {
       //Turn phi view on
       fRFCanMaker->fAvgSurfKelvinView=0;
+      fAvgSurfMeasuredKelvinViewButton->SetFillColor(kGray);
       fAvgSurfKelvinViewButton->SetFillColor(kGray);
       fAvgSurfAdcViewButton->SetFillColor(kGray+3);
       fAvgSurfKelvinViewButton->Modified();
       fAvgSurfAdcViewButton->Modified();
+      fAvgSurfMeasuredKelvinViewButton->Modified();
    }
       
 }

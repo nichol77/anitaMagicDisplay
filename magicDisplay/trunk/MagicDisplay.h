@@ -285,6 +285,7 @@ class MagicDisplay
    TButton *fSurfTimeViewButton; ///< The SURF hk phi view button.
    TButton *fSurfAdcViewButton; ///< The SURF RF power ADC view button.
    TButton *fSurfKelvinViewButton; ///< The SURF RF power kelvin view button.
+   TButton *fSurfMeasuredKelvinViewButton; ///< The SURF RF power kelvin view button.
    TButton *fSurfLogButton; ///< The Surf log/linear button
 
    TButton *fSumTurfYScaleButton; ///< The summed TURF rate Y scale button.
@@ -292,6 +293,7 @@ class MagicDisplay
    TButton *fAvgSurfPhiViewButton; ///< The averaged SURF hk phi view button.
    TButton *fAvgSurfAdcViewButton; ///< The averaged SURF RF power ADC view button.
    TButton *fAvgSurfKelvinViewButton; ///< The averaged SURF RF power kelvin view button.
+   TButton *fAvgSurfMeasuredKelvinViewButton; ///< The averaged SURF RF power kelvin view button.
    TButton *fAvgSurfLogButton; ///< The averaged SURF log/linear button
 
 
