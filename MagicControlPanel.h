@@ -48,20 +48,37 @@
 #include <TGFontDialog.h>
 
 
+
 //!  The Magic Display control panel
 /*!
   This is the horribly buggy control panel that was meant to enable easy control of magic Display, without resorting to command line power user mode. Unfortunately, it doesn't yet really work in a non segmentation violation frenzy way. I blame ROOT, others may have different opinions.
 */
-class MagicControlPanel : public TGMainFrame
+class MagicControlPanel 
 {
- private:
  
  public:
-   TGTextButton    *fButton0; ///< Text button.
-   TGTextButton    *fButton1; ///< Text button.
-   TGTextButton    *fButton2; ///< Text button.
-   TGTextButton    *fButton3; ///< Text button.
+
+
+   MagicControlPanel(); ///< The default constructor
+   virtual ~MagicControlPanel(); ///< The destructor
+
+   //   virtual Bool_t ProcessMessage(Long_t msg, Long_t parm1, Long_t); ///< ROOT underlying code fragment
+
+  
+
+  //Instance generator
+   static MagicControlPanel*  Instance(); ///< The instance generator (there should only be one instance of the MagicControlPanel at a time
+   
+   void goToEvent();
+   void closeControlPanel();
+  
+
+ protected:
+   static MagicControlPanel *fgInstance;   ///< Protect against multiple instances
+
+   TGMainFrame     *fMainFrame; ///< Main frame
    TGTextButton    *fGotoBut; ///< Text button.
+
    TGCheckButton   *fEventBut; ///< Check button
    TGCheckButton   *fSurfBut; ///< Check button
    TGCheckButton   *fTurfBut; ///< Check button
@@ -76,32 +93,12 @@ class MagicControlPanel : public TGMainFrame
    TGNumberEntry   *fEventEntry; ///< Number entry form
    TGLabel         *fRunLabel; ///< It's a label
    TGLabel         *fEventLabel; ///< It's a label
-   TGLabel         *fQuickJumpLabel; ///< It's a label
    TGLabel         *fUpdateLabel; ///< It's a label
 
    TGVerticalFrame *fEntryPanel; ///< A vertical frame
    TGHorizontalFrame *fRunPanel; ///< A horizontal frame
    TGHorizontalFrame *fEventPanel; ///< A horizontal frame
    TGVerticalFrame *fButtonPanel; ///< A vertical frame
-
-
-
-   MagicControlPanel(); ///< The default constructor
-   MagicControlPanel(const TGWindow *p, UInt_t w, UInt_t h); ///< The constructor
-   virtual ~MagicControlPanel(); ///< The destructor
-
-   virtual void CloseWindow(); ///< ROOT underlying code fragment
-   virtual Bool_t ProcessMessage(Long_t msg, Long_t parm1, Long_t); ///< ROOT underlying code fragment
-
-  
-
-  //Instance generator
-   static MagicControlPanel*  Instance(); ///< The instance generator (there should only be one instance of the MagicControlPanel at a time
-  
-  
-
- protected:
-   static MagicControlPanel *fgInstance;   ///< Protect against multiple instances
 
    ClassDef(MagicControlPanel,1); ///< One of the magic ROOT macros.
 };

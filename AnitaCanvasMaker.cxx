@@ -171,8 +171,9 @@ TPad *AnitaCanvasMaker::getEventInfoCanvas(UsefulAnitaEvent *evPtr, RawAnitaHead
 
      topPad->cd(2);
      gPad->SetRightMargin(0);
+     gPad->SetLeftMargin(0);
      if(midLeftPave) delete midLeftPave;
-     midLeftPave = new TPaveText(0,0,1,0.9);
+     midLeftPave = new TPaveText(0,0,0.99,0.9);
      midLeftPave->SetName("midLeftPave");
      midLeftPave->SetBorderSize(0);
      midLeftPave->SetTextAlign(13);
@@ -188,7 +189,9 @@ TPad *AnitaCanvasMaker::getEventInfoCanvas(UsefulAnitaEvent *evPtr, RawAnitaHead
      //      sprintf(textLabel,"Lab Chip %d",labChip);
      //      midLeftPave->AddText(textLabel);
      midLeftPave->Draw();
+     //     midLeftPave->Modified();
      gPad->Modified();
+     gPad->Update();
      
      topPad->cd(3);
      if(midRightPave) delete midRightPave;
