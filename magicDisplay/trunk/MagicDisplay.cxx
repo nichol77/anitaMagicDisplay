@@ -194,9 +194,11 @@ MagicDisplay*  MagicDisplay::Instance()
 
 void MagicDisplay::startControlPanel() 
 {
-  //  fControlPanel=MagicControlPanel::Instance();
+  fControlPanel=MagicControlPanel::Instance();
+  //  
+  //  fControlPanel=new MagicControlPanel(gClient->GetRoot(), 400, 200);
   //  fControlPanel->DrawControlPanel();
-  new MagicControlPanel(gClient->GetRoot(), 400, 200);
+  //  fControlPanel->Draw();
 }
 
 
@@ -483,7 +485,11 @@ void MagicDisplay::drawEventButtons() {
    TButton *butReset = new TButton("Reset Avg","AnitaCanvasMaker::Instance()->resetAverage();",0.85,0.975,0.90,1);
    butReset->SetTextSize(0.5);
    butReset->SetFillColor(kViolet-10);
-   butReset->Draw();
+   butReset->Draw();;
+   TButton *butGoto = new TButton("Go to Event","MagicDisplay::Instance()->startControlPanel();",0.85,0.95,0.9,0.975);
+   butGoto->SetTextSize(0.5);
+   butGoto->SetFillColor(kOrange);
+   butGoto->Draw();
 
 
    fVertButton = new TButton("V","MagicDisplay::Instance()->setCanvasLayout(MagicDisplayCanvasLayoutOption::kPhiVerticalOnly); MagicDisplay::Instance()->refreshEventDisplay();",0,0.966,0.05,1);
