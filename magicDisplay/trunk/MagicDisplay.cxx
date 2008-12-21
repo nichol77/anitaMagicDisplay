@@ -82,6 +82,8 @@ void MagicDisplay::zeroPointers()
 {
   fApplyEventCut=0;
   fOrderByEventNumber=0;
+  fEventCutListEntry=-1;
+  fEventTreeIndexEntry=-1;
    fHeadFile=0;
    fEventFile=0;
    fTurfRateFile=0;
@@ -377,12 +379,12 @@ void MagicDisplay::applyCut(char *cutString)
 
 int MagicDisplay::displayNextEvent()
 {
-  static Int_t indexNumber=-1;
-  static Int_t listNumber=-1;
+  //  static Int_t fEventTreeIndexEntry=-1;
+  //  static Int_t listNumber=-1;
   if(fApplyEventCut==1) {
-    listNumber++;
-    if(listNumber<fCutEventList->GetSize()) {
-      fEventEntry=fCutEventList->GetEntry(listNumber);  
+    fEventCutListEntry++;
+    if(fEventCutListEntry<fCutEventList->GetSize()) {
+      fEventEntry=fCutEventList->GetEntry(fEventCutListEntry);  
       int retVal=getEventEntry();
       fEventCanMaker->fNewEvent=1;
       if(retVal==0) {
@@ -406,18 +408,18 @@ int MagicDisplay::displayNextEvent()
   }
   else {
     Long64_t *indVals=fHeadIndex->GetIndex();
-    if(indexNumber==-1) {
+    if(fEventTreeIndexEntry==-1) {
       //Need to find which entry we are at
       for(int i=0;i<fHeadIndex->GetN();i++) {
 	if(indVals[i]==fEventEntry) {
-	  indexNumber=i;
+	  fEventTreeIndexEntry=i;
 	  break;
 	}
       }
     }
-    indexNumber++;
-    if(indexNumber<fHeadIndex->GetN()) {
-      fEventEntry=indVals[indexNumber];
+    fEventTreeIndexEntry++;
+    if(fEventTreeIndexEntry<fHeadIndex->GetN()) {
+      fEventEntry=indVals[fEventTreeIndexEntry];
       int retVal=getEventEntry();
       fEventCanMaker->fNewEvent=1;
       if(retVal==0) {
@@ -469,12 +471,12 @@ int MagicDisplay::displayLastEvent()
 
 int MagicDisplay::displayPreviousEvent()
 {
-  static Int_t indexNumber=-1;
-  static Int_t listNumber=-1;
+  //  static Int_t fEventTreeIndexEntry=-1;
+  //  static Int_t fEventCutListEntry=-1;
   if(fApplyEventCut==1) {
-    listNumber--;
-    if(listNumber>=0 && listNumber<fCutEventList->GetSize()) {
-      fEventEntry=fCutEventList->GetEntry(listNumber);  
+    fEventCutListEntry--;
+    if(fEventCutListEntry>=0 && fEventCutListEntry<fCutEventList->GetSize()) {
+      fEventEntry=fCutEventList->GetEntry(fEventCutListEntry);  
       int retVal=getEventEntry();
       fEventCanMaker->fNewEvent=1;
       if(retVal==0) {
@@ -500,18 +502,18 @@ int MagicDisplay::displayPreviousEvent()
   }
   else {
     Long64_t *indVals=fHeadIndex->GetIndex();
-    if(indexNumber==-1) {
+    if(fEventTreeIndexEntry==-1) {
       //Need to find which entry we are at
       for(int i=0;i<fHeadIndex->GetN();i++) {
 	if(indVals[i]==fEventEntry) {
-	  indexNumber=i;
+	  fEventTreeIndexEntry=i;
 	  break;
 	}
       }
     }
-    indexNumber--;
-    if(indexNumber>=0 && indexNumber<fHeadIndex->GetN()) {
-      fEventEntry=indVals[indexNumber];
+    fEventTreeIndexEntry--;
+    if(fEventTreeIndexEntry>=0 && fEventTreeIndexEntry<fHeadIndex->GetN()) {
+      fEventEntry=indVals[fEventTreeIndexEntry];
       int retVal=getEventEntry();
       fEventCanMaker->fNewEvent=1;
       if(retVal==0) {
