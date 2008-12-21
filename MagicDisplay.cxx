@@ -469,16 +469,60 @@ int MagicDisplay::displayLastEvent()
 
 int MagicDisplay::displayPreviousEvent()
 {
-   if(fEventEntry>0)
+  static Int_t indexNumber=-1;
+  static Int_t listNumber=-1;
+  if(fApplyEventCut==1) {
+    listNumber--;
+    if(listNumber>=0 && listNumber<fCutEventList->GetSize()) {
+      fEventEntry=fCutEventList->GetEntry(listNumber);  
+      int retVal=getEventEntry();
+      fEventCanMaker->fNewEvent=1;
+      if(retVal==0) {
+	refreshEventDisplay(); 
+      }
+      return retVal;
+    }
+    else {
+      return -1;
+    }      
+  }
+  else if(fOrderByEventNumber==0) {
+    if(fEventEntry>0)
       fEventEntry--;
-   else 
+    else 
       return -1;
    int retVal=getEventEntry();
-     fEventCanMaker->fNewEvent=1;
+   fEventCanMaker->fNewEvent=1;
    if(retVal==0) {
-      refreshEventDisplay(); 
+     refreshEventDisplay(); 
    }  
    return retVal;  
+  }
+  else {
+    Long64_t *indVals=fHeadIndex->GetIndex();
+    if(indexNumber==-1) {
+      //Need to find which entry we are at
+      for(int i=0;i<fHeadIndex->GetN();i++) {
+	if(indVals[i]==fEventEntry) {
+	  indexNumber=i;
+	  break;
+	}
+      }
+    }
+    indexNumber--;
+    if(indexNumber>=0 && indexNumber<fHeadIndex->GetN()) {
+      fEventEntry=indVals[indexNumber];
+      int retVal=getEventEntry();
+      fEventCanMaker->fNewEvent=1;
+      if(retVal==0) {
+	refreshEventDisplay(); 
+      }
+      else fEventEntry--;
+      return retVal;  
+    }
+    else 
+      return -1;
+  }
 }
 
 
