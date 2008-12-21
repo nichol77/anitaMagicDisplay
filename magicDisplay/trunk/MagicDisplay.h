@@ -40,6 +40,7 @@ class GpsGga;
 class TButton;
 class TTreeIndex;
 class TFile;
+class TEventList;
 
 //!  The Marvellous ANITA Graphical Interface and Class Display (Magic Display)
 /*!
@@ -102,6 +103,8 @@ class MagicDisplay
     \param waveformView See MagicDisplayFormatOption for options.
   */
   void setWaveformFormat(MagicDisplayFormatOption::MagicDisplayFormatOption_t waveformView); 
+  void toggleTimeEventOrdering(); ///< Toggles between time and event ordering
+  void applyCut(char *cutString); ///< Applies a cut to the head tree
 
   int loadTurfTree(); ///< Opens the TURF rate file for the current run.
   void startTurfDisplay(); ///< Starts the TURF Rate display window.
@@ -210,7 +213,7 @@ class MagicDisplay
   Long64_t fAdu5bVtgEntry; ///< The current ADU5 B velocity entry.
 
   //And something to help with the indexing
-  TTreeIndex *fHeadIndex; ///< Disused.
+  TTreeIndex *fHeadIndex; ///< Reused
   TTreeIndex *fAdu5aSatIndex; ///< Index for ADU5 satellite fun.
   TTreeIndex *fAdu5bSatIndex; ///< Inde for ADU5B satellite fun.
 
@@ -278,6 +281,8 @@ class MagicDisplay
    TButton *fPowerButton; ///< The FFT view button.
    TButton *fHilbertButton; ///< The Hilbert envelope view button.
    TButton *fAverageFFTButton; ///< The average FFT button.
+   TButton *fTimeEntryButton; ///< The button that toggles between events and times
+
 
    TButton *fTurfYScaleButton; ///< The TURF rate Y scale button.
    TButton *fSurfSurfViewButton; ///< The SURF hk SURF view button.
@@ -302,6 +307,11 @@ class MagicDisplay
 
    Int_t fInEventPlayMode; ///< Flag that indicates playback mode
    Int_t fEventPlaySleepMs; ///< Length of sleep between events in playback mode.
+   Int_t fOrderByEventNumber; ///< Order by event number
+   Int_t fApplyEventCut; ///< Apply an event cut
+   TEventList *fCutEventList; ///<The cut eventlist
+   
+
    Int_t fInSurfPlayMode; ///< Flag that indicates surfhk play mode
    Int_t fInAvgSurfPlayMode; ///< Flag that indicates surfhk play mode
    Int_t fInGpsPlayMode; ///< Flag that indicates GPS play mode.

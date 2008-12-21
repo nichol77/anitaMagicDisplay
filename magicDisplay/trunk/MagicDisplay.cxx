@@ -66,6 +66,7 @@
 #include "TButton.h"
 #include "TGroupButton.h"
 #include "TThread.h"
+#include "TEventList.h"
 #include <TGClient.h>
 
 using namespace std;
@@ -79,6 +80,8 @@ MagicControlPanel *fControlPanel=0;
 
 void MagicDisplay::zeroPointers() 
 {
+  fApplyEventCut=0;
+  fOrderByEventNumber=0;
    fHeadFile=0;
    fEventFile=0;
    fTurfRateFile=0;
@@ -315,7 +318,7 @@ int MagicDisplay::loadEventTree()
   fHeadTree->SetBranchAddress("header",&fHeadPtr);
   fEventEntry=0;
   fHeadTree->BuildIndex("eventNumber");
-  //      fHeadIndex = (TTreeIndex*) fHeadTree->GetTreeIndex();
+  fHeadIndex = (TTreeIndex*) fHeadTree->GetTreeIndex();
   std::cerr << fEventTree << "\t" << fHeadTree << "\n";
   std::cerr << fHeadTree->GetEntries() << "\t"
 	    << fEventTree->GetEntries() << "\n";
@@ -357,16 +360,75 @@ void MagicDisplay::refreshEventDisplay()
   fMagicCanvas->Update();
 }
 
+void MagicDisplay::applyCut(char *cutString)
+{
+  if(cutString==0)
+    fApplyEventCut=0;
+
+  TCanvas tempCan;
+  tempCan.cd();
+  fHeadTree->Draw(">>elist1",cutString);
+  fCutEventList = (TEventList*)gDirectory->Get("elist1");
+  fApplyEventCut=1;
+  fCutEventList->Print();
+ 
+
+}
+
 int MagicDisplay::displayNextEvent()
 {
-   fEventEntry++;
-   int retVal=getEventEntry();
-     fEventCanMaker->fNewEvent=1;
-   if(retVal==0) {
+  static Int_t indexNumber=-1;
+  static Int_t listNumber=-1;
+  if(fApplyEventCut==1) {
+    listNumber++;
+    if(listNumber<fCutEventList->GetSize()) {
+      fEventEntry=fCutEventList->GetEntry(listNumber);  
+      int retVal=getEventEntry();
+      fEventCanMaker->fNewEvent=1;
+      if(retVal==0) {
+	refreshEventDisplay(); 
+      }
+      return retVal;
+    }
+    else {
+      return -1;
+    }      
+  }
+  else if(fOrderByEventNumber==0) {
+    fEventEntry++;    
+    int retVal=getEventEntry();
+    fEventCanMaker->fNewEvent=1;
+    if(retVal==0) {
       refreshEventDisplay(); 
-   }
-   else fEventEntry--;
-   return retVal;  
+    }
+    else fEventEntry--;
+    return retVal;  
+  }
+  else {
+    Long64_t *indVals=fHeadIndex->GetIndex();
+    if(indexNumber==-1) {
+      //Need to find which entry we are at
+      for(int i=0;i<fHeadIndex->GetN();i++) {
+	if(indVals[i]==fEventEntry) {
+	  indexNumber=i;
+	  break;
+	}
+      }
+    }
+    indexNumber++;
+    if(indexNumber<fHeadIndex->GetN()) {
+      fEventEntry=indVals[indexNumber];
+      int retVal=getEventEntry();
+      fEventCanMaker->fNewEvent=1;
+      if(retVal==0) {
+	refreshEventDisplay(); 
+      }
+      else fEventEntry--;
+      return retVal;  
+    }
+    else 
+      return -1;
+  }
 }
 
 
@@ -490,6 +552,10 @@ void MagicDisplay::drawEventButtons() {
    butGoto->SetTextSize(0.5);
    butGoto->SetFillColor(kOrange);
    butGoto->Draw();
+   fTimeEntryButton= new TButton("Event#","MagicDisplay::Instance()->toggleTimeEventOrdering();",0.85,0.925,0.9,0.95);
+   fTimeEntryButton->SetTextSize(0.5);
+   fTimeEntryButton->SetFillColor(kGray);
+   fTimeEntryButton->Draw();
 
 
    fVertButton = new TButton("V","MagicDisplay::Instance()->setCanvasLayout(MagicDisplayCanvasLayoutOption::kPhiVerticalOnly); MagicDisplay::Instance()->refreshEventDisplay();",0,0.966,0.05,1);
@@ -583,6 +649,21 @@ void MagicDisplay::setCanvasLayout(MagicDisplayCanvasLayoutOption::MagicDisplayC
    fPayloadButton->Modified();
 }
 
+
+void MagicDisplay::toggleTimeEventOrdering()
+{
+  if(fOrderByEventNumber) {
+    fOrderByEventNumber=0;
+    fTimeEntryButton->SetFillColor(kGray);
+    fTimeEntryButton->Modified();
+  }
+  else {
+    fOrderByEventNumber=1;
+    fTimeEntryButton->SetFillColor(kGray+3);
+    fTimeEntryButton->Modified();
+  }
+}
+    
 
 void MagicDisplay::setWaveformFormat(MagicDisplayFormatOption::MagicDisplayFormatOption_t waveformOption)
 {
