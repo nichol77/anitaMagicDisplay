@@ -342,7 +342,7 @@ void AnitaGpsCanvasMaker::getMapView(Adu5Pat *adu5PatPtr, TPad *plotPad)
     plotPad->SetRightMargin(0);
     char *installDir=getenv("ANITA_UTIL_INSTALL_DIR");
     if(installDir) {
-      sprintf(mapFileName,"%s/share/anita/antarcticaIceMap.png",installDir);
+      sprintf(mapFileName,"%s/share/anitaMap/antarcticaIceMap.png",installDir);
     }
     else {
       sprintf(mapFileName,"antarcticaIceMap.png");
