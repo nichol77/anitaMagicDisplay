@@ -197,6 +197,8 @@ class MagicDisplay
   TTree *fAdu5bVtgTree; ///< A pointer to the current ADU5 B velocity tree.
 
   //And some useful info to keep track of what is where
+  Long64_t fEventCutListEntry; ///< The current cut index
+  Long64_t fEventTreeIndexEntry; ///< The current entry in the TTreeIndex
   Long64_t fEventEntry; ///< The current event+header entry.
   Long64_t fPrettyHkEntry; ///< The current pretty hk entry.
   Long64_t fTurfRateEntry; ///< The current TURF rate entry.
