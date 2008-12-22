@@ -383,7 +383,7 @@ int MagicDisplay::displayNextEvent()
   //  static Int_t listNumber=-1;
   if(fApplyEventCut==1) {
     fEventCutListEntry++;
-    if(fEventCutListEntry<fCutEventList->GetSize()) {
+    if(fEventCutListEntry<fCutEventList->GetN()) {
       fEventEntry=fCutEventList->GetEntry(fEventCutListEntry);  
       int retVal=getEventEntry();
       fEventCanMaker->fNewEvent=1;
@@ -393,6 +393,7 @@ int MagicDisplay::displayNextEvent()
       return retVal;
     }
     else {
+      fEventCutListEntry=fCutEventList->GetN()-1;
       return -1;
     }      
   }
@@ -425,57 +426,25 @@ int MagicDisplay::displayNextEvent()
       if(retVal==0) {
 	refreshEventDisplay(); 
       }
-      else fEventEntry--;
+      else {
+	fEventTreeIndexEntry--;
+      }
       return retVal;  
     }
-    else 
+    else  {
+      fEventTreeIndexEntry--;
       return -1;
+    }
   }
 }
 
 
 int MagicDisplay::displayFirstEvent()
 {
-  fEventEntry=0;
-   int retVal=getEventEntry();
-     fEventCanMaker->fNewEvent=1;
-   if(retVal==0) {
-      refreshEventDisplay(); 
-   }
-   else fEventEntry--;
-   return retVal;  
-}
 
-
-int MagicDisplay::displayLastEvent()
-{
-  //  fEventTree->Refresh();
-  //  fHeadTree->Refresh();
-  
-
-  Long64_t headEnts=fHeadTree->GetEntries();
-  Long64_t eventEnts=fEventTree->GetEntries();
-
-  fEventEntry=headEnts-1;
-  if(eventEnts<headEnts)
-    fEventEntry=eventEnts-1;
-   int retVal=getEventEntry();
-     fEventCanMaker->fNewEvent=1;
-   if(retVal==0) {
-      refreshEventDisplay(); 
-   }
-   else fEventEntry--;
-   return retVal;  
-}
-
-
-int MagicDisplay::displayPreviousEvent()
-{
-  //  static Int_t fEventTreeIndexEntry=-1;
-  //  static Int_t fEventCutListEntry=-1;
-  if(fApplyEventCut==1) {
-    fEventCutListEntry--;
-    if(fEventCutListEntry>=0 && fEventCutListEntry<fCutEventList->GetSize()) {
+  if(fApplyEventCut==1) {    
+    fEventCutListEntry=0;
+    if(fEventCutListEntry<fCutEventList->GetN()) {
       fEventEntry=fCutEventList->GetEntry(fEventCutListEntry);  
       int retVal=getEventEntry();
       fEventCanMaker->fNewEvent=1;
@@ -485,6 +454,128 @@ int MagicDisplay::displayPreviousEvent()
       return retVal;
     }
     else {
+      fEventCutListEntry=0;
+      return -1;
+    }      
+  }
+  else if(fOrderByEventNumber==0) {    
+    fEventEntry=0;
+    int retVal=getEventEntry();
+    fEventCanMaker->fNewEvent=1;
+    if(retVal==0) {
+      refreshEventDisplay(); 
+    }
+    else fEventEntry--;
+    return retVal;  
+  }
+  else if(fOrderByEventNumber==1) {
+    Long64_t *indVals=fHeadIndex->GetIndex();
+    fEventTreeIndexEntry=0;
+    if(fEventTreeIndexEntry<fHeadIndex->GetN()) {
+      fEventEntry=indVals[fEventTreeIndexEntry];
+      int retVal=getEventEntry();
+      fEventCanMaker->fNewEvent=1;
+      if(retVal==0) {
+	refreshEventDisplay(); 
+      }
+      else {
+	//Nothing
+      }
+      return retVal;  
+    }
+    else  {
+      //Nothing
+      return -1;
+    }
+  }
+  return -1;
+}
+
+
+int MagicDisplay::displayLastEvent()
+{
+  //  fEventTree->Refresh();
+  //  fHeadTree->Refresh();
+  
+  Long64_t headEnts=fHeadTree->GetEntries();
+  Long64_t eventEnts=fEventTree->GetEntries();
+
+  if(fApplyEventCut==1) {    
+    fEventCutListEntry=fCutEventList->GetN()-1;
+    if(fEventCutListEntry<fCutEventList->GetN() && fEventCutListEntry>=0) {
+      fEventEntry=fCutEventList->GetEntry(fEventCutListEntry);  
+      int retVal=getEventEntry();
+      fEventCanMaker->fNewEvent=1;
+      if(retVal==0) {
+	refreshEventDisplay(); 
+      }
+      return retVal;
+    }
+    else {
+      fEventCutListEntry=0;
+      return -1;
+    }      
+  }
+  else if(fOrderByEventNumber==0) {    
+    fEventEntry=headEnts-1;
+    if(eventEnts<headEnts)
+      fEventEntry=eventEnts-1;
+    int retVal=getEventEntry();
+    fEventCanMaker->fNewEvent=1;
+    if(retVal==0) {
+      refreshEventDisplay(); 
+    }
+    else fEventEntry--;
+    return retVal;  
+  }
+  else if(fOrderByEventNumber==1) {
+    Long64_t *indVals=fHeadIndex->GetIndex();
+    fEventTreeIndexEntry=fHeadIndex->GetN()-1;
+    if(fEventTreeIndexEntry>=0) {
+      fEventEntry=indVals[fEventTreeIndexEntry];
+      int retVal=getEventEntry();
+      fEventCanMaker->fNewEvent=1;
+      if(retVal==0) {
+	refreshEventDisplay(); 
+      }
+      else {
+	//Nothing
+	fEventTreeIndexEntry=0;
+      }
+      return retVal;  
+    }
+    else  {
+      //Nothing
+      fEventTreeIndexEntry=0;
+      return -1;
+    }
+  }
+  return -1;
+}
+
+
+int MagicDisplay::displayPreviousEvent()
+{
+  //  static Int_t fEventTreeIndexEntry=-1;
+  //  static Int_t fEventCutListEntry=-1;
+
+  if(fApplyEventCut==1) {
+    //    std::cout << fApplyEventCut << "\t" << fEventCutListEntry << "\t" << fCutEventList->GetN() << "\n";
+    fEventCutListEntry--;
+    if(fEventCutListEntry>=0 && fEventCutListEntry<fCutEventList->GetN()) {
+      fEventEntry=fCutEventList->GetEntry(fEventCutListEntry);  
+      int retVal=getEventEntry();
+      fEventCanMaker->fNewEvent=1;
+      if(retVal==0) {
+	refreshEventDisplay(); 
+      }
+      else {
+	fEventCutListEntry++;
+      }
+      return retVal;
+    }
+    else {
+      fEventCutListEntry++;
       return -1;
     }      
   }
@@ -518,12 +609,16 @@ int MagicDisplay::displayPreviousEvent()
       fEventCanMaker->fNewEvent=1;
       if(retVal==0) {
 	refreshEventDisplay(); 
+      } 
+      else {
+	fEventTreeIndexEntry++;
       }
-      else fEventEntry--;
       return retVal;  
     }
-    else 
+    else  {
+      fEventTreeIndexEntry++;
       return -1;
+    }
   }
 }
 
