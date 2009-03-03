@@ -91,6 +91,8 @@ void MagicDisplay::zeroPointers()
    fSurfHkFile=0;
    fAvgSurfHkFile=0;
    fRawEventPtr=0;
+   fCalEventPtr=0;
+   fUseCalibratedEventFile=0;
    fHeadPtr=0;
    fHkPtr=0;
    fAvgSurfPtr=0;
@@ -240,7 +242,15 @@ int MagicDisplay::getEventEntry()
    }
    if(fUsefulEventPtr)
       delete fUsefulEventPtr;
-   fUsefulEventPtr = new UsefulAnitaEvent(fRawEventPtr,fCalType,fHeadPtr);  
+   if(fUseCalibratedEventFile) {
+      if(fCalType==WaveCalType::kDefault)
+	 fUsefulEventPtr = new UsefulAnitaEvent(fCalEventPtr);
+      else
+	 fUsefulEventPtr = new UsefulAnitaEvent((RawAnitaEvent*)fCalEventPtr,fCalType,fHkPtr);
+   }
+   else {
+     fUsefulEventPtr = new UsefulAnitaEvent(fRawEventPtr,fCalType,fHeadPtr);  
+   }
   //Need to make configurable at some point
   //This will also need to be modifed to make realEvent accessible outside here
    return 0;
@@ -280,27 +290,55 @@ void MagicDisplay::closeCurrentRun()
 
 
 int MagicDisplay::loadEventTree()
-{       
+{     
+   Int_t fGotCalEventFile=0;
   char eventName[FILENAME_MAX];
-  char headerName[FILENAME_MAX];
-  sprintf(eventName,"%s/run%d/eventFile%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);
+  char headerName[FILENAME_MAX];  
   sprintf(headerName,"%s/run%d/headFile%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);
-  fEventTree = new TChain("eventTree");
-  fEventTree->Add(eventName);
+  if(1) {
+    //Will try and use calibrated event files  
+    sprintf(eventName,"%s/run%d/calEventFile%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);    
+    fEventTree = new TChain("eventTree");
+    fEventTree->Add(eventName);
 
-  for(int extra=1;extra<100;extra++) {
-    sprintf(eventName,"%s/run%d/eventFile%d_%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun,extra);
-    TFile *fpTest = TFile::Open(eventName);
-    if(!fpTest) 
-      break;
+    for(int extra=1;extra<100;extra++) {
+      sprintf(eventName,"%s/run%d/calEventFile%d_%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun,extra);
+      TFile *fpTest = TFile::Open(eventName);
+      if(!fpTest) 
+	break;
+      else {
+	delete fpTest;
+	fEventTree->Add(eventName);
+      }
+    }
+    if(fEventTree->GetEntries()>0) {
+       fGotCalEventFile=1;
+       fUseCalibratedEventFile=1;
+      fEventTree->SetBranchAddress("event",&fCalEventPtr);
+    }
     else {
-      delete fpTest;
-      fEventTree->Add(eventName);
+       fUseCalibratedEventFile=0;
+      fGotCalEventFile=0;
     }
   }
-
-
-  fEventTree->SetBranchAddress("event",&fRawEventPtr);
+  
+  if(!fGotCalEventFile) {
+    sprintf(eventName,"%s/run%d/eventFile%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);    
+    fEventTree = new TChain("eventTree");
+    fEventTree->Add(eventName);
+    
+    for(int extra=1;extra<100;extra++) {
+      sprintf(eventName,"%s/run%d/eventFile%d_%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun,extra);
+      TFile *fpTest = TFile::Open(eventName);
+      if(!fpTest) 
+	break;
+      else {
+	delete fpTest;
+	fEventTree->Add(eventName);
+      }
+    }
+    fEventTree->SetBranchAddress("event",&fRawEventPtr);
+  }
       
   if(fEventTree->GetEntries()<1) {
     cout << "Couldn't open: " << eventName << "\n";

@@ -23,6 +23,7 @@ class TPad;
 class RawAnitaHeader;
 class PrettyAnitaHk;
 class RawAnitaEvent;
+class CalibratedAnitaEvent;
 class UsefulAnitaEvent;
 
 class TurfRate;
@@ -219,6 +220,8 @@ class MagicDisplay
   TTreeIndex *fAdu5aSatIndex; ///< Index for ADU5 satellite fun.
   TTreeIndex *fAdu5bSatIndex; ///< Inde for ADU5B satellite fun.
 
+
+  Int_t  fUseCalibratedEventFile; ///< Flag to determine whether or not to use TTrees of lovely CalibratedAnitaEvent objects
   UInt_t fCurrentRun; ///< The current run number.
   Char_t fCurrentBaseDir[180]; ///< The base directory for the ROOT files.
   
@@ -259,6 +262,7 @@ class MagicDisplay
    RawAnitaHeader *fHeadPtr; ///< Pointer to the header.
    PrettyAnitaHk *fHkPtr; ///< Pointer to the pretty hk.
    RawAnitaEvent *fRawEventPtr; ///< Pointer to the raw event.
+   CalibratedAnitaEvent *fCalEventPtr; ///< Pointer to the raw event.
    UsefulAnitaEvent *fUsefulEventPtr; ///< Pointer to the calibrated event.
    TurfRate *fTurfPtr; ///< Pointer to the TURF rate.
    SurfHk *fSurfPtr; ///< Pointer to the SURF hk.
