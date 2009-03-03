@@ -1,4 +1,4 @@
-gSystem->Reset();
+//gSystem->Reset();
 
 void runMagicDisplay() {
   //  gSystem->AddIncludePath(gSystem->ExpandPathName("-I${EVENT_READER_DIR}"));
@@ -16,12 +16,10 @@ void runMagicDisplay() {
   gSystem->Load("libMagicDisplay.so");
 
   TChain *fred=0; //Will this work?
-  runMagicDisplayRun(708);
-}
 
+  int run=1;
 
-void runMagicDisplayRun(int run) {
-  MagicDisplay *magicPtr = new MagicDisplay("/TBdata/anita/antarctica08/root/",run,WaveCalType::kVTFullAGCrossCorClock);
+  MagicDisplay *magicPtr = new MagicDisplay("/unix/anita3/flight0809/root/",run,WaveCalType::kDefault);
 
   //magicPtr->startSurfDisplay();
   //  magicPtr->startAvgSurfDisplay();
