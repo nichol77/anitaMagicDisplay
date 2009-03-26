@@ -243,10 +243,10 @@ int MagicDisplay::getEventEntry()
    if(fUsefulEventPtr)
       delete fUsefulEventPtr;
    if(fUseCalibratedEventFile) {
-      if(fCalType==WaveCalType::kDefault)
-	 fUsefulEventPtr = new UsefulAnitaEvent(fCalEventPtr);
-      else
-	 fUsefulEventPtr = new UsefulAnitaEvent((RawAnitaEvent*)fCalEventPtr,fCalType,fHkPtr);
+     if(fCalType==WaveCalType::kDefault)
+       fUsefulEventPtr = new UsefulAnitaEvent(fCalEventPtr);
+     else
+       fUsefulEventPtr = new UsefulAnitaEvent(fCalEventPtr,fCalType);
    }
    else {
      fUsefulEventPtr = new UsefulAnitaEvent(fRawEventPtr,fCalType,fHeadPtr);  
@@ -404,6 +404,13 @@ void MagicDisplay::applyCut(char *cutString)
 {
   if(cutString==0)
     fApplyEventCut=0;
+  
+  if(!fEventTree) {
+    if(loadEventTree()<0) {
+      std::cout << "Couldn't open event file\n";
+      return;
+    }
+  }
 
   TCanvas tempCan;
   tempCan.cd();
