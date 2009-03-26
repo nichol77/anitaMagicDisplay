@@ -1,4 +1,4 @@
-//gSystem->Reset();
+gSystem->Reset();
 
 void runMagicDisplay() {
   //  gSystem->AddIncludePath(gSystem->ExpandPathName("-I${EVENT_READER_DIR}"));
@@ -16,16 +16,19 @@ void runMagicDisplay() {
   gSystem->Load("libMagicDisplay.so");
 
   TChain *fred=0; //Will this work?
+  runMagicDisplayRun(1);
+}
 
-  int run=1;
 
-  MagicDisplay *magicPtr = new MagicDisplay("/unix/anita3/flight0809/root/",run,WaveCalType::kDefault);
+void runMagicDisplayRun(int run) {
+  MagicDisplay *magicPtr = new MagicDisplay("/unix/anita3/flight0809/root",run,WaveCalType::kDefault);
 
   //magicPtr->startSurfDisplay();
   //  magicPtr->startAvgSurfDisplay();
   //   magicPtr->startTurfDisplay();
   //  magicPtr->startSumTurfDisplay();
-   magicPtr->startEventDisplay();
+  magicPtr->startEventDisplay();
+  //   magicPtr->startGpsDisplay();
   //  magicPtr->startControlPanel();
 
 }
