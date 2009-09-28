@@ -21,7 +21,7 @@ void runMagicDisplay() {
 
 
 void runMagicDisplayRun(int run) {
-  MagicDisplay *magicPtr = new MagicDisplay("/unix/anita3/flight0809/root",run,WaveCalType::kDefault);
+  MagicDisplay *magicPtr = new MagicDisplay("/unix/anita1/flight0809/root",run,WaveCalType::kDefault);
 
   //magicPtr->startSurfDisplay();
   //  magicPtr->startAvgSurfDisplay();

@@ -62,6 +62,7 @@ AnitaRing::AnitaRing_t ringMap[5]={AnitaRing::kUpperRing,
 
 
 WaveformGraph *grSurf[ACTIVE_SURFS][CHANNELS_PER_SURF]={{0}};
+WaveformGraph *grSurfFiltered[ACTIVE_SURFS][CHANNELS_PER_SURF]={{0}};
 WaveformGraph *grSurfHilbert[ACTIVE_SURFS][CHANNELS_PER_SURF]={{0}};
 FFTGraph *grSurfFFT[ACTIVE_SURFS][CHANNELS_PER_SURF]={{0}};
 FFTGraph *grSurfAveragedFFT[ACTIVE_SURFS][CHANNELS_PER_SURF]={{0}};
@@ -71,6 +72,12 @@ AnitaCanvasMaker::AnitaCanvasMaker(WaveCalType::WaveCalType_t calType)
 {
   //Default constructor
   fACMGeomTool=AnitaGeomTool::Instance();
+  fPassBandFilter=0;
+  fNotchFilter=0;
+  fLowPassEdge=200;
+  fHighPassEdge=1200;
+  fLowNotchEdge=235;
+  fHighNotchEdge=500;
   fMinVoltLimit=-60;
   fMaxVoltLimit=60;
   fPhiMax=0;
@@ -95,6 +102,7 @@ AnitaCanvasMaker::AnitaCanvasMaker(WaveCalType::WaveCalType_t calType)
   fCalType=calType;
   fgInstance=this;
   memset(grSurf,0,sizeof(WaveformGraph*)*ACTIVE_SURFS*CHANNELS_PER_SURF);
+  memset(grSurfFiltered,0,sizeof(WaveformGraph*)*ACTIVE_SURFS*CHANNELS_PER_SURF);
   memset(grSurfHilbert,0,sizeof(WaveformGraph*)*ACTIVE_SURFS*CHANNELS_PER_SURF);
   memset(grSurfFFT,0,sizeof(FFTGraph*)*ACTIVE_SURFS*CHANNELS_PER_SURF);
   memset(grSurfAveragedFFT,0,sizeof(FFTGraph*)*ACTIVE_SURFS*CHANNELS_PER_SURF);
@@ -401,6 +409,12 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr,
 	  delete grSurfFFT[surf][chan];
 	  grSurfFFT[surf][chan]=0;
 	}
+	
+	if(grSurfFiltered[surf][chan]) {
+	  delete grSurfFiltered[surf][chan];
+	  grSurfFiltered[surf][chan]=0;
+	}
+
 
 	TGraph *grTemp = evPtr->getGraphFromSurfAndChan(surf,chan);
 	if(fAutoScale || fCanvasView==MagicDisplayCanvasLayoutOption::kPayloadView) {
@@ -442,6 +456,18 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr,
 	  }
 	  
 	}
+
+	if(fPassBandFilter) {
+	  TGraph *grDoubleTemp= FFTtools::simplePassBandFilter(grTemp,fLowPassEdge,fHighPassEdge);
+	  delete grTemp;
+	  grTemp=grDoubleTemp;
+	}
+	if(fNotchFilter) {
+	  TGraph *grDoubleTemp= FFTtools::simpleNotchFilter(grTemp,fLowNotchEdge,fHighNotchEdge);
+	  delete grTemp;
+	  grTemp=grDoubleTemp;
+	}
+
 	grSurf[surf][chan] = new WaveformGraph(grTemp->GetN(),grTemp->GetX(),grTemp->GetY());	
 	if(fWaveformOption==MagicDisplayFormatOption::kFFT) {
 	  TGraph *grTempFFT = grSurf[surf][chan]->getFFT();

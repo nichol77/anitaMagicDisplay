@@ -104,6 +104,13 @@ class AnitaCanvasMaker
    //Instance generator
    static AnitaCanvasMaker*  Instance(); ///< The instance generator.
    
+   void setPassBandFilterFlag( int flag) { fPassBandFilter=flag;} ///<Flags the pass band filter on or off
+   void setNotchFilterFlag( int flag) { fNotchFilter=flag;} ///<Flags the notch filter on or off
+   void setPassBandLimits(Double_t low, Double_t high)
+   { fLowPassEdge=low; fHighPassEdge=high;} ///<Sets the limits of the pass band (200-1200) in MHz
+   void setNotchBandLimits(Double_t low, Double_t high)
+   { fLowNotchEdge=low; fHighNotchEdge=high;} ///<Sets the limits of the notched band (235-500) in MHz
+
    
    WaveCalType::WaveCalType_t fCalType; ///< The calibration type.
    
@@ -114,6 +121,12 @@ class AnitaCanvasMaker
    Int_t fPhiMax;
    TFile *fAnitaGeomFile;
    TGeoManager *fAnitaGeomManager;
+   Int_t fPassBandFilter; ///< Whether or not to pass band filter the interpolated waves;
+   Int_t fNotchFilter; ///< Whether or not to notch filter;
+   Double_t fLowPassEdge; ///< The lower edge of the pass band
+   Double_t fHighPassEdge; ///< The higher edge of the pass band
+   Double_t fLowNotchEdge; ///< The lower edge of the notch band
+   Double_t fHighNotchEdge; ///< The higher edge of the notch band
    //!  A worker function to draw the horizontal canvas -- shouldn't be called directly.
    /*!
      /param hdPtr Pointer to the header of the event we want to draw.

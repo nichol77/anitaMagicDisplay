@@ -1,10 +1,8 @@
 gSystem->Reset();
 
-void runMagicDisplayRemote() {
-  runMagicDisplayRemoteRun(66);
-}
+void runMagicDisplayRemote(int run=34) ;
 
-void runMagicDisplayRemoteRun(int run) {
+void runMagicDisplayRemote(int run)  {
   //  gSystem->AddIncludePath(gSystem->ExpandPathName("-I${EVENT_READER_DIR}"));
   gSystem->AddIncludePath("-I${ANITA_UTIL_INSTALL_DIR}/include");
   //  cout << gSystem->GetIncludePath() <<endl;
@@ -28,6 +26,6 @@ void runMagicDisplayRemoteRun(int run) {
   magicPtr->startEventDisplay();
   //  magicPtr->startControlPanel();
   //  magicPtr->displayThisEvent(7919213,66);
-  magicPtr->applyCut("triggerTimeNs>1e5 && triggerTimeNs<2e6");
+  //  magicPtr->applyCut("triggerTimeNs>1e5 && triggerTimeNs<2e6");
 
 }
