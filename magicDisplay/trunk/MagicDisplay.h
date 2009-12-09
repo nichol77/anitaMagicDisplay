@@ -221,7 +221,7 @@ class MagicDisplay
   TTreeIndex *fAdu5bSatIndex; ///< Inde for ADU5B satellite fun.
 
 
-  Int_t  fUseCalibratedEventFile; ///< Flag to determine whether or not to use TTrees of lovely CalibratedAnitaEvent objects
+  Int_t  fWhichEventFileKind; ///< Flag to determine whether or not to use TTrees of lovely CalibratedAnitaEvent objects
   UInt_t fCurrentRun; ///< The current run number.
   Char_t fCurrentBaseDir[180]; ///< The base directory for the ROOT files.
   

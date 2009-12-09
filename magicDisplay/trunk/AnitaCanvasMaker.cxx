@@ -265,7 +265,7 @@ TPad *AnitaCanvasMaker::getEventInfoCanvas(UsefulAnitaEvent *evPtr, RawAnitaHead
 
 TPad *AnitaCanvasMaker::quickGetEventViewerCanvasForWebPlottter(UsefulAnitaEvent *evPtr,RawAnitaHeader *hdPtr, TPad *useCan)
 {
-  TPad *retCan;
+  TPad *retCan=0;
 
   //  static Int_t lastEventView=0;
 
@@ -374,7 +374,7 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr,
 					     RawAnitaHeader *hdPtr,
 					     TPad *useCan)
 {
-  TPad *retCan;
+  TPad *retCan=0;
 
   static UInt_t lastEventNumber=0;
 
@@ -551,8 +551,8 @@ TPad *AnitaCanvasMaker::getHorizontalCanvas(RawAnitaHeader *hdPtr,
     fACMGeomTool=AnitaGeomTool::Instance();
   char textLabel[180];
   char padName[180];
-  TPad *canHoriz;
-  TPad *plotPad;
+  TPad *canHoriz=0;
+  TPad *plotPad=0;
   if(!useCan) {
     canHoriz = (TPad*) gROOT->FindObject("canHoriz");
     if(!canHoriz) {
@@ -700,8 +700,8 @@ TPad *AnitaCanvasMaker::getVerticalCanvas(RawAnitaHeader *hdPtr,
     fACMGeomTool=AnitaGeomTool::Instance();
   char textLabel[180];
   char padName[180];
-  TPad *canVert;
-  TPad *plotPad;
+  TPad *canVert=0;
+  TPad *plotPad=0;
   if(!useCan) {
     canVert = (TPad*) gROOT->FindObject("canVert");
     if(!canVert) {
@@ -852,8 +852,8 @@ TPad *AnitaCanvasMaker::getVerticalCanvasForWebPlotter(RawAnitaHeader *hdPtr,
     fACMGeomTool=AnitaGeomTool::Instance();
   char textLabel[180];
   char padName[180];
-  TPad *canVert;
-  TPad *plotPad;
+  TPad *canVert=0;
+  TPad *plotPad=0;
   if(!useCan) {
     canVert = (TPad*) gROOT->FindObject("canVert");
     if(!canVert) {
@@ -984,8 +984,8 @@ TPad *AnitaCanvasMaker::getSurfChanCanvas(RawAnitaHeader *hdPtr,
     fACMGeomTool=AnitaGeomTool::Instance();
   char textLabel[180];
   char padName[180];
-  TPad *canSurf;
-  TPad *plotPad;
+  TPad *canSurf=0;
+  TPad *plotPad=0;
   if(!useCan) {
     canSurf = (TPad*) gROOT->FindObject("canSurf");
     if(!canSurf) {
@@ -1118,8 +1118,8 @@ TPad *AnitaCanvasMaker::getPayloadCanvas(RawAnitaHeader *hdPtr,
     fACMGeomTool=AnitaGeomTool::Instance();
   char textLabel[180];
   char padName[180];
-  TPad *canPayload;
-  TPad *plotPad;
+  TPad *canPayload=0;
+  TPad *plotPad=0;
   if(!useCan) {
     canPayload = (TPad*) gROOT->FindObject("canPayload");
     if(!canPayload) {
@@ -1329,8 +1329,8 @@ TPad *AnitaCanvasMaker::getCombinedCanvas(RawAnitaHeader *hdPtr,
     fACMGeomTool=AnitaGeomTool::Instance();
   char textLabel[180];
   char padName[180];
-  TPad *canBoth;
-  TPad *plotPad;
+  TPad *canBoth=0;
+  TPad *plotPad=0;
   if(!useCan) {
     canBoth = (TPad*) gROOT->FindObject("canBoth");
     if(!canBoth) {
@@ -1560,7 +1560,7 @@ void AnitaCanvasMaker::setupPhiPadWithFrames(TPad *plotPad)
       paddy1->Draw();
       paddy1->cd();
 
-      TH1F *framey;
+      TH1F *framey=0;
       
       if(fWaveformOption==MagicDisplayFormatOption::kWaveform || fWaveformOption==MagicDisplayFormatOption::kHilbertEnvelope) 
 	framey = (TH1F*) paddy1->DrawFrame(fMinTimeLimit,fMinVoltLimit,fMaxTimeLimit,fMaxVoltLimit);
@@ -1665,7 +1665,7 @@ void AnitaCanvasMaker::setupSurfPadWithFrames(TPad *plotPad)
 	paddy1->SetBottomMargin(0.1);
       paddy1->Draw();
       paddy1->cd();
-      TH1F *framey;
+      TH1F *framey=0;
       if(fWaveformOption==MagicDisplayFormatOption::kFFT || fWaveformOption==MagicDisplayFormatOption::kAveragedFFT){
 	  framey = (TH1F*) paddy1->DrawFrame(fMinFreqLimit,fMinPowerLimit,fMaxFreqLimit,fMaxPowerLimit);
       }
@@ -1699,7 +1699,7 @@ void AnitaCanvasMaker::setupSurfPadWithFrames(TPad *plotPad)
 void AnitaCanvasMaker::setupPayloadViewWithFrames(TPad *plotPad)
 {
   static int payloadPadsDone=0;
-  char textLabel[180];
+  //  char textLabel[180];
   char padName[180];
   plotPad->cd();
   if(fLastCanvasView!=MagicDisplayCanvasLayoutOption::kPayloadView) {
@@ -1773,7 +1773,7 @@ void AnitaCanvasMaker::setupPayloadViewWithFrames(TPad *plotPad)
 	paddy1->SetBottomMargin(0.1);
       paddy1->Draw();
       paddy1->cd();
-      TH1F *framey;
+      TH1F *framey=0;
       if(fWaveformOption==MagicDisplayFormatOption::kFFT || fWaveformOption==MagicDisplayFormatOption::kAveragedFFT){
 	  framey = (TH1F*) paddy1->DrawFrame(fMinFreqLimit,fMinPowerLimit,fMaxFreqLimit,fMaxPowerLimit);
       }

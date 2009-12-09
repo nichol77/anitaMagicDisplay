@@ -72,6 +72,13 @@ namespace MagicDisplayGpsDisplay {
   } MagicDisplayGpsDisplay_t; ///< Enumeration for plot style
 };
 
+namespace MagicDisplayFileType {
+   typedef enum EMagicDisplayFileType {
+      kRawEvent = 0,
+      kCalEvent = 1,
+      kMcEvent = 2
+   } MagicDisplayFileType_t; ///<Enumeration for file kind
+};
 
 int getNiceColour(int ind); ///< Simple fucntion to return some of my favourite colours.
 int getMarker(int ind);///< Returns a maker number
