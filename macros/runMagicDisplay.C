@@ -16,7 +16,7 @@ void runMagicDisplay() {
   gSystem->Load("libMagicDisplay.so");
 
   TChain *fred=0; //Will this work?
-  runMagicDisplayRun(1);
+  runMagicDisplayRun(16);
 }
 
 
