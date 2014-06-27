@@ -1,6 +1,6 @@
 gSystem->Reset();
 
-void runMagicDisplay() {
+void runMagicDisplay(int run=49) {
   //  gSystem->AddIncludePath(gSystem->ExpandPathName("-I${EVENT_READER_DIR}"));
   gSystem->AddIncludePath("-I${ANITA_UTIL_INSTALL_DIR}/include");
   //  cout << gSystem->GetIncludePath() <<endl;
@@ -16,12 +16,12 @@ void runMagicDisplay() {
   gSystem->Load("libMagicDisplay.so");
 
   TChain *fred=0; //Will this work?
-  runMagicDisplayRun(16);
+  runMagicDisplayRun(run);
 }
 
 
 void runMagicDisplayRun(int run) {
-  MagicDisplay *magicPtr = new MagicDisplay("/unix/anita1/flight0809/root",run,WaveCalType::kDefault);
+  MagicDisplay *magicPtr = new MagicDisplay("/storage/palestine14/root",run,WaveCalType::kNoCalib);
 
   //magicPtr->startSurfDisplay();
   //  magicPtr->startAvgSurfDisplay();
