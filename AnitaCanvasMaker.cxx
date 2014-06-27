@@ -1617,9 +1617,20 @@ void AnitaCanvasMaker::setupSurfPadWithFrames(TPad *plotPad)
 
   surfPadsDone=1;
       
+  Double_t leftEdge=0.04;
+  Double_t rightEdge=0.97;
+  Double_t standardStep=(rightEdge-leftEdge)/(1.01*ACTIVE_SURFS);
+  Double_t firstStep=(rightEdge-leftEdge)-(ACTIVE_SURFS-1)*standardStep;
 
-  Double_t left[10]={0.04,0.142,0.234,0.326,0.418,0.51,0.602,0.694,0.786,0.878};
-  Double_t right[10]={0.142,0.234,0.326,0.418,0.51,0.602,0.694,0.786,0.878,0.97};
+  Double_t left[ACTIVE_SURFS]={0};
+  Double_t right[ACTIVE_SURFS]={0};  
+  left[0]=leftEdge;
+  right[0]=leftEdge+firstStep;
+  for(int surf=1;surf<ACTIVE_SURFS;surf++) {
+    left[surf]=right[surf-1];
+    right[surf]=left[surf]+standardStep;
+  }
+    
   Double_t top[9]={0.95,0.85,0.75,0.65,0.55,0.45,0.35,0.25,0.15};
   Double_t bottom[9]={0.85,0.75,0.65,0.55,0.45,0.35,0.25,0.15,0.03};
   
@@ -1627,7 +1638,7 @@ void AnitaCanvasMaker::setupSurfPadWithFrames(TPad *plotPad)
   TLatex texy;
   texy.SetTextSize(0.03); 
   texy.SetTextAlign(12);  
-  for(int column=0;column<10;column++) {
+  for(int column=0;column<ACTIVE_SURFS;column++) {
     sprintf(textLabel,"Surf %d",1+column);
     if(column==9)
       texy.DrawTextNDC(right[column]-0.1,0.97,textLabel);
@@ -1647,7 +1658,7 @@ void AnitaCanvasMaker::setupSurfPadWithFrames(TPad *plotPad)
   //  std::cout << hdPtr->eventNumber << "\t" << hdPtr->l3TrigPattern << std::endl;
 
 
-  for(int column=0;column<10;column++) {
+  for(int column=0;column<ACTIVE_SURFS;column++) {
     for(int row=0;row<9;row++) {
       plotPad->cd();
       //      int surf=surfMap[row][column];
@@ -1736,7 +1747,7 @@ void AnitaCanvasMaker::setupPayloadViewWithFrames(TPad *plotPad)
       
 
   Double_t left[3]={0.53,0.7,0.85};
-  Double_t right[10]={0.7,0.85,0.99};
+  Double_t right[3]={0.7,0.85,0.99};
   Double_t top[3]={0.95,0.65,0.35};
   Double_t bottom[3]={0.65,0.35,0.03};
   
