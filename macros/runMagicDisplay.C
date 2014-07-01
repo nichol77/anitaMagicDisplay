@@ -21,7 +21,7 @@ void runMagicDisplay(int run=49) {
 
 
 void runMagicDisplayRun(int run) {
-  MagicDisplay *magicPtr = new MagicDisplay("/storage/palestine14/root",run,WaveCalType::kNoCalib);
+  MagicDisplay *magicPtr = new MagicDisplay("/storage/palestine14/root",run,WaveCalType::kNoCalib);//kVoltageTime);
 
   //magicPtr->startSurfDisplay();
   //  magicPtr->startAvgSurfDisplay();

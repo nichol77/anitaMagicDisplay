@@ -88,8 +88,8 @@ AnitaCanvasMaker::AnitaCanvasMaker(WaveCalType::WaveCalType_t calType)
   fAutoScale=1;
   fMinTimeLimit=0;
   fMaxTimeLimit=100;
-  fMinPowerLimit=-90;
-  fMaxPowerLimit=10;
+  fMinPowerLimit=-60;
+  fMaxPowerLimit=40;
   fMinFreqLimit=0;
   fMaxFreqLimit=1200;
   fCanvasView=MagicDisplayCanvasLayoutOption::kPhiVerticalOnly;
