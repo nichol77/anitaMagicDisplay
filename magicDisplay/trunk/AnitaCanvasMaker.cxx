@@ -86,6 +86,7 @@ AnitaCanvasMaker::AnitaCanvasMaker(WaveCalType::WaveCalType_t calType)
   fMinClockVoltLimit=-200;
   fMaxClockVoltLimit=200;
   fAutoScale=1;
+  fAutoScaleNeg=1;
   fMinTimeLimit=0;
   fMaxTimeLimit=100;
   fMinPowerLimit=-60;
@@ -113,6 +114,11 @@ AnitaCanvasMaker::AnitaCanvasMaker(WaveCalType::WaveCalType_t calType)
   case WaveCalType::kJustUnwrap:
     fMinTimeLimit=0;
     fMaxTimeLimit=260;
+    break;
+  case WaveCalType::kAddPeds:
+    fMinVoltLimit=0;
+    fMaxVoltLimit=2000;
+    fAutoScaleNeg=0;
     break;
   default:
     break;
@@ -337,12 +343,12 @@ TPad *AnitaCanvasMaker::quickGetEventViewerCanvasForWebPlottter(UsefulAnitaEvent
   }
 
   if(fAutoScale) {
-    if(fMaxVoltLimit>-1*fMinVoltLimit) {
-      fMinVoltLimit=-1*fMaxVoltLimit;
-    }
-    else {
-      fMaxVoltLimit=-1*fMinVoltLimit;
-    }
+      if(fMaxVoltLimit>-1*fMinVoltLimit) {
+	fMinVoltLimit=-1*fMaxVoltLimit;
+      }
+      else {
+	fMaxVoltLimit=-1*fMinVoltLimit;
+      }
 
     if(fMaxVertVoltLimit>-1*fMinVertVoltLimit) {
       fMinVertVoltLimit=-1*fMaxVertVoltLimit;
@@ -496,11 +502,13 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr,
   }
 
   if(fAutoScale) {
-    if(fMaxVoltLimit>-1*fMinVoltLimit) {
-      fMinVoltLimit=-1*fMaxVoltLimit;
-    }
-    else {
-      fMaxVoltLimit=-1*fMinVoltLimit;
+    if(fAutoScaleNeg) {
+      if(fMaxVoltLimit>-1*fMinVoltLimit) {
+	fMinVoltLimit=-1*fMaxVoltLimit;
+      }
+      else {
+	fMaxVoltLimit=-1*fMinVoltLimit;
+      }
     }
 
     if(fMaxVertVoltLimit>-1*fMinVertVoltLimit) {

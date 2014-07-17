@@ -40,6 +40,7 @@ class AnitaCanvasMaker
    Double_t fMinVertVoltLimit; ///< The minimum voltage in vertical channels.
    Double_t fMaxVertVoltLimit; ///< The maximum voltage in vertical channels.
    Int_t fAutoScale; ///< Fixed or auto-scaling y-axis?
+   Int_t fAutoScaleNeg; ///< Fixed or auto-scaling y-axis?
    Double_t fMinClockVoltLimit; ///< The minimum voltage in the clock channels.
    Double_t fMaxClockVoltLimit; ///< The maximum voltage in the clock channels.
    Double_t fMinTimeLimit; ///< The minimum time in the waveform (typically 0).
