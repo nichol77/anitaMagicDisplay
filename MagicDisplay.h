@@ -17,13 +17,15 @@
 #include "TChain.h"
 #include "MagicDisplayConventions.h"
 #include "AnitaConventions.h"
+#include "CalibratedAnitaEvent.h"
+
 
 class TCanvas;
 class TPad;
 class RawAnitaHeader;
 class PrettyAnitaHk;
 class RawAnitaEvent;
-class CalibratedAnitaEvent;
+//class CalibratedAnitaEvent;
 class UsefulAnitaEvent;
 
 class TurfRate;
@@ -61,7 +63,7 @@ class MagicDisplay
     \param run The run number to start with
     \param calType The calibration option desired (see <a HREF="/uhen/anita/eventReader/">the event reader documentation for the different available calibration options</A>)
   */
-  MagicDisplay(char *baseDir, int run, WaveCalType::WaveCalType_t calType=WaveCalType::kVoltageTime);
+  MagicDisplay(char *baseDir, int run, WaveCalType::WaveCalType_t calType=WaveCalType::kDefault);
   MagicDisplay(); ///< Default constructor
   ~MagicDisplay(); ///< Destructor
 

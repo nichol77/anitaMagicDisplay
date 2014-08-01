@@ -10,6 +10,7 @@ using namespace std;
 
 #include "FFTtools.h"
 
+static Int_t zoomCounter=0;
 
 ClassImp(WaveformGraph);
 
@@ -88,6 +89,7 @@ void WaveformGraph::ExecuteEvent(Int_t event, Int_t px, Int_t py)
 void WaveformGraph::drawInNewCanvas()
 {
   char graphTitle[180];
+  char graphName[180];
   gStyle->SetTitleH(0.1);
   gStyle->SetOptTitle(1);
   gStyle->SetPadLeftMargin(0.15);
@@ -105,6 +107,7 @@ void WaveformGraph::drawInNewCanvas()
   thisCopy->GetXaxis()->SetTitle("Time (ns)");
   thisCopy->GetYaxis()->SetTitle("Voltage (mV-ish)");
 
+
   if(fChan!=8) {
     sprintf(graphTitle,"Ant %d%c (%s Ring --  Phi %d -- SURF %d -- Chan %d)",
 	    fAnt+1,AnitaPol::polAsChar(fPol),AnitaRing::ringAsString(fRing),
@@ -113,14 +116,21 @@ void WaveformGraph::drawInNewCanvas()
   else {
     sprintf(graphTitle,"Clock SURF %d -- Chan %d",fSurf+1,fChan+1);
   }
-
+  sprintf(graphName,"grZoom%d",zoomCounter++);
+  thisCopy->SetName(graphName);
   thisCopy->SetTitle(graphTitle);
+  //  std::cout << graphName << "\t" << graphTitle << "\n";
   TCanvas *can = new TCanvas();
   can->SetLeftMargin(0.15);
   can->SetBottomMargin(0.15);
   can->SetTopMargin(0.1);
   can->SetRightMargin(0.1);
   thisCopy->Draw("al");
+  int numPoints=thisCopy->GetN();
+  can->Update();
+  can->Modified();
+
+
   //  fNewCanvas=1;
   
 }

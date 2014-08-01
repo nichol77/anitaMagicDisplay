@@ -134,8 +134,8 @@ TPad *AnitaRFCanvasMaker::getTurfRateCanvas(TurfRate *turfPtr, TPad *useCan)
   plotPad->cd();
   plotPad->Clear();
 
-  char *histNames[6]={"histUpperL1","histLowerL1","histUpperL2","histLowerL2","histNadirL","histL3"};
-  char *histTitles[6]={"Upper L1","Lower L1","Upper L2","Lower L2","Nadir L1/2","L3"};
+  const char *histNames[6]={"histUpperL1","histLowerL1","histUpperL2","histLowerL2","histNadirL","histL3"};
+  const char *histTitles[6]={"Upper L1","Lower L1","Upper L2","Lower L2","Nadir L1/2","L3"};
 
   for(int i=0;i<6;i++) {
     if(histTurfRate[i]) {
@@ -145,7 +145,7 @@ TPad *AnitaRFCanvasMaker::getTurfRateCanvas(TurfRate *turfPtr, TPad *useCan)
       histTurfRate[i]= new TH1F(histNames[i],histTitles[i],PHI_SECTORS,0.5,PHI_SECTORS+0.5);
     }
   }
-  char *maskNames[2]={"histAntMask0","histAntMask1"};
+  const char *maskNames[2]={"histAntMask0","histAntMask1"};
   for(int i=0;i<2;i++) {
     if(histAntMask[i])
       histAntMask[i]->Reset();
@@ -363,8 +363,8 @@ void AnitaRFCanvasMaker::getSurfHkSurfCanvas(SurfHk *surfPtr,TPad *plotPad) {
   //   plotPad->Clear();
 
   char actualName[180];
-  char *histNames[3]={"histScaler","histThreshold","histRFPower"};
-  char *histTitles[3]={"Scaler","Threshold","RF Power"};
+  const char *histNames[3]={"histScaler","histThreshold","histRFPower"};
+  const char *histTitles[3]={"Scaler","Threshold","RF Power"};
 
   if(histBadThreshold)
     delete histBadThreshold;
@@ -558,8 +558,8 @@ void AnitaRFCanvasMaker::getSurfHkPhiCanvas(SurfHk *surfPtr,TPad *plotPad) {
   if(!fARFCGeomTool)
     fARFCGeomTool=AnitaGeomTool::Instance();
   char actualName[180];
-  char *histNames[3]={"histScalerPhi","histThresholdPhi","histRFPowerPhi"};
-  char *histTitles[3]={"Scaler","Threshold","RF Power"};
+  const char *histNames[3]={"histScalerPhi","histThresholdPhi","histRFPowerPhi"};
+  const char *histTitles[3]={"Scaler","Threshold","RF Power"};
 
   if(histBadThreshold)
     delete histBadThreshold;
@@ -975,8 +975,8 @@ TPad *AnitaRFCanvasMaker::getSumTurfRateCanvas(SummedTurfRate *sumTurfPtr, TPad 
   plotPad->cd();
   plotPad->Clear();
 
-  char *histNames[6]={"histSumUpperL1","histSumLowerL1","histSumUpperL2","histSumLowerL2","histSumNadirL","histSumL3"};
-  char *histTitles[6]={"Upper L1","Lower L1","Upper L2","Lower L2","Nadir L1/2","L3"};
+  const char *histNames[6]={"histSumUpperL1","histSumLowerL1","histSumUpperL2","histSumLowerL2","histSumNadirL","histSumL3"};
+  const char *histTitles[6]={"Upper L1","Lower L1","Upper L2","Lower L2","Nadir L1/2","L3"};
 
   for(int i=0;i<6;i++) {
     if(histSumTurfRate[i]) {
@@ -987,7 +987,7 @@ TPad *AnitaRFCanvasMaker::getSumTurfRateCanvas(SummedTurfRate *sumTurfPtr, TPad 
     histSumTurfRate[i]= new TH1F(histNames[i],histTitles[i],PHI_SECTORS,0.5,PHI_SECTORS+0.5);
       //    }
   }
-  char *maskNames[2]={"histSumAntMask0","histSumAntMask1"};
+  const char *maskNames[2]={"histSumAntMask0","histSumAntMask1"};
   for(int i=0;i<2;i++) {
     if(histSumAntMask[i])
       delete histSumAntMask[i];
@@ -1216,8 +1216,8 @@ void AnitaRFCanvasMaker::getAvgSurfHkSurfCanvas(AveragedSurfHk *avgSurfPtr,TPad 
   //   plotPad->Clear();
 
   char actualName[180];
-  char *histNames[3]={"histAvgScaler","histAvgThreshold","histAvgRFPower"};
-  char *histTitles[3]={"Scaler","Threshold","RF Power"};
+  const char *histNames[3]={"histAvgScaler","histAvgThreshold","histAvgRFPower"};
+  const char *histTitles[3]={"Scaler","Threshold","RF Power"};
 
   if(histAvgSurfBadThreshold)
     delete histAvgSurfBadThreshold;
@@ -1443,8 +1443,8 @@ void AnitaRFCanvasMaker::getAvgSurfHkPhiCanvas(AveragedSurfHk *avgSurfPtr,TPad *
   if(!fARFCGeomTool)
     fARFCGeomTool=AnitaGeomTool::Instance();
   char actualName[180];
-  char *histNames[3]={"histAvgScalerPhi","histAvgThresholdPhi","histAvgRFPowerPhi"};
-  char *histTitles[3]={"Scaler","Threshold","RF Power"};
+  const char *histNames[3]={"histAvgScalerPhi","histAvgThresholdPhi","histAvgRFPowerPhi"};
+  const char *histTitles[3]={"Scaler","Threshold","RF Power"};
 
   if(histAvgSurfBadThreshold)
     delete histAvgSurfBadThreshold;
