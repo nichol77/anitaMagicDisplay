@@ -45,20 +45,22 @@ AnitaCanvasMaker*  AnitaCanvasMaker::fgInstance = 0;
 AnitaGeomTool *fACMGeomTool=0;
 
 
-int phiMap[5][8]={{0,2,4,6,8,10,12,14},
+int phiMap[6][8]={{0,2,4,6,8,10,12,14},
 		  {1,3,5,7,9,11,13,15},
 		  {0,2,4,6,8,10,12,14},
 		  {1,3,5,7,9,11,13,15},
-		  {0,2,4,6,8,10,12,14}};
+		  {0,2,4,6,8,10,12,14},
+		  {1,3,5,7,9,11,13,15}};
 
 
-int rowMap[5]={0,0,1,1,2};
+int rowMap[6]={0,0,1,1,2,2};
 
-AnitaRing::AnitaRing_t ringMap[5]={AnitaRing::kUpperRing,
-				   AnitaRing::kUpperRing,
-				   AnitaRing::kLowerRing,
-				   AnitaRing::kLowerRing,
-				   AnitaRing::kNadirRing};
+AnitaRing::AnitaRing_t ringMap[6]={AnitaRing::kTopRing,
+				   AnitaRing::kTopRing,
+				   AnitaRing::kMiddleRing,
+				   AnitaRing::kMiddleRing,
+				   AnitaRing::kBottomRing,
+				   AnitaRing::kBottomRing};
 
 
 WaveformGraph *grSurf[ACTIVE_SURFS][CHANNELS_PER_SURF]={{0}};
@@ -584,10 +586,10 @@ TPad *AnitaCanvasMaker::getHorizontalCanvas(RawAnitaHeader *hdPtr,
   setupPhiPadWithFrames(plotPad);
 
 
-  // Upper
+  // Top
   // 1 3 5 7 9 11 13 15
   // 2 4 6 8 10 12 14 16
-  // Lower
+  // Middle
   // 1 3 5 7 9 11 13 15
   // 2 4 6 8 10 12 14 16
 
@@ -596,7 +598,7 @@ TPad *AnitaCanvasMaker::getHorizontalCanvas(RawAnitaHeader *hdPtr,
 
   //  std::cout << hdPtr->eventNumber << "\t" << hdPtr->l3TrigPattern << std::endl;
   for(int column=0;column<8;column++) {
-    for(int row=0;row<5;row++) {
+    for(int row=0;row<6;row++) {
       plotPad->cd();
       int phi=phiMap[row][column];
       //      int ring=rowMap[row];
@@ -625,13 +627,13 @@ TPad *AnitaCanvasMaker::getHorizontalCanvas(RawAnitaHeader *hdPtr,
 	grSurf[surf][chan]->SetLineColor(kBlack);
       }
 
-      if(ringMap[row]==AnitaRing::kUpperRing) {
+      if(ringMap[row]==AnitaRing::kTopRing) {
 	if(hdPtr->upperL1TrigPattern & (1<<phi))
 	  grSurf[surf][chan]->SetLineColor(kBlue-2);
 	if(hdPtr->upperL2TrigPattern & (1<<phi))
 	  grSurf[surf][chan]->SetLineColor(kGreen-2);
       }
-      else if(ringMap[row]==AnitaRing::kLowerRing) {
+      else if(ringMap[row]==AnitaRing::kMiddleRing) {
       	if(hdPtr->lowerL1TrigPattern & (1<<phi))
 	  grSurf[surf][chan]->SetLineColor(kBlue-2);
 	if(hdPtr->lowerL2TrigPattern & (1<<phi))
@@ -733,10 +735,10 @@ TPad *AnitaCanvasMaker::getVerticalCanvas(RawAnitaHeader *hdPtr,
   setupPhiPadWithFrames(plotPad);
 
 
-  // Upper
+  // Top
   // 1 3 5 7 9 11 13 15
   // 2 4 6 8 10 12 14 16
-  // Lower
+  // Middle
   // 1 3 5 7 9 11 13 15
   // 2 4 6 8 10 12 14 16
 
@@ -745,7 +747,7 @@ TPad *AnitaCanvasMaker::getVerticalCanvas(RawAnitaHeader *hdPtr,
 
   //  std::cout << hdPtr->eventNumber << "\t" << hdPtr->l3TrigPattern << std::endl;
   for(int column=0;column<8;column++) {
-    for(int row=0;row<5;row++) {
+    for(int row=0;row<6;row++) {
       plotPad->cd();
       int phi=phiMap[row][column];
       //      int ring=rowMap[row];
@@ -766,13 +768,13 @@ TPad *AnitaCanvasMaker::getVerticalCanvas(RawAnitaHeader *hdPtr,
 	deleteTGraphsFromPad(paddy1,surf,chan,chan+4);
       paddy1->cd();
 
-      if(ringMap[row]==AnitaRing::kUpperRing) {
+      if(ringMap[row]==AnitaRing::kTopRing) {
 	if(hdPtr->upperL1TrigPattern & (1<<phi))
 	  grSurf[surf][chan]->SetLineColor(kBlue-2);
 	if(hdPtr->upperL2TrigPattern & (1<<phi))
 	  grSurf[surf][chan]->SetLineColor(kGreen-2);
       }
-      else if(ringMap[row]==AnitaRing::kLowerRing) {
+      else if(ringMap[row]==AnitaRing::kMiddleRing) {
       	if(hdPtr->lowerL1TrigPattern & (1<<phi))
 	  grSurf[surf][chan]->SetLineColor(kBlue-2);
 	if(hdPtr->lowerL2TrigPattern & (1<<phi))
@@ -885,10 +887,10 @@ TPad *AnitaCanvasMaker::getVerticalCanvasForWebPlotter(RawAnitaHeader *hdPtr,
   setupPhiPadWithFrames(plotPad);
 
 
-  // Upper
+  // Top
   // 1 3 5 7 9 11 13 15
   // 2 4 6 8 10 12 14 16
-  // Lower
+  // Middle
   // 1 3 5 7 9 11 13 15
   // 2 4 6 8 10 12 14 16
 
@@ -897,7 +899,7 @@ TPad *AnitaCanvasMaker::getVerticalCanvasForWebPlotter(RawAnitaHeader *hdPtr,
 
   //  std::cout << hdPtr->eventNumber << "\t" << hdPtr->l3TrigPattern << std::endl;
   for(int column=0;column<8;column++) {
-    for(int row=0;row<5;row++) {
+    for(int row=0;row<6;row++) {
       plotPad->cd();
       int phi=phiMap[row][column];
       //      int ring=rowMap[row];
@@ -921,13 +923,13 @@ TPad *AnitaCanvasMaker::getVerticalCanvasForWebPlotter(RawAnitaHeader *hdPtr,
       //      std::cout << phi << "\t" << ring << "\t" << surf << "\t" 
       //		<< chan << "\t" << grSurf[surf][chan]->GetRMS(2) << "\n";
 
-      if(ringMap[row]==AnitaRing::kUpperRing) {
+      if(ringMap[row]==AnitaRing::kTopRing) {
 	if(hdPtr->upperL1TrigPattern & (1<<phi))
 	  grSurf[surf][chan]->SetLineColor(kBlue-2);
 	if(hdPtr->upperL2TrigPattern & (1<<phi))
 	  grSurf[surf][chan]->SetLineColor(kGreen-2);
       }
-      else if(ringMap[row]==AnitaRing::kLowerRing) {
+      else if(ringMap[row]==AnitaRing::kMiddleRing) {
       	if(hdPtr->lowerL1TrigPattern & (1<<phi))
 	  grSurf[surf][chan]->SetLineColor(kBlue-2);
 	if(hdPtr->lowerL2TrigPattern & (1<<phi))
@@ -1041,13 +1043,13 @@ TPad *AnitaCanvasMaker::getSurfChanCanvas(RawAnitaHeader *hdPtr,
 	grSurf[surf][chan]->setSurfChanPhiAntPolRing(surf,chan,phi,ant,
 						     pol,ring);
 	
-	if(ring==AnitaRing::kUpperRing) {
+	if(ring==AnitaRing::kTopRing) {
 	  if(hdPtr->upperL1TrigPattern & (1<<phi))
 	    grSurf[surf][chan]->SetLineColor(kBlue-2);
 	  if(hdPtr->upperL2TrigPattern & (1<<phi))
 	    grSurf[surf][chan]->SetLineColor(kGreen-2);
 	}
-	else if(ring==AnitaRing::kLowerRing) {
+	else if(ring==AnitaRing::kMiddleRing) {
 	  if(hdPtr->lowerL1TrigPattern & (1<<phi))
 	    grSurf[surf][chan]->SetLineColor(kBlue-2);
 	  if(hdPtr->lowerL2TrigPattern & (1<<phi))
@@ -1179,10 +1181,10 @@ TPad *AnitaCanvasMaker::getPayloadCanvas(RawAnitaHeader *hdPtr,
 			 {0,2,4,6,8,10,12,14,16,0,0,0,0,0,0},
 			 {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15},
 			 {0,2,4,6,8,10,12,14,16,0,0,0,0,0,0}};
-    AnitaRing::AnitaRing_t littleRingMap[4]={AnitaRing::kUpperRing,
-					     AnitaRing::kUpperRing,
-					     AnitaRing::kLowerRing,
-					     AnitaRing::kNadirRing};
+    AnitaRing::AnitaRing_t littleRingMap[4]={AnitaRing::kTopRing,
+					     AnitaRing::kTopRing,
+					     AnitaRing::kMiddleRing,
+					     AnitaRing::kBottomRing};
 
     
     for (int i_layer=0;i_layer<4;i_layer++){
@@ -1235,9 +1237,9 @@ TPad *AnitaCanvasMaker::getPayloadCanvas(RawAnitaHeader *hdPtr,
   }
 
 
-  AnitaRing::AnitaRing_t payloadRingMap[3]={AnitaRing::kUpperRing,
-					    AnitaRing::kLowerRing,
-					    AnitaRing::kNadirRing};
+  AnitaRing::AnitaRing_t payloadRingMap[3]={AnitaRing::kTopRing,
+					    AnitaRing::kMiddleRing,
+					    AnitaRing::kBottomRing};
 
   static Int_t lastSurf[3][3]={{-1,-1,-1},{-1,-1,-1},{-1,-1,-1}};
   static Int_t lastChan[3][3]={{-1,-1,-1},{-1,-1,-1},{-1,-1,-1}};
@@ -1257,7 +1259,7 @@ TPad *AnitaCanvasMaker::getPayloadCanvas(RawAnitaHeader *hdPtr,
       Int_t phi=phiArray[phiInd];
       AnitaPol::AnitaPol_t pol=AnitaPol::kVertical;
       AnitaRing::AnitaRing_t ring=payloadRingMap[row];
-      if(ring==AnitaRing::kNadirRing &&
+      if(ring==AnitaRing::kBottomRing &&
 	 phiArray[phiInd]%2==1) {
 	lastSurf[row][phiInd]=-1;
 	continue;
@@ -1364,10 +1366,10 @@ TPad *AnitaCanvasMaker::getCombinedCanvas(RawAnitaHeader *hdPtr,
   
  
 
-  // Upper
+  // Top
   // 1 3 5 7 9 11 13 15
   // 2 4 6 8 10 12 14 16
-  // Lower
+  // Middle
   // 1 3 5 7 9 11 13 15
   // 2 4 6 8 10 12 14 16
 
@@ -1375,7 +1377,7 @@ TPad *AnitaCanvasMaker::getCombinedCanvas(RawAnitaHeader *hdPtr,
 
   //  std::cout << hdPtr->eventNumber << "\t" << hdPtr->l3TrigPattern << std::endl;
   for(int column=0;column<8;column++) {
-    for(int row=0;row<5;row++) {
+    for(int row=0;row<6;row++) {
       plotPad->cd();
 
       int phi=phiMap[row][column];
@@ -1392,8 +1394,7 @@ TPad *AnitaCanvasMaker::getCombinedCanvas(RawAnitaHeader *hdPtr,
 						 phi,AnitaPol::kHorizontal,
 						 surf,chanH,ant);
 
-      sprintf(padName,"phiChanPad%d",count);
-      
+      sprintf(padName,"phiChanPad%d",count);      
       TPad *paddy1 = (TPad*) plotPad->FindObject(padName);
       paddy1->SetEditable(kTRUE);
       deleteTGraphsFromPad(paddy1,surf,chanH,chanV);
@@ -1502,7 +1503,7 @@ void AnitaCanvasMaker::setupPhiPadWithFrames(TPad *plotPad)
   static int phiPadsDone=0;
   if(phiPadsDone && !fRedoEventCanvas) {
     int errors=0;
-    for(int i=0;i<40;i++) {
+    for(int i=0;i<48;i++) {
       sprintf(padName,"phiChanPad%d",i);
       TPad *paddy = (TPad*) plotPad->FindObject(padName);
       if(!paddy)
@@ -1517,8 +1518,8 @@ void AnitaCanvasMaker::setupPhiPadWithFrames(TPad *plotPad)
 
   Double_t left[8]={0.04,0.165,0.28,0.395,0.51,0.625,0.74,0.855};
   Double_t right[8]={0.165,0.28,0.395,0.51,0.625,0.74,0.855,0.97};
-  Double_t top[5]={0.95,0.77,0.59,0.41,0.23};
-  Double_t bottom[5]={0.77,0.59,0.41,0.23,0.03};
+  Double_t top[6]={0.95,0.8,0.65,0.50,0.35,0.20};
+  Double_t bottom[6]={0.8,0.65,0.50,0.35,0.20,0.03};
   
   //Now add some labels around the plot
   TLatex texy;
@@ -1533,14 +1534,14 @@ void AnitaCanvasMaker::setupPhiPadWithFrames(TPad *plotPad)
   }
   texy.SetTextAlign(21);  
   texy.SetTextAngle(90);
-  texy.DrawTextNDC(left[0]-0.01,bottom[0],"Upper Ring");
-  texy.DrawTextNDC(left[0]-0.01,bottom[2],"Lower Ring");
-  texy.DrawTextNDC(left[0]-0.01,bottom[4]+0.09,"Nadir Ring");
+  texy.DrawTextNDC(left[0]-0.01,bottom[0],"Top Ring");
+  texy.DrawTextNDC(left[0]-0.01,bottom[2],"Middle Ring");
+  texy.DrawTextNDC(left[0]-0.01,bottom[4],"Bottom Ring");
 
-  // Upper
+  // Top
   // 1 3 5 7 9 11 13 15
   // 2 4 6 8 10 12 14 16
-  // Lower
+  // Middle
   // 1 3 5 7 9 11 13 15
   // 2 4 6 8 10 12 14 16
 
@@ -1550,7 +1551,7 @@ void AnitaCanvasMaker::setupPhiPadWithFrames(TPad *plotPad)
 
 
   for(int column=0;column<8;column++) {
-    for(int row=0;row<5;row++) {
+    for(int row=0;row<6;row++) {
       plotPad->cd();
       //      int phi=phiMap[row][column];
       sprintf(padName,"phiChanPad%d",count);
@@ -1563,7 +1564,7 @@ void AnitaCanvasMaker::setupPhiPadWithFrames(TPad *plotPad)
 	paddy1->SetRightMargin(0.01);
       if(column==0)
 	paddy1->SetLeftMargin(0.1);
-      if(row==4)
+      if(row==5)
 	paddy1->SetBottomMargin(0.1);
       paddy1->Draw();
       paddy1->cd();
@@ -1578,7 +1579,7 @@ void AnitaCanvasMaker::setupPhiPadWithFrames(TPad *plotPad)
       framey->GetYaxis()->SetLabelSize(0.08);
       framey->GetYaxis()->SetTitleSize(0.1);
       framey->GetYaxis()->SetTitleOffset(0.5);
-      if(row==4) {
+      if(row==5) {
 	framey->GetXaxis()->SetLabelSize(0.09);
 	framey->GetXaxis()->SetTitleSize(0.09);
 	framey->GetYaxis()->SetLabelSize(0.09);
@@ -1655,9 +1656,9 @@ void AnitaCanvasMaker::setupSurfPadWithFrames(TPad *plotPad)
   }
   texy.SetTextAlign(21);  
   texy.SetTextAngle(90);
-  //  texy.DrawTextaNDC(left[0]-0.01,bottom[0],"Upper Ring");
-  //  texy.DrawTextNDC(left[0]-0.01,bottom[2],"Lower Ring");
-  //  texy.DrawTextNDC(left[0]-0.01,bottom[4]+0.09,"Nadir Ring");
+  //  texy.DrawTextaNDC(left[0]-0.01,bottom[0],"Top Ring");
+  //  texy.DrawTextNDC(left[0]-0.01,bottom[2],"Middle Ring");
+  //  texy.DrawTextNDC(left[0]-0.01,bottom[4]+0.09,"Bottom Ring");
 
  
   int count=0;
