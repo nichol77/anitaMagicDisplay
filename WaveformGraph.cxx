@@ -109,8 +109,8 @@ void WaveformGraph::drawInNewCanvas()
 
 
   if(fChan!=8) {
-    sprintf(graphTitle,"Ant %d%c (%s Ring --  Phi %d -- SURF %d -- Chan %d)",
-	    fAnt+1,AnitaPol::polAsChar(fPol),AnitaRing::ringAsString(fRing),
+    sprintf(graphTitle,"Ant %d%c%c (%s Ring --  Phi %d -- SURF %d -- Chan %d)",
+	    fPhi+1,AnitaRing::ringAsChar(fRing),AnitaPol::polAsChar(fPol),AnitaRing::ringAsString(fRing),
 	    fPhi+1,fSurf+1,fChan+1);
   }
   else {
