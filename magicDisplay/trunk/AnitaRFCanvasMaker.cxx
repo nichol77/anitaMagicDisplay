@@ -613,24 +613,6 @@ void AnitaRFCanvasMaker::getSurfHkPhiCanvas(SurfHk *surfPtr,TPad *plotPad) {
 	if(phi%2)
 	  continue;
       }
-      for(int band=0;band<4;band++) {
-	Int_t index=band+4*phi+64*ring;
-	if(ring==2)
-	  index=128 + band+4*(phi/2);
-	maskedBands[index]=
-	  surfPtr->isBandMasked(phi,(AnitaRing::AnitaRing_t)ring,(AnitaBand::AnitaBand_t)band);
-	 
-	histSurfHkPhi[0][phi]->Fill(index,surfPtr->getScaler(phi,(AnitaRing::AnitaRing_t)ring,(AnitaBand::AnitaBand_t)band));
-	 
-	histSurfHkPhi[1][phi]->Fill(index,surfPtr->getThreshold(phi,(AnitaRing::AnitaRing_t)ring,(AnitaBand::AnitaBand_t)band));
-	 
-	if(!surfPtr->globalThreshold && 
-	   (surfPtr->getThreshold(phi,(AnitaRing::AnitaRing_t)ring,(AnitaBand::AnitaBand_t)band)!=surfPtr->getSetThreshold(phi,(AnitaRing::AnitaRing_t)ring,(AnitaBand::AnitaBand_t)band))){
-	  histBadThreshold->Fill(index,surfPtr->getThreshold(phi,(AnitaRing::AnitaRing_t)ring,(AnitaBand::AnitaBand_t)band));
-	}
-	 
-      }
-       
       //Now for the RF power
       //Argh
       for(int pol=0;pol<2;pol++) {

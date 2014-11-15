@@ -627,21 +627,21 @@ TPad *AnitaCanvasMaker::getHorizontalCanvas(RawAnitaHeader *hdPtr,
 	grSurf[surf][chan]->SetLineColor(kBlack);
       }
 
-      if(ringMap[row]==AnitaRing::kTopRing) {
-	if(hdPtr->upperL1TrigPattern & (1<<phi))
-	  grSurf[surf][chan]->SetLineColor(kBlue-2);
-	if(hdPtr->upperL2TrigPattern & (1<<phi))
-	  grSurf[surf][chan]->SetLineColor(kGreen-2);
-      }
-      else if(ringMap[row]==AnitaRing::kMiddleRing) {
-      	if(hdPtr->lowerL1TrigPattern & (1<<phi))
-	  grSurf[surf][chan]->SetLineColor(kBlue-2);
-	if(hdPtr->lowerL2TrigPattern & (1<<phi))
-	  grSurf[surf][chan]->SetLineColor(kGreen-2);
-      }
-      else{
+      // if(ringMap[row]==AnitaRing::kTopRing) {
+      // 	if(hdPtr->upperL1TrigPattern & (1<<phi))
+      // 	  grSurf[surf][chan]->SetLineColor(kBlue-2);
+      // 	if(hdPtr->upperL2TrigPattern & (1<<phi))
+      // 	  grSurf[surf][chan]->SetLineColor(kGreen-2);
+      // }
+      // else if(ringMap[row]==AnitaRing::kMiddleRing) {
+      // 	if(hdPtr->lowerL1TrigPattern & (1<<phi))
+      // 	  grSurf[surf][chan]->SetLineColor(kBlue-2);
+      // 	if(hdPtr->lowerL2TrigPattern & (1<<phi))
+      // 	  grSurf[surf][chan]->SetLineColor(kGreen-2);
+      // }
+      // else{
 	grSurf[surf][chan]->SetLineColor(kBlack);
-      }
+	//      }
       
 
       grSurf[surf][chan]->setSurfChanPhiAntPolRing(surf,chan,phi,ant,
@@ -1196,14 +1196,14 @@ TPad *AnitaCanvasMaker::getPayloadCanvas(RawAnitaHeader *hdPtr,
 
 	anita->GetNode(i_node)->GetVolume()->GetNode(1)->GetVolume()->SetLineColor(kWhite); // change color of v-pol
 	
-	if(hdPtr->isInL1Pattern(phiNums[i_layer][i_ant],littleRingMap[i_layer])) {
-	    anita->GetNode(i_node)->GetVolume()->GetNode(1)->GetVolume()->SetLineColor(kBlue-2); // change color of v-pol
-	    anita->GetNode(i_node)->GetVolume()->GetNode(4)->GetVolume()->SetLineColor(kBlue-2); 
-	  }
-	if(hdPtr->isInL2Pattern(phiNums[i_layer][i_ant],littleRingMap[i_layer])) {
-	    anita->GetNode(i_node)->GetVolume()->GetNode(1)->GetVolume()->SetLineColor(kGreen-2); // change color of v-pol
-	    anita->GetNode(i_node)->GetVolume()->GetNode(4)->GetVolume()->SetLineColor(kGreen-2); 
-	  }
+	// if(hdPtr->isInL1Pattern(phiNums[i_layer][i_ant],littleRingMap[i_layer])) {
+	//     anita->GetNode(i_node)->GetVolume()->GetNode(1)->GetVolume()->SetLineColor(kBlue-2); // change color of v-pol
+	//     anita->GetNode(i_node)->GetVolume()->GetNode(4)->GetVolume()->SetLineColor(kBlue-2); 
+	//   }
+	// if(hdPtr->isInL2Pattern(phiNums[i_layer][i_ant],littleRingMap[i_layer])) {
+	//     anita->GetNode(i_node)->GetVolume()->GetNode(1)->GetVolume()->SetLineColor(kGreen-2); // change color of v-pol
+	//     anita->GetNode(i_node)->GetVolume()->GetNode(4)->GetVolume()->SetLineColor(kGreen-2); 
+	//   }
 	if(hdPtr->isInL3Pattern(phiNums[i_layer][i_ant])) {
 	    anita->GetNode(i_node)->GetVolume()->GetNode(1)->GetVolume()->SetLineColor(kRed-3); // change color of v-pol
 	    anita->GetNode(i_node)->GetVolume()->GetNode(4)->GetVolume()->SetLineColor(kRed-3); 
@@ -1271,11 +1271,11 @@ TPad *AnitaCanvasMaker::getPayloadCanvas(RawAnitaHeader *hdPtr,
       lastSurf[row][phiInd]=surf;
       lastChan[row][phiInd]=chan;
 
-      if(hdPtr->isInL1Pattern(phi,ring))
-	grSurf[surf][chan]->SetLineColor(kBlue-2);
-      if(hdPtr->isInL2Pattern(phi,ring))
-	grSurf[surf][chan]->SetLineColor(kGreen-2);
-      if(hdPtr->isInL3Pattern(phi))
+      // if(hdPtr->isInL1Pattern(phi,ring))
+      // 	grSurf[surf][chan]->SetLineColor(kBlue-2);
+      // if(hdPtr->isInL2Pattern(phi,ring))
+      // 	grSurf[surf][chan]->SetLineColor(kGreen-2);
+      if(hdPtr->isInL3Pattern(phi,pol))
 	grSurf[surf][chan]->SetLineColor(kRed-3);
       
       if(fWaveformOption==MagicDisplayFormatOption::kPowerSpectralDensity){

@@ -317,21 +317,10 @@ int MagicDisplay::loadEventTree()
 
    //Step one try calEventFile
    //Will try and use calibrated event files  
-   sprintf(eventName,"%s/run%d/calEventFile%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);    
-   fEventTree = new TChain("eventTree");
-   fEventTree->Add(eventName);
-   
-   if(fEventTree->GetEntries()>0) {
-     for(int extra=1;extra<100;extra++) {
-       sprintf(eventName,"%s/run%d/calEventFile%d_%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun,extra);
-       TFile *fpTest = TFile::Open(eventName);
-       if(!fpTest) 
-	 break;
-       else {
-	 delete fpTest;
-	 fEventTree->Add(eventName);
-       }
-     }
+   sprintf(eventName,"%s/run%d/calEventFile%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);
+   fEventFile = TFile::Open(eventName);
+   if(fEventFile) {
+     fEventTree = (TTree*) fEventFile->Get("eventTree");
      fGotCalEventFile=1;
      fWhichEventFileKind=MagicDisplayFileType::kCalEvent;
      fEventTree->SetBranchAddress("event",&fCalEventPtr);
@@ -339,18 +328,9 @@ int MagicDisplay::loadEventTree()
    else {
      fGotCalEventFile=0;     
      sprintf(eventName,"%s/run%d/eventFile%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);    
-     fEventTree->Add(eventName);     
-     if(fEventTree->GetEntries()>0) {
-       for(int extra=1;extra<100;extra++) {
-	 sprintf(eventName,"%s/run%d/eventFile%d_%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun,extra);
-	 TFile *fpTest = TFile::Open(eventName);
-	 if(!fpTest) 
-	   break;
-	 else {
-	   delete fpTest;
-	   fEventTree->Add(eventName);
-	 }
-       }
+     fEventFile = TFile::Open(eventName);
+     if(fEventFile) {
+       fEventTree = (TTree*) fEventFile->Get("eventTree");
        fGotCalEventFile=0;
        fWhichEventFileKind=MagicDisplayFileType::kRawEvent;
        fEventTree->SetBranchAddress("event",&fRawEventPtr);
@@ -358,21 +338,10 @@ int MagicDisplay::loadEventTree()
      else {
        ///Now check mcTree  
        sprintf(eventName,"%s/run%d/mcEventFile%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);    
-       fEventTree->Add(eventName);
-       if(fEventTree->GetEntries()>0) {
-	 for(int extra=1;extra<100;extra++) {
-	   sprintf(eventName,"%s/run%d/mcEventFile%d_%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun,extra);
-	   TFile *fpTest = TFile::Open(eventName);
-	   if(!fpTest) 
-	     break;
-	   else {
-	     delete fpTest;
-	   fEventTree->Add(eventName);
-	   }
-	 }       
-	 fWhichEventFileKind=MagicDisplayFileType::kMcEvent;
-	 fEventTree->SetBranchAddress("event",&fUsefulEventPtr);
-       }
+       fEventFile = TFile::Open(eventName);
+       fEventTree = (TTree*) fEventFile->Get("eventTree");     
+       fWhichEventFileKind=MagicDisplayFileType::kMcEvent;
+       fEventTree->SetBranchAddress("event",&fUsefulEventPtr);
      }
    }
    
