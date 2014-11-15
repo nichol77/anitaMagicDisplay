@@ -110,8 +110,8 @@ void WaveformGraph::drawInNewCanvas()
 
   if(fChan!=8) {
     sprintf(graphTitle,"Ant %d%c%c (%s Ring --  Phi %d -- SURF %d -- Chan %d)",
-	    fPhi+1,AnitaRing::ringAsChar(fRing),AnitaPol::polAsChar(fPol),AnitaRing::ringAsString(fRing),
-	    fPhi+1,fSurf+1,fChan+1);
+	    fPhi+1,AnitaRing::ringAsChar(fRing),AnitaPol::polAsChar(fPol),AnitaRing::ringAsString(fRing),fPhi+1,fSurf+1,fChan+1);
+	    
   }
   else {
     sprintf(graphTitle,"Clock SURF %d -- Chan %d",fSurf+1,fChan+1);
@@ -163,9 +163,8 @@ void WaveformGraph::DrawFFT()
   grFFT->GetYaxis()->SetTitle("dB (m maybe)");
 
   if(fChan!=8) {
-    sprintf(graphTitle,"Ant %d%c (%s Ring --  Phi %d -- SURF %d -- Chan %d)",
-	    fAnt+1,AnitaPol::polAsChar(fPol),AnitaRing::ringAsString(fRing),
-	    fPhi+1,fSurf+1,fChan+1);
+    sprintf(graphTitle,"Ant %d%c%c (%s Ring --  Phi %d -- SURF %d -- Chan %d)",
+	    fPhi+1,AnitaRing::ringAsChar(fRing),AnitaPol::polAsChar(fPol),AnitaRing::ringAsString(fRing),fPhi+1,fSurf+1,fChan+1);
   }
   else {
     sprintf(graphTitle,"Clock SURF %d -- Chan %d",fSurf+1,fChan+1);
@@ -204,9 +203,9 @@ void WaveformGraph::DrawHilbert()
   grHilbert->GetXaxis()->SetTitle("Time (ns)");
   grHilbert->GetYaxis()->SetTitle("Voltage^2 (mv^2) ");
   if(fChan!=8) {
-    sprintf(graphTitle,"Ant %d%c (%s Ring --  Phi %d -- SURF %d -- Chan %d)",
-	    fAnt+1,AnitaPol::polAsChar(fPol),AnitaRing::ringAsString(fRing),
-	    fPhi+1,fSurf+1,fChan+1);
+
+    sprintf(graphTitle,"Ant %d%c%c (%s Ring --  Phi %d -- SURF %d -- Chan %d)",
+	    fPhi+1,AnitaRing::ringAsChar(fRing),AnitaPol::polAsChar(fPol),AnitaRing::ringAsString(fRing),fPhi+1,fSurf+1,fChan+1);
   }
   else {
     sprintf(graphTitle,"Clock SURF %d -- Chan %d",fSurf+1,fChan+1);

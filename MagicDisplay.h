@@ -184,7 +184,7 @@ class MagicDisplay
 
   //Here are the data managers
   TTree *fHeadTree; ///< A pointer to the current header tree.
-  TChain *fEventTree; ///< A pointer to the current event tree.
+  TTree *fEventTree; ///< A pointer to the current event tree.
   TTree *fPrettyHkTree; ///< A pointer to the current pretty hk tree.
   TTree *fTurfRateTree; ///< A pointer to the current TURF rate tree.
   TTree *fSurfHkTree; ///< A pointer to the current SURF hk tree.
