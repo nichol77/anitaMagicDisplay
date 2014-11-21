@@ -1,6 +1,6 @@
 gSystem->Reset();
 
-void runMagicDisplay(int run=10139) {
+void runMagicDisplay(int run=10120) {
   //  gSystem->AddIncludePath(gSystem->ExpandPathName("-I${EVENT_READER_DIR}"));
   gSystem->AddIncludePath("-I${ANITA_UTIL_INSTALL_DIR}/include");
   //  cout << gSystem->GetIncludePath() <<endl;
@@ -22,7 +22,7 @@ void runMagicDisplay(int run=10139) {
 
 void runMagicDisplayRun(int run) {
   //  MagicDisplay *magicPtr = new MagicDisplay("/anitaStorage/antarctica14/root",run,WaveCalType::kVoltageTime);  //kAddPeds
-  MagicDisplay *magicPtr = new MagicDisplay("/anitaStorage/antarctica14/root",run,WaveCalType::kVoltageTime);  //kAddPeds
+  MagicDisplay *magicPtr = new MagicDisplay("/anitaStorage/antarctica14/root",run,WaveCalType::kVTLabAG);  //kAddPeds
 
   //magicPtr->startSurfDisplay();
   //  magicPtr->startAvgSurfDisplay();
