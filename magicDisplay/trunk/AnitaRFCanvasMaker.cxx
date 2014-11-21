@@ -166,14 +166,14 @@ TPad *AnitaRFCanvasMaker::getTurfRateCanvas(TurfRate *turfPtr, TPad *useCan)
   int maskedAnts[2][PHI_SECTORS];
   memset(maskedAnts,0,2*PHI_SECTORS*sizeof(int));
   for(int phi=0;phi<PHI_SECTORS;phi++) {
-    if(turfPtr->getL1Rate(phi,0)>l1Max)
-      l1Max=turfPtr->getL1Rate(phi,0);
-    if(turfPtr->getL1Rate(phi,1)>l1Max)
-      l1Max=turfPtr->getL1Rate(phi,1);
-    if(turfPtr->getL2Rate(phi,0)>l2Max)
-      l2Max=turfPtr->getL2Rate(phi,0);
-    if(turfPtr->getL2Rate(phi,1)>l2Max)
-      l2Max=turfPtr->getL2Rate(phi,1);
+    // if(turfPtr->getL1Rate(phi,0)>l1Max)
+    //   l1Max=turfPtr->getL1Rate(phi,0);
+    // if(turfPtr->getL1Rate(phi,1)>l1Max)
+    //   l1Max=turfPtr->getL1Rate(phi,1);
+    // if(turfPtr->getL2Rate(phi,0)>l2Max)
+    //   l2Max=turfPtr->getL2Rate(phi,0);
+    // if(turfPtr->getL2Rate(phi,1)>l2Max)
+    //   l2Max=turfPtr->getL2Rate(phi,1);
     if(turfPtr->isAntMasked(phi,0))
       maskedAnts[0][phi]=1;
     if(turfPtr->isAntMasked(phi,1))
@@ -182,11 +182,11 @@ TPad *AnitaRFCanvasMaker::getTurfRateCanvas(TurfRate *turfPtr, TPad *useCan)
       l3Max=turfPtr->getL3Rate(phi);
     
       
-    histTurfRate[0]->Fill(phi+1,1e-3*turfPtr->getL1Rate(phi,0));
-    histTurfRate[1]->Fill(phi+1,1e-3*turfPtr->getL1Rate(phi,1));
-    histTurfRate[2]->Fill(phi+1,turfPtr->getL2Rate(phi,0));
-    histTurfRate[3]->Fill(phi+1,turfPtr->getL2Rate(phi,1));    
-    histTurfRate[4]->Fill(phi+1,turfPtr->getNadirL12Rate(phi));
+    //    histTurfRate[0]->Fill(phi+1,1e-3*turfPtr->getL1Rate(phi,0));
+    //    histTurfRate[1]->Fill(phi+1,1e-3*turfPtr->getL1Rate(phi,1));
+    // histTurfRate[2]->Fill(phi+1,turfPtr->getL2Rate(phi,0));
+    // histTurfRate[3]->Fill(phi+1,turfPtr->getL2Rate(phi,1));    
+    // histTurfRate[4]->Fill(phi+1,turfPtr->getNadirL12Rate(phi));
     histTurfRate[5]->Fill(phi+1,turfPtr->getL3Rate(phi));
 
     if(turfPtr->phiTrigMask & (1<<phi))
@@ -992,14 +992,14 @@ TPad *AnitaRFCanvasMaker::getSumTurfRateCanvas(SummedTurfRate *sumTurfPtr, TPad 
   memset(maskedAnts,0,2*PHI_SECTORS*sizeof(int));
   
   for(int phi=0;phi<PHI_SECTORS;phi++) {
-    if(sumTurfPtr->getL1Rate(phi,0)>l1Max)
-      l1Max=sumTurfPtr->getL1Rate(phi,0);
-    if(sumTurfPtr->getL1Rate(phi,1)>l1Max)
-      l1Max=sumTurfPtr->getL1Rate(phi,1);
-    if(sumTurfPtr->getL2Rate(phi,0)>l2Max)
-      l2Max=sumTurfPtr->getL2Rate(phi,0);
-    if(sumTurfPtr->getL2Rate(phi,1)>l2Max)
-      l2Max=sumTurfPtr->getL2Rate(phi,1);
+    // if(sumTurfPtr->getL1Rate(phi,0)>l1Max)
+    //   l1Max=sumTurfPtr->getL1Rate(phi,0);
+    // if(sumTurfPtr->getL1Rate(phi,1)>l1Max)
+    //   l1Max=sumTurfPtr->getL1Rate(phi,1);
+    // if(sumTurfPtr->getL2Rate(phi,0)>l2Max)
+    //   l2Max=sumTurfPtr->getL2Rate(phi,0);
+    // if(sumTurfPtr->getL2Rate(phi,1)>l2Max)
+    //   l2Max=sumTurfPtr->getL2Rate(phi,1);
     if(sumTurfPtr->isAntMasked(phi,0))
       maskedAnts[0][phi]=1;
     if(sumTurfPtr->isAntMasked(phi,1))
@@ -1008,11 +1008,11 @@ TPad *AnitaRFCanvasMaker::getSumTurfRateCanvas(SummedTurfRate *sumTurfPtr, TPad 
       l3Max=sumTurfPtr->getL3Rate(phi);
     
       
-    histSumTurfRate[0]->Fill(phi+1,(1e-3*sumTurfPtr->getL1Rate(phi,0)));
-    histSumTurfRate[1]->Fill(phi+1,(1e-3*sumTurfPtr->getL1Rate(phi,1)));
-    histSumTurfRate[2]->Fill(phi+1,(sumTurfPtr->getL2Rate(phi,0)));
-    histSumTurfRate[3]->Fill(phi+1,(sumTurfPtr->getL2Rate(phi,1)));
-    histSumTurfRate[4]->Fill(phi+1,sumTurfPtr->getNadirL12Rate(phi));
+    // histSumTurfRate[0]->Fill(phi+1,(1e-3*sumTurfPtr->getL1Rate(phi,0)));
+    // histSumTurfRate[1]->Fill(phi+1,(1e-3*sumTurfPtr->getL1Rate(phi,1)));
+    // histSumTurfRate[2]->Fill(phi+1,(sumTurfPtr->getL2Rate(phi,0)));
+    // histSumTurfRate[3]->Fill(phi+1,(sumTurfPtr->getL2Rate(phi,1)));
+    // histSumTurfRate[4]->Fill(phi+1,sumTurfPtr->getNadirL12Rate(phi));
     histSumTurfRate[5]->Fill(phi+1,sumTurfPtr->getL3Rate(phi));
 
     if(sumTurfPtr->phiTrigMask & (1<<phi))
