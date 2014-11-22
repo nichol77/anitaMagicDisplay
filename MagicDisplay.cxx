@@ -313,7 +313,9 @@ int MagicDisplay::loadEventTree()
    Int_t fGotCalEventFile=0;
    char eventName[FILENAME_MAX];
    char headerName[FILENAME_MAX];  
+   char telemHeaderName[FILENAME_MAX];  
    sprintf(headerName,"%s/run%d/headFile%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);
+   sprintf(telemHeaderName,"%s/run%d/eventHeadFile%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);
 
    //Step one try calEventFile
    //Will try and use calibrated event files  
@@ -351,11 +353,14 @@ int MagicDisplay::loadEventTree()
      return -1;
    }
    
-   fHeadFile = TFile::Open(headerName);
+   fHeadFile = TFile::Open(telemHeaderName);
    if(!fHeadFile) {
-     cout << "Couldn't open: " << headerName << "\n";
-     return -1;
-  }
+     fHeadFile = TFile::Open(headerName);
+     if(!fHeadFile) {
+       cout << "Couldn't open: " << headerName << "\n";
+       return -1;
+     }
+   }
   fHeadTree = (TTree*) fHeadFile->Get("headTree");
   if(!fHeadTree) {
     cout << "Couldn't get headTree from " << headerName << endl;
