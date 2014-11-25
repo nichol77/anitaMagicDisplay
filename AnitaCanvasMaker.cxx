@@ -596,7 +596,6 @@ TPad *AnitaCanvasMaker::getHorizontalCanvas(RawAnitaHeader *hdPtr,
   int count=0;
 
 
-  //  std::cout << hdPtr->eventNumber << "\t" << hdPtr->l3TrigPattern << std::endl;
   for(int column=0;column<8;column++) {
     for(int row=0;row<6;row++) {
       plotPad->cd();
@@ -620,28 +619,20 @@ TPad *AnitaCanvasMaker::getHorizontalCanvas(RawAnitaHeader *hdPtr,
       paddy1->cd();
 
 
-      if(hdPtr->l3TrigPattern & (1<<phi)){
+      if(hdPtr->isInL3Pattern(phi,AnitaPol::kHorizontal)){
 	  grSurf[surf][chan]->SetLineColor(kRed-2);
       }
       else{
 	grSurf[surf][chan]->SetLineColor(kBlack);
       }
 
-      // if(ringMap[row]==AnitaRing::kTopRing) {
-      // 	if(hdPtr->upperL1TrigPattern & (1<<phi))
-      // 	  grSurf[surf][chan]->SetLineColor(kBlue-2);
-      // 	if(hdPtr->upperL2TrigPattern & (1<<phi))
-      // 	  grSurf[surf][chan]->SetLineColor(kGreen-2);
-      // }
-      // else if(ringMap[row]==AnitaRing::kMiddleRing) {
-      // 	if(hdPtr->lowerL1TrigPattern & (1<<phi))
-      // 	  grSurf[surf][chan]->SetLineColor(kBlue-2);
-      // 	if(hdPtr->lowerL2TrigPattern & (1<<phi))
-      // 	  grSurf[surf][chan]->SetLineColor(kGreen-2);
-      // }
-      // else{
-	grSurf[surf][chan]->SetLineColor(kBlack);
-	//      }
+     
+      if(hdPtr->isInPhiMask(phi,AnitaPol::kVertical)) {
+	grSurf[surf][chan]->SetLineStyle(2);
+      }
+      else {
+	grSurf[surf][chan]->SetLineStyle(1);
+      }
       
 
       grSurf[surf][chan]->setSurfChanPhiAntPolRing(surf,chan,phi,ant,
@@ -745,7 +736,6 @@ TPad *AnitaCanvasMaker::getVerticalCanvas(RawAnitaHeader *hdPtr,
   int count=0;
 
 
-  //  std::cout << hdPtr->eventNumber << "\t" << hdPtr->l3TrigPattern << std::endl;
   for(int column=0;column<8;column++) {
     for(int row=0;row<6;row++) {
       plotPad->cd();
@@ -768,24 +758,12 @@ TPad *AnitaCanvasMaker::getVerticalCanvas(RawAnitaHeader *hdPtr,
 	deleteTGraphsFromPad(paddy1,surf,chan,chan+4);
       paddy1->cd();
 
-      if(ringMap[row]==AnitaRing::kTopRing) {
-	if(hdPtr->upperL1TrigPattern & (1<<phi))
-	  grSurf[surf][chan]->SetLineColor(kBlue-2);
-	if(hdPtr->upperL2TrigPattern & (1<<phi))
-	  grSurf[surf][chan]->SetLineColor(kGreen-2);
-      }
-      else if(ringMap[row]==AnitaRing::kMiddleRing) {
-      	if(hdPtr->lowerL1TrigPattern & (1<<phi))
-	  grSurf[surf][chan]->SetLineColor(kBlue-2);
-	if(hdPtr->lowerL2TrigPattern & (1<<phi))
-	  grSurf[surf][chan]->SetLineColor(kGreen-2);
-      }
       
-      if(hdPtr->l3TrigPattern & (1<<phi))
+      if(hdPtr->isInL3Pattern(phi,AnitaPol::kVertical))
 	grSurf[surf][chan]->SetLineColor(kRed-3);
 
 
-      if(hdPtr->phiTrigMask & (1<<phi)) {
+      if(hdPtr->isInPhiMask(phi,AnitaPol::kVertical)) {
 	grSurf[surf][chan]->SetLineStyle(2);
       }
       else {
@@ -941,11 +919,11 @@ TPad *AnitaCanvasMaker::getVerticalCanvasForWebPlotter(RawAnitaHeader *hdPtr,
 						   AnitaPol::kVertical,
 						   ringMap[row]);
       
-      if(hdPtr->l3TrigPattern & (1<<phi))
+      if(hdPtr->isInL3Pattern(phi,AnitaPol::kVertical))
 	grSurf[surf][chan]->SetLineColor(kRed-3);
 
 
-      if(hdPtr->phiTrigMask & (1<<phi)) {
+      if(hdPtr->isInPhiMask(phi,AnitaPol::kVertical)) {
 	grSurf[surf][chan]->SetLineStyle(2);
       }
       else {
@@ -1043,23 +1021,11 @@ TPad *AnitaCanvasMaker::getSurfChanCanvas(RawAnitaHeader *hdPtr,
 	grSurf[surf][chan]->setSurfChanPhiAntPolRing(surf,chan,phi,ant,
 						     pol,ring);
 	
-	if(ring==AnitaRing::kTopRing) {
-	  if(hdPtr->upperL1TrigPattern & (1<<phi))
-	    grSurf[surf][chan]->SetLineColor(kBlue-2);
-	  if(hdPtr->upperL2TrigPattern & (1<<phi))
-	    grSurf[surf][chan]->SetLineColor(kGreen-2);
-	}
-	else if(ring==AnitaRing::kMiddleRing) {
-	  if(hdPtr->lowerL1TrigPattern & (1<<phi))
-	    grSurf[surf][chan]->SetLineColor(kBlue-2);
-	  if(hdPtr->lowerL2TrigPattern & (1<<phi))
-	    grSurf[surf][chan]->SetLineColor(kGreen-2);
-	}
       
-	if(hdPtr->l3TrigPattern & (1<<phi))
+	if(hdPtr->isInL3Pattern(phi,pol))
 	  grSurf[surf][chan]->SetLineColor(kRed-3);
 
-	if(hdPtr->phiTrigMask & (1<<phi)) {
+	if(hdPtr->isInPhiMask(phi,pol)) {
 	  grSurf[surf][chan]->SetLineStyle(2);
 	}
 	else {
@@ -1375,7 +1341,6 @@ TPad *AnitaCanvasMaker::getCombinedCanvas(RawAnitaHeader *hdPtr,
 
   int count=0;
 
-  //  std::cout << hdPtr->eventNumber << "\t" << hdPtr->l3TrigPattern << std::endl;
   for(int column=0;column<8;column++) {
     for(int row=0;row<6;row++) {
       plotPad->cd();
@@ -1664,7 +1629,6 @@ void AnitaCanvasMaker::setupSurfPadWithFrames(TPad *plotPad)
   int count=0;
 
 
-  //  std::cout << hdPtr->eventNumber << "\t" << hdPtr->l3TrigPattern << std::endl;
 
 
   for(int column=0;column<ACTIVE_SURFS;column++) {
@@ -1768,7 +1732,6 @@ void AnitaCanvasMaker::setupPayloadViewWithFrames(TPad *plotPad)
   int count=0;
 
 
-  //  std::cout << hdPtr->eventNumber << "\t" << hdPtr->l3TrigPattern << std::endl;
   sprintf(padName,"payloadPadLeft");
   TPad *padLeft =new TPad(padName,padName,0.05,0.05,0.5,0.95);
   padLeft->SetFillColor(kBlack);
