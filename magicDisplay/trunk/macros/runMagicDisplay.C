@@ -32,7 +32,7 @@ void runMagicDisplayRun(int run) {
   //  magicPtr->applyCut("triggerTimeNs>999.9e6 && triggerTimeNs<1000e6 && eventNumber%2==1");
   //  magicPtr->applyCut("eventNumber%2==1");
 
-  //   magicPtr->startGpsDisplay();
+  //  magicPtr->startGpsDisplay();
   //  magicPtr->startControlPanel();
 
 }
