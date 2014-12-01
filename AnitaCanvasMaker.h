@@ -157,7 +157,12 @@ class AnitaCanvasMaker
      /param hdPtr Pointer to the header of the event we want to draw.
      /param useCan Optional pointer to a canvas to draw the squiggly ines in (if zero a canvas will be created).
    */
-   TPad *getVerticalCanvasForWebPlotter(RawAnitaHeader *hdPtr, TPad *useCan=0);
+   TPad *getVerticalCanvasForWebPlotter(RawAnitaHeader *hdPtr, TPad *useCan=0);  //!  A worker function to draw the vertical canvas for QnDWBOM -- shouldn't be called directly.
+   /*!
+     /param hdPtr Pointer to the header of the event we want to draw.
+     /param useCan Optional pointer to a canvas to draw the squiggly ines in (if zero a canvas will be created).
+   */
+   TPad *getCombinedCanvasForWebPlotter(RawAnitaHeader *hdPtr, TPad *useCan=0);
 
    //!  A worker function to draw the Payload view canvas -- shouldn't be called directly.
    /*!
