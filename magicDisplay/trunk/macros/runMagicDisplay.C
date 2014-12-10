@@ -22,7 +22,7 @@ void runMagicDisplay(int run=10120) {
 
 void runMagicDisplayRun(int run) {
   //  MagicDisplay *magicPtr = new MagicDisplay("/anitaStorage/antarctica14/root",run,WaveCalType::kVoltageTime);  //kAddPeds
-  MagicDisplay *magicPtr = new MagicDisplay("/anitaStorage/antarctica14/root",run,WaveCalType::kVTLabAG);  //kAddPeds
+  MagicDisplay *magicPtr = new MagicDisplay("/anitaStorage/antarctica14/root",run,WaveCalType::kVTBenS);  //kAddPeds
 
   //magicPtr->startSurfDisplay();
   //  magicPtr->startAvgSurfDisplay();
