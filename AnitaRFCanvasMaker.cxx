@@ -436,11 +436,6 @@ void AnitaRFCanvasMaker::getSurfHkSurfCanvas(SurfHk *surfPtr,TPad *plotPad) {
 	histSurfHk[2][surf]->Fill(chan+surf*RFCHAN_PER_SURF,
 				  surfPtr->getRFPowerInK(surf,chan));
       }
-      else if(fSurfKelvinView==2) {
-	histSurfHk[2][surf]->Fill(chan+surf*RFCHAN_PER_SURF,
-				  surfPtr->getMeasuredRFPowerInK(surf,chan));
-
-      }
       else {
 	histSurfHk[2][surf]->Fill(chan+surf*RFCHAN_PER_SURF,
 				  surfPtr->rfPower[surf][chan]);
@@ -625,11 +620,6 @@ void AnitaRFCanvasMaker::getSurfHkPhiCanvas(SurfHk *surfPtr,TPad *plotPad) {
 	if(fSurfKelvinView==1) {
 	  histSurfHkPhi[2][surf]->Fill(index,
 				    surfPtr->getRFPowerInK(surf,rfChan));
-	}
-	else if(fSurfKelvinView==2) {
-	  histSurfHkPhi[2][surf]->Fill(index,
-				       surfPtr->getMeasuredRFPowerInK(surf,rfChan));
-
 	}
 	else {
 	  histSurfHkPhi[2][surf]->Fill(index,
@@ -1282,21 +1272,12 @@ void AnitaRFCanvasMaker::getAvgSurfHkSurfCanvas(AveragedSurfHk *avgSurfPtr,TPad 
 	if(fAvgSurfKelvinView==1) {
 	  error=avgSurfPtr->getRMSRFPowerInK(surf,chan);///sqrt(avgSurfPtr->numHks);
 	}
-	else if(fAvgSurfKelvinView==2) {
-	  error=avgSurfPtr->getMeasuredRMSRFPowerInK(surf,chan);///sqrt(avgSurfPtr->numHks);
-	}	  
 	else {
 	  error=avgSurfPtr->rmsRFPower[surf][chan];///sqrt(avgSurfPtr->numHks);
 	}
       }
       if(fAvgSurfKelvinView==1) {
 	Double_t val=avgSurfPtr->getRFPowerInK(surf,chan);
-	histAvgSurfHk[2][surf]->Fill(chan+surf*RFCHAN_PER_SURF,val);
-	if(maxVals[2]<val+error)
-	  maxVals[2]=val+error;
-      }
-      else if(fAvgSurfKelvinView==2) {
-	Double_t val=avgSurfPtr->getMeasuredRMSRFPowerInK(surf,chan);
 	histAvgSurfHk[2][surf]->Fill(chan+surf*RFCHAN_PER_SURF,val);
 	if(maxVals[2]<val+error)
 	  maxVals[2]=val+error;
@@ -1518,21 +1499,12 @@ void AnitaRFCanvasMaker::getAvgSurfHkPhiCanvas(AveragedSurfHk *avgSurfPtr,TPad *
 	  if(fAvgSurfKelvinView==1) {
 	    error=avgSurfPtr->getRMSRFPowerInK(surf,rfChan);///sqrt(avgSurfPtr->numHks);
 	  }
-	  else if(fAvgSurfKelvinView==2) {
-	    error=avgSurfPtr->getMeasuredRMSRFPowerInK(surf,rfChan);///sqrt(avgSurfPtr->numHks);
-	  }
 	  else {
 	    error=avgSurfPtr->rmsRFPower[surf][rfChan];///sqrt(avgSurfPtr->numHks);
 	  }
 	}
 	if(fAvgSurfKelvinView==1) {
 	  Double_t val=avgSurfPtr->getRFPowerInK(surf,rfChan);
-	  histAvgSurfHkPhi[2][phi]->Fill(index,val);
-	  if(maxVals[2]<val+error)
-	    maxVals[2]=val+error;
-	}
-	else if(fAvgSurfKelvinView==2) {
-	  Double_t val=avgSurfPtr->getMeasuredRFPowerInK(surf,rfChan);
 	  histAvgSurfHkPhi[2][phi]->Fill(index,val);
 	  if(maxVals[2]<val+error)
 	    maxVals[2]=val+error;
