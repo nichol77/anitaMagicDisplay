@@ -174,10 +174,10 @@ TPad *AnitaRFCanvasMaker::getTurfRateCanvas(TurfRate *turfPtr, TPad *useCan)
     //   l2Max=turfPtr->getL2Rate(phi,0);
     // if(turfPtr->getL2Rate(phi,1)>l2Max)
     //   l2Max=turfPtr->getL2Rate(phi,1);
-    if(turfPtr->isAntMasked(phi,0))
-      maskedAnts[0][phi]=1;
-    if(turfPtr->isAntMasked(phi,1))
-      maskedAnts[1][phi]=1;
+     //    if(turfPtr->isAntMasked(phi,0))
+     //      maskedAnts[0][phi]=1;
+     //    if(turfPtr->isAntMasked(phi,1))
+     //      maskedAnts[1][phi]=1;
     if(turfPtr->getL3Rate(phi)>l3Max)
       l3Max=turfPtr->getL3Rate(phi);
     
@@ -990,10 +990,10 @@ TPad *AnitaRFCanvasMaker::getSumTurfRateCanvas(SummedTurfRate *sumTurfPtr, TPad 
     //   l2Max=sumTurfPtr->getL2Rate(phi,0);
     // if(sumTurfPtr->getL2Rate(phi,1)>l2Max)
     //   l2Max=sumTurfPtr->getL2Rate(phi,1);
-    if(sumTurfPtr->isAntMasked(phi,0))
-      maskedAnts[0][phi]=1;
-    if(sumTurfPtr->isAntMasked(phi,1))
-      maskedAnts[1][phi]=1;
+     //    if(sumTurfPtr->isAntMasked(phi,0))
+     //      maskedAnts[0][phi]=1;
+     //    if(sumTurfPtr->isAntMasked(phi,1))
+     //      maskedAnts[1][phi]=1;
     if(sumTurfPtr->getL3Rate(phi)>l3Max)
       l3Max=sumTurfPtr->getL3Rate(phi);
     
