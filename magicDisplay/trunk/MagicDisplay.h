@@ -18,7 +18,7 @@
 #include "MagicDisplayConventions.h"
 #include "AnitaConventions.h"
 #include "CalibratedAnitaEvent.h"
-
+#include "CrossCorrelator.h"
 
 class TCanvas;
 class TPad;
@@ -63,7 +63,7 @@ class MagicDisplay
     \param run The run number to start with
     \param calType The calibration option desired (see <a HREF="/uhen/anita/eventReader/">the event reader documentation for the different available calibration options</A>)
   */
-  MagicDisplay(char *baseDir, int run, WaveCalType::WaveCalType_t calType=WaveCalType::kDefault);
+  MagicDisplay(const char *baseDir, int run, WaveCalType::WaveCalType_t calType=WaveCalType::kDefault);
   MagicDisplay(); ///< Default constructor
   ~MagicDisplay(); ///< Destructor
 
@@ -101,13 +101,16 @@ class MagicDisplay
     \param option See MagicDisplayCanvasLayoutOption for options.
   */
   void setCanvasLayout(MagicDisplayCanvasLayoutOption::MagicDisplayCanvasLayoutOption_t option); ///< Sets the drawing option for the event display see MagicDisplayCanvasLayoutOption for available options.
+  void swapWaveformButtonFunctionsAndTitles(MagicDisplayCanvasLayoutOption::MagicDisplayCanvasLayoutOption_t option);  
   //! Toggles between waveform and FFT view modes
   /*!
     \param waveformView See MagicDisplayFormatOption for options.
   */
-  void setWaveformFormat(MagicDisplayFormatOption::MagicDisplayFormatOption_t waveformView); 
+  void setWaveformFormat(MagicDisplayFormatOption::MagicDisplayFormatOption_t waveformView);
+  void setInterferometryTypeFlags(CrossCorrelator::mapMode_t mapMode, CrossCorrelator::zoomMode_t zoomMode);
+  
   void toggleTimeEventOrdering(); ///< Toggles between time and event ordering
-  void applyCut(char *cutString); ///< Applies a cut to the head tree
+  void applyCut(const char *cutString); ///< Applies a cut to the head tree
 
   int loadTurfTree(); ///< Opens the TURF rate file for the current run.
   void startTurfDisplay(); ///< Starts the TURF Rate display window.
@@ -226,7 +229,7 @@ class MagicDisplay
   Int_t  fWhichEventFileKind; ///< Flag to determine whether or not to use TTrees of lovely CalibratedAnitaEvent objects
   UInt_t fCurrentRun; ///< The current run number.
   Char_t fCurrentBaseDir[180]; ///< The base directory for the ROOT files.
-  
+
 
  protected:
   static MagicDisplay *fgInstance;  ///< The pointer to the current MagicDisplay
@@ -236,7 +239,7 @@ class MagicDisplay
   void zeroPointers();
   MagicDisplayFormatOption::MagicDisplayFormatOption_t fWaveformFormat; ///< The format for displaying waveforms.
   MagicDisplayCanvasLayoutOption::MagicDisplayCanvasLayoutOption_t fCanvasLayout; ///< The format for the canvas layout
-
+  
    TCanvas *fMagicCanvas; ///< The main event display canvas.
    TPad *fMagicMainPad; ///< The main event display pad.
    TPad *fMagicEventInfoPad; ///< The event display info pad.
@@ -284,6 +287,7 @@ class MagicDisplay
    TButton *fBothButton; ///< The both polarisations button.
    TButton *fSurfButton; ///< The SURF view button.
    TButton *fPayloadButton; ///< The payload view button.
+   TButton *fInterferometryButton; ///< The Interferometry view button.  
 
    TButton *fWaveformButton; ///< The waveform view button.
    TButton *fPowerButton; ///< The FFT view button.
@@ -325,6 +329,9 @@ class MagicDisplay
    Int_t fInGpsPlayMode; ///< Flag that indicates GPS play mode.
 
    WaveCalType::WaveCalType_t fCalType; ///< The waveform calibration type.
+
+  CrossCorrelator::mapMode_t fInterferometryMapMode;
+  CrossCorrelator::zoomMode_t fInterferometryZoomMode;  
 
 };
 

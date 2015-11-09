@@ -16,6 +16,7 @@
 #include <TVector3.h>
 #include "AnitaConventions.h"
 #include "MagicDisplayConventions.h"
+#include "CrossCorrelator.h"
 
 class UsefulAnitaEvent;
 class RawAnitaHeader;
@@ -33,10 +34,17 @@ class AnitaCanvasMaker
 
   void setCanvasLayout(MagicDisplayCanvasLayoutOption::MagicDisplayCanvasLayoutOption_t canLay) {fCanvasView=canLay;}
   void setWaveformFormat(MagicDisplayFormatOption::MagicDisplayFormatOption_t waveOption) {fWaveformOption=waveOption;}
+  void setInterferometryTypeFlags(CrossCorrelator::mapMode_t mapMode, CrossCorrelator::zoomMode_t zoomMode){
+    fInterferometryMapMode=mapMode;
+    fInterferometryZoomMode=zoomMode;
+  }
+  
   void resetAverage();
 
    Double_t fMinVoltLimit; ///< The minimum voltage. 
    Double_t fMaxVoltLimit; ///< The maximum voltage.
+   Double_t fMinInterfLimit; ///< The minimum interferometry. 
+   Double_t fMaxInterfLimit; ///< The maximum interferometry.
    Double_t fMinVertVoltLimit; ///< The minimum voltage in vertical channels.
    Double_t fMaxVertVoltLimit; ///< The maximum voltage in vertical channels.
    Int_t fAutoScale; ///< Fixed or auto-scaling y-axis?
@@ -56,6 +64,11 @@ class AnitaCanvasMaker
    MagicDisplayCanvasLayoutOption::MagicDisplayCanvasLayoutOption_t fLastCanvasView; ///< What was the last view (phi or SURF)?
    MagicDisplayFormatOption::MagicDisplayFormatOption_t fLastWaveformFormat; ///< What did we plot last time??
    Int_t fNewEvent; ///< Is this a new event?
+
+  CrossCorrelator::mapMode_t fInterferometryMapMode;
+  CrossCorrelator::mapMode_t fLastInterferometryMapMode;
+  CrossCorrelator::zoomMode_t fInterferometryZoomMode;	  
+  CrossCorrelator::zoomMode_t fLastInterferometryZoomMode;
   
    //!  The main event view canvas getter.
    /*!
@@ -65,8 +78,18 @@ class AnitaCanvasMaker
      /param useCan Optional pointer to a canvas to draw the squiggly ines in (if zero a canvas will be created).
    */
    TPad *getEventViewerCanvas(UsefulAnitaEvent *evPtr,RawAnitaHeader *hdPtr, TPad *useCan=0);
-   
-   //!  The main event view canvas getter used by QnDWBOM.
+
+   //!  The interferometry canvas getter.
+   /*!
+     Puts histograms from the Cross Correlator onto the display
+     /param evPtr Pointer to the UsefulAnitaEvent we want to draw.
+     /param hdPtr Pointer to the header of the event we want to draw
+     /param useCan Optional pointer to a canvas to draw in (if zero a canvas will be created).
+   */
+  TPad *getInterferometryCanvas(RawAnitaHeader *hdPtr,TPad *useCan=NULL);
+
+
+  //!  The main event view canvas getter used by QnDWBOM.
    /*!
      Actually draws all the little squiggly lines.
      /param evPtr Pointer to the UsefulAnitaEvent we want to draw.
@@ -88,6 +111,7 @@ class AnitaCanvasMaker
   
    
    void setupPhiPadWithFrames(TPad *plotPad); ///< Worker function to setup the phi view canvas.
+   void setupInterfPadWithFrames(TPad *plotPad); ///< Worker function to setup the phi view canvas.  
    void setupSurfPadWithFrames(TPad *plotPad); ///< Worker function to setup the surf view canvas.
    void setupPayloadViewWithFrames(TPad *plotPad); ///< Worker function to setup the payload view canvas.
    //void deleteTGraphsFromPad(TPad *paddy); ///< Deprecated.

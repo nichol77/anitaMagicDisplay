@@ -5,6 +5,7 @@
 /////     Class for making pretty event canvases for ANITA-II            /////
 /////  Author: Ryan Nichol (rjn@hep.ucl.ac.uk)                           /////
 //////////////////////////////////////////////////////////////////////////////
+
 #include <fstream>
 #include <iostream>
 #include "AnitaCanvasMaker.h"
@@ -14,8 +15,9 @@
 #include "RawAnitaHeader.h"
 #include "WaveformGraph.h"
 #include "FFTGraph.h"
+#include "CrossCorrelator.h"
 
-
+#include "TH2D.h"
 #include "TString.h"
 #include "TObjArray.h"
 #include "TObjString.h"
@@ -43,7 +45,7 @@
 
 AnitaCanvasMaker*  AnitaCanvasMaker::fgInstance = 0;
 AnitaGeomTool *fACMGeomTool=0;
-
+CrossCorrelator* fCrossCorr = 0;
 
 int phiMap[6][8]={{0,2,4,6,8,10,12,14},
 		  {1,3,5,7,9,11,13,15},
@@ -68,6 +70,10 @@ WaveformGraph *grSurfFiltered[ACTIVE_SURFS][CHANNELS_PER_SURF]={{0}};
 WaveformGraph *grSurfHilbert[ACTIVE_SURFS][CHANNELS_PER_SURF]={{0}};
 FFTGraph *grSurfFFT[ACTIVE_SURFS][CHANNELS_PER_SURF]={{0}};
 FFTGraph *grSurfAveragedFFT[ACTIVE_SURFS][CHANNELS_PER_SURF]={{0}};
+
+TH2D* hImage[AnitaPol::kNotAPol] = {0};
+TGraph* grL3Trig[AnitaPol::kNotAPol] = {0};
+TGraph* grPhiMask[AnitaPol::kNotAPol] = {0};
 
 
 AnitaCanvasMaker::AnitaCanvasMaker(WaveCalType::WaveCalType_t calType)
@@ -126,11 +132,18 @@ AnitaCanvasMaker::AnitaCanvasMaker(WaveCalType::WaveCalType_t calType)
     break;
   }
 
+  fCrossCorr=new CrossCorrelator;
+  for(Int_t pol=0; pol<AnitaPol::kNotAPol; pol++){
+    hImage[pol] = NULL;
+    grL3Trig[pol] = NULL;
+    grPhiMask[pol] = NULL;        
+  }
 
 }
 
 AnitaCanvasMaker::~AnitaCanvasMaker()
 {
+  delete fCrossCorr;
    //Default destructor
 }
 
@@ -379,13 +392,66 @@ TPad *AnitaCanvasMaker::quickGetEventViewerCanvasForWebPlottter(UsefulAnitaEvent
 
 }
 
-TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr,
-					     RawAnitaHeader *hdPtr,
-					     TPad *useCan)
-{
-  TPad *retCan=0;
 
+
+TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr, RawAnitaHeader *hdPtr, TPad *useCan){
+  // std::cerr << __PRETTY_FUNCTION__ << std::endl;
+
+  TPad *retCan=0;
   static UInt_t lastEventNumber=0;
+
+  if(fCanvasView==MagicDisplayCanvasLayoutOption::kInterferometry){
+    for(Int_t polInd=0; polInd<AnitaPol::kNotAPol; polInd++){
+      AnitaPol::AnitaPol_t pol = AnitaPol::AnitaPol_t(polInd);
+      if(fCrossCorr->eventNumber[polInd] != evPtr->eventNumber || fInterferometryMapMode!=fLastInterferometryMapMode || fInterferometryZoomMode!=fLastInterferometryZoomMode){
+	fCrossCorr->correlateEvent(evPtr, pol);
+	if(hImage[polInd]!=NULL){
+	  delete hImage[polInd];
+	  hImage[polInd] = NULL;
+	}
+	if(grL3Trig[polInd]!=NULL){
+	  delete grL3Trig[polInd];
+	  grL3Trig[polInd] = NULL;
+	}
+	if(grPhiMask[polInd]!=NULL){
+	  delete grPhiMask[pol];
+	  grPhiMask[pol] = NULL;
+	}
+	fMinInterfLimit = 1;
+	fMaxInterfLimit = -1;
+      }
+    }
+  
+    for(Int_t polInd=0; polInd<AnitaPol::kNotAPol; polInd++){
+      AnitaPol::AnitaPol_t pol = AnitaPol::AnitaPol_t(polInd);
+      if(hImage[polInd]==NULL){
+	Double_t imagePeak, peakPhiDeg, peakThetaDeg;
+	UShort_t l3TrigPattern = pol==AnitaPol::kHorizontal ? hdPtr->l3TrigPatternH : hdPtr->l3TrigPattern;
+
+	if(fInterferometryMapMode==CrossCorrelator::kGlobal){
+	  hImage[polInd] = fCrossCorr->makeGlobalImage(pol, imagePeak, peakPhiDeg, peakThetaDeg);
+	}
+	else{
+	  hImage[polInd] = fCrossCorr->makeTriggeredImage(pol, imagePeak, peakPhiDeg,
+							  peakThetaDeg, l3TrigPattern);
+
+	  if(fInterferometryZoomMode==CrossCorrelator::kZoomedIn){
+	    delete hImage[polInd];
+	    hImage[polInd] = fCrossCorr->makeZoomedImage(pol, l3TrigPattern,
+							 peakPhiDeg, peakThetaDeg);
+	  }
+	  
+	}
+
+	TString polChar = pol==AnitaPol::kHorizontal ? "H" : "V";
+	TString name = "grL3Trig" + polChar + TString::Format("_%u", evPtr->eventNumber);
+	grL3Trig[polInd] = fCrossCorr->makeTrigPatternGraph(name, l3TrigPattern, kRed, 3345);
+	UShort_t phiTrigMask = pol==AnitaPol::kHorizontal ? hdPtr->phiTrigMaskH : hdPtr->phiTrigMask;
+	name = "grPhiTrigMask" + polChar + TString::Format("_%u", evPtr->eventNumber);
+	grPhiMask[pol] = fCrossCorr->makeTrigPatternGraph(name, phiTrigMask, kBlack, 3354);
+      }
+    }
+  }
 
   
   if(evPtr->eventNumber!=lastEventNumber || fWaveformOption!=fLastWaveformFormat) {
@@ -401,7 +467,7 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr,
     }
     
     Double_t maxVal=0;
-
+    
     for(int surf=0;surf<ACTIVE_SURFS;surf++){
       for(int chan=0;chan<CHANNELS_PER_SURF;chan++){
 
@@ -463,7 +529,6 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr,
 		fMaxClockVoltLimit=yVals[i];	    
 	    }
 	  }
-	  
 	}
 
 	if(fPassBandFilter) {
@@ -535,16 +600,21 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr,
   fRedoEventCanvas=0;
   if(fLastWaveformFormat!=fWaveformOption) fRedoEventCanvas=1;
   if(fLastCanvasView!=fCanvasView) fRedoEventCanvas=1;
+  if(fLastInterferometryMapMode!=fInterferometryMapMode)fRedoEventCanvas=1;
+  if(fLastInterferometryZoomMode!=fInterferometryZoomMode)fRedoEventCanvas=1;
+
 
   if(fCanvasView==MagicDisplayCanvasLayoutOption::kPhiVerticalOnly) retCan=AnitaCanvasMaker::getVerticalCanvas(hdPtr,useCan);
   else if(fCanvasView==MagicDisplayCanvasLayoutOption::kPhiHorizontalOnly) retCan=AnitaCanvasMaker::getHorizontalCanvas(hdPtr,useCan);
   else if(fCanvasView==MagicDisplayCanvasLayoutOption::kPhiCombined) retCan=AnitaCanvasMaker::getCombinedCanvas(hdPtr,useCan);
   else if(fCanvasView==MagicDisplayCanvasLayoutOption::kSurfOnly) retCan=AnitaCanvasMaker::getSurfChanCanvas(hdPtr,useCan);
   else if(fCanvasView==MagicDisplayCanvasLayoutOption::kPayloadView) retCan=AnitaCanvasMaker::getPayloadCanvas(hdPtr,useCan);
+  else if(fCanvasView==MagicDisplayCanvasLayoutOption::kInterferometry) retCan=AnitaCanvasMaker::getInterferometryCanvas(hdPtr,useCan);
 
   fLastWaveformFormat=fWaveformOption;
   fLastCanvasView=fCanvasView;
-
+  fLastInterferometryMapMode=fInterferometryMapMode;
+  fLastInterferometryZoomMode=fInterferometryZoomMode;
   return retCan;
 
 }
@@ -1102,8 +1172,7 @@ TPad *AnitaCanvasMaker::getCombinedCanvasForWebPlotter(RawAnitaHeader *hdPtr,
 
 }
 
-TPad *AnitaCanvasMaker::getSurfChanCanvas(RawAnitaHeader *hdPtr,
-					  TPad *useCan)
+TPad *AnitaCanvasMaker::getSurfChanCanvas(RawAnitaHeader *hdPtr,TPad *useCan)
 {
    //  gStyle->SetTitleH(0.1);
   gStyle->SetOptTitle(0); 
@@ -1223,9 +1292,81 @@ TPad *AnitaCanvasMaker::getSurfChanCanvas(RawAnitaHeader *hdPtr,
   
 }
 
+TPad *AnitaCanvasMaker::getInterferometryCanvas(RawAnitaHeader *hdPtr,TPad *useCan)
+{
+  // std::cerr << __PRETTY_FUNCTION__ << std::endl;
+   //  gStyle->SetTitleH(0.1);
+  gStyle->SetOptTitle(1); 
 
-TPad *AnitaCanvasMaker::getPayloadCanvas(RawAnitaHeader *hdPtr,
-					 TPad *useCan)
+  char textLabel[180];
+  char padName[180];
+  TPad *canSurf=0;
+  TPad *plotPad=0;
+  if(!useCan) {
+    canSurf = (TPad*) gROOT->FindObject("canInterf");
+    if(!canSurf) {
+      canSurf = new TCanvas("canInterf","canInterf",1000,600);
+    }
+    canSurf->Clear();
+    canSurf->SetTopMargin(0);
+    TPaveText *leftPave = new TPaveText(0.05,0.92,0.95,0.98);
+    leftPave->SetBorderSize(0);
+    sprintf(textLabel,"Event %d",hdPtr->eventNumber);
+    TText *eventText = leftPave->AddText(textLabel);
+    eventText->SetTextColor(50);
+    leftPave->Draw();
+    plotPad = new TPad("canInterfMain","canInterfMain",0,0,1,0.9);
+    plotPad->Draw();
+  }
+  else {
+    plotPad=useCan;
+  }
+  plotPad->cd();
+  setupInterfPadWithFrames(plotPad);  
+
+  for(Int_t polInd=0; polInd<AnitaPol::kNotAPol; polInd++){
+    plotPad->cd();
+    sprintf(padName,"interfPad%d",polInd);
+    TPad *paddy1 = (TPad*) plotPad->FindObject(padName);
+    paddy1->SetEditable(kTRUE);
+    paddy1->cd();
+    hImage[polInd]->Draw("colz");
+    grL3Trig[polInd]->Draw("samef");
+    grPhiMask[polInd]->Draw("samef");
+
+    Double_t tempMax = hImage[polInd]->GetMaximum();
+    Double_t tempMin = hImage[polInd]->GetMinimum();
+
+    if(tempMax > fMaxInterfLimit){
+      fMaxInterfLimit = tempMax;
+    }
+    if(tempMin < fMinInterfLimit){
+      fMinInterfLimit = tempMin;
+    }
+    // paddy1->SetEditable(kFALSE);
+  }
+  if(fInterferometryZoomMode==CrossCorrelator::kZoomedOut){
+    for(Int_t polInd=0; polInd<AnitaPol::kNotAPol; polInd++){
+      hImage[polInd]->SetMaximum(fMaxInterfLimit);
+      hImage[polInd]->SetMinimum(fMinInterfLimit);	    
+    }
+  }
+  // plotPad->Update();
+
+  if(!useCan)
+    return canSurf;
+  else 
+    return plotPad;
+  
+}
+
+
+
+
+
+
+
+TPad *AnitaCanvasMaker::getPayloadCanvas(RawAnitaHeader *hdPtr,TPad *useCan)
 {
    //  gStyle->SetTitleH(0.1);
   gStyle->SetOptTitle(0); 
@@ -1713,6 +1854,60 @@ void AnitaCanvasMaker::setupPhiPadWithFrames(TPad *plotPad)
 
 }
 
+
+
+void AnitaCanvasMaker::setupInterfPadWithFrames(TPad *plotPad)
+{  
+  static int interfPadsDone=0;
+  char padName[180];
+  plotPad->cd();
+  if(fLastCanvasView!=MagicDisplayCanvasLayoutOption::kInterferometry) {
+    plotPad->Clear();
+  }
+
+  if(fRedoEventCanvas && interfPadsDone){
+    plotPad->Clear();
+  }
+
+  fLastCanvasView=MagicDisplayCanvasLayoutOption::kInterferometry;
+
+  if(interfPadsDone && !fRedoEventCanvas) {
+    int errors=0;
+    for(Int_t polInd=0; polInd<AnitaPol::kNotAPol; polInd++){    
+      sprintf(padName,"interfPad%d",polInd);
+      TPad *paddy = (TPad*) plotPad->FindObject(padName);
+      if(!paddy)
+  	errors++;
+    }
+    if(!errors){
+      return;
+    }
+  }
+
+  // std::cerr << "here" << std::endl;
+
+  interfPadsDone=1;
+      
+  int count=0;
+  Double_t left[AnitaPol::kNotAPol] = {0.03, 0.5};
+  Double_t right[AnitaPol::kNotAPol] = {0.5, 0.97};
+  Double_t top = 0.9;
+  Double_t bottom = 0.03;
+
+  for(Int_t polInd=0; polInd<AnitaPol::kNotAPol; polInd++){      
+    plotPad->cd();
+    sprintf(padName,"interfPad%d",polInd);
+    TPad *paddy1 = new TPad(padName,padName,left[polInd],bottom,right[polInd],top);
+    // TCanvas *paddy1 = new TCanvas(padName,padName,left[polInd],bottom,right[polInd],top);       
+    // paddy1->SetTopMargin(0);
+    // paddy1->SetBottomMargin(0);
+    // paddy1->SetLeftMargin(0);
+    // paddy1->SetRightMargin(0);
+    paddy1->Draw();
+    paddy1->cd();
+    count++;
+  }
+}
 
 
 void AnitaCanvasMaker::setupSurfPadWithFrames(TPad *plotPad)
