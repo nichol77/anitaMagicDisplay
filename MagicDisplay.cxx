@@ -33,6 +33,8 @@
 #include <fstream>
 #include <iostream>
 
+#include "CalibratedAnitaEvent.h"
+
 //Magic Display Includes
 #include "MagicDisplay.h"
 #include "WaveformGraph.h"
@@ -167,6 +169,8 @@ void MagicDisplay::zeroPointers()
 
    fWaveformFormat=MagicDisplayFormatOption::kWaveform;
    fCanvasLayout=MagicDisplayCanvasLayoutOption::kPhiVerticalOnly;
+   fInterferometryMapMode=CrossCorrelator::kGlobal;
+   fInterferometryZoomMode=CrossCorrelator::kZoomedOut;   
 
 }
 
@@ -182,7 +186,7 @@ MagicDisplay::~MagicDisplay()
 }
 
 
-MagicDisplay::MagicDisplay(char *baseDir, int run, WaveCalType::WaveCalType_t calType)
+MagicDisplay::MagicDisplay(const char *baseDir, int run, WaveCalType::WaveCalType_t calType)
 {
   //Offline constructor
   zeroPointers();
@@ -341,7 +345,11 @@ int MagicDisplay::loadEventTree()
        ///Now check mcTree  
        sprintf(eventName,"%s/run%d/mcEventFile%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);    
        fEventFile = TFile::Open(eventName);
-       fEventTree = (TTree*) fEventFile->Get("eventTree");     
+       if(fEventFile==NULL) {
+	 cout << "Couldn't find calEventFile, eventFile or mcEventFile!" << endl;
+	 return -1;
+       }
+       fEventTree = (TTree*) fEventFile->Get("eventTree");   
        fWhichEventFileKind=MagicDisplayFileType::kMcEvent;
        fEventTree->SetBranchAddress("event",&fUsefulEventPtr);
      }
@@ -400,18 +408,20 @@ void MagicDisplay::refreshEventDisplay()
            
   //This will need to change
   
-   fEventCanMaker->getEventInfoCanvas(fUsefulEventPtr,fHeadPtr,fMagicEventInfoPad);
-   
    fEventCanMaker->setWaveformFormat(fWaveformFormat);
    fEventCanMaker->setCanvasLayout(fCanvasLayout);
+   fEventCanMaker->setInterferometryTypeFlags(fInterferometryMapMode, fInterferometryZoomMode);
+   
 
    fEventCanMaker->getEventViewerCanvas(fUsefulEventPtr,fHeadPtr,fMagicMainPad);
+   fEventCanMaker->getEventInfoCanvas(fUsefulEventPtr,fHeadPtr,fMagicEventInfoPad);
+   
    
 
   fMagicCanvas->Update();
 }
 
-void MagicDisplay::applyCut(char *cutString)
+void MagicDisplay::applyCut(const char *cutString)
 {
   if(cutString==0)
     fApplyEventCut=0;
@@ -723,7 +733,7 @@ void MagicDisplay::drawEventButtons() {
    butFirst->SetTextSize(0.5);
    butFirst->SetFillColor(kOrange+10);
    butFirst->Draw();
-   TButton *butLast = new TButton("Last.","MagicDisplay::Instance()->displayLastEvent();",0.95,0.90,1,0.925);
+   TButton *butLast = new TButton("Last","MagicDisplay::Instance()->displayLastEvent();",0.95,0.90,1,0.925);
    butLast->SetTextSize(0.5);
    butLast->SetFillColor(kViolet-10);
    butLast->Draw();
@@ -771,10 +781,15 @@ void MagicDisplay::drawEventButtons() {
    fSurfButton->SetTextSize(0.5);
    fSurfButton->SetFillColor(kGray);
    fSurfButton->Draw();
-   fPayloadButton = new TButton("Payload","MagicDisplay::Instance()->setCanvasLayout(MagicDisplayCanvasLayoutOption::kPayloadView); MagicDisplay::Instance()->refreshEventDisplay();",0.05,0.933,0.1,0.966);
+   // fPayloadButton = new TButton("Payload","MagicDisplay::Instance()->setCanvasLayout(MagicDisplayCanvasLayoutOption::kPayloadView); MagicDisplay::Instance()->refreshEventDisplay();",0.05,0.933,0.1,0.966);
+   fPayloadButton = new TButton("Payload","std::cout << \"Sorry. Payload view currently disabled for ANITA-3.\" << std::endl;",0.05,0.933,0.1,0.966);   
    fPayloadButton->SetTextSize(0.5);
    fPayloadButton->SetFillColor(kGray);
    fPayloadButton->Draw();
+   fInterferometryButton = new TButton("Interferometry","MagicDisplay::Instance()->setCanvasLayout(MagicDisplayCanvasLayoutOption::kInterferometry); MagicDisplay::Instance()->refreshEventDisplay();",0.05,0.9,0.1,0.933);
+   fInterferometryButton->SetTextSize(0.33);
+   fInterferometryButton->SetFillColor(kGray);
+   fInterferometryButton->Draw();
 
    //NEW BUTTONS
    fWaveformButton = new TButton("Waveform","MagicDisplay::Instance()->setWaveformFormat(MagicDisplayFormatOption::kWaveform); MagicDisplay::Instance()->refreshEventDisplay();",0.1,0.975,0.2,1);
@@ -797,53 +812,162 @@ void MagicDisplay::drawEventButtons() {
    
 }
 
+
+
+void MagicDisplay::setInterferometryTypeFlags(CrossCorrelator::mapMode_t mapMode, CrossCorrelator::zoomMode_t zoomMode){
+
+  fInterferometryZoomMode = zoomMode;
+  if(zoomMode==CrossCorrelator::kZoomedIn){
+    fInterferometryMapMode = CrossCorrelator::kTriggered;
+  }
+  else{
+    fInterferometryMapMode = mapMode;
+  }
+  if(fInterferometryMapMode==CrossCorrelator::kGlobal) {
+    fWaveformButton->SetFillColor(kGray+3);
+    fPowerButton->SetFillColor(kGray);
+    fHilbertButton->SetFillColor(kGray);
+    fAverageFFTButton->SetFillColor(kGray);
+    fWaveformButton->Modified();
+    fPowerButton->Modified();
+    fHilbertButton->Modified();
+    fAverageFFTButton->Modified();
+  }
+  else if(fInterferometryZoomMode==CrossCorrelator::kZoomedOut) {
+    fWaveformButton->SetFillColor(kGray);
+    fPowerButton->SetFillColor(kGray+3);
+    fHilbertButton->SetFillColor(kGray);
+    fAverageFFTButton->SetFillColor(kGray);
+    fWaveformButton->Modified();
+    fPowerButton->Modified();
+    fHilbertButton->Modified();
+    fAverageFFTButton->Modified();
+  }
+  else if(fInterferometryZoomMode==CrossCorrelator::kZoomedIn &&
+	  fInterferometryMapMode==CrossCorrelator::kTriggered) {
+    //Turn fft view on
+    fWaveformButton->SetFillColor(kGray);
+    fPowerButton->SetFillColor(kGray);
+    fHilbertButton->SetFillColor(kGray+3);
+    fAverageFFTButton->SetFillColor(kGray);
+    fWaveformButton->Modified();
+    fPowerButton->Modified();
+    fHilbertButton->Modified();
+    fAverageFFTButton->Modified();
+  }
+
+  // std::cout << fInterferometryMapMode << "\t" << fInterferometryZoomMode << std::endl;
+  
+}
+
+
+
+void MagicDisplay::swapWaveformButtonFunctionsAndTitles(MagicDisplayCanvasLayoutOption::MagicDisplayCanvasLayoutOption_t option){
+
+  if(option==MagicDisplayCanvasLayoutOption::kInterferometry){
+    fWaveformButton->SetTitle("Global");
+    fWaveformButton->SetMethod("MagicDisplay::Instance()->setInterferometryTypeFlags(CrossCorrelator::kGlobal, CrossCorrelator::kZoomedOut); MagicDisplay::Instance()->refreshEventDisplay();");
+    fWaveformButton->SetTextSize(0.4);
+
+    fPowerButton->SetTitle("Triggered");
+    fPowerButton->SetMethod("MagicDisplay::Instance()->setInterferometryTypeFlags(CrossCorrelator::kTriggered, CrossCorrelator::kZoomedOut); MagicDisplay::Instance()->refreshEventDisplay();");
+    fPowerButton->SetTextSize(0.4);
+
+    fHilbertButton->SetTitle("Zoom");
+    fHilbertButton->SetMethod("MagicDisplay::Instance()->setInterferometryTypeFlags(CrossCorrelator::kTriggered, CrossCorrelator::kZoomedIn); MagicDisplay::Instance()->refreshEventDisplay();");
+    fHilbertButton->SetTextSize(0.4);
+  
+    fAverageFFTButton->SetTitle("");
+    fAverageFFTButton->SetMethod("");
+    fAverageFFTButton->SetTextSize(0.4);
+  }
+  else{
+    fWaveformButton->SetTitle("Waveform");
+    fWaveformButton->SetMethod("MagicDisplay::Instance()->setWaveformFormat(MagicDisplayFormatOption::kWaveform); MagicDisplay::Instance()->refreshEventDisplay();");
+    fWaveformButton->SetTextSize(0.4);
+
+    fPowerButton->SetTitle("FFT");
+    fPowerButton->SetMethod("MagicDisplay::Instance()->setWaveformFormat(MagicDisplayFormatOption::kFFT); MagicDisplay::Instance()->refreshEventDisplay();");
+    fPowerButton->SetTextSize(0.4);
+
+    fHilbertButton->SetTitle("Hilbert");
+    fHilbertButton->SetMethod("MagicDisplay::Instance()->setWaveformFormat(MagicDisplayFormatOption::kHilbertEnvelope); MagicDisplay::Instance()->refreshEventDisplay();");
+    fHilbertButton->SetTextSize(0.4);
+  
+    fAverageFFTButton->SetTitle("Average FFT");
+    fAverageFFTButton->SetMethod("MagicDisplay::Instance()->setWaveformFormat(MagicDisplayFormatOption::kAveragedFFT); MagicDisplay::Instance()->refreshEventDisplay();");
+    fAverageFFTButton->SetTextSize(0.4);
+  }
+  fWaveformButton->Modified();
+  fPowerButton->Modified();
+  fHilbertButton->Modified();
+  fAverageFFTButton->Modified();
+  
+}
+
 void MagicDisplay::setCanvasLayout(MagicDisplayCanvasLayoutOption::MagicDisplayCanvasLayoutOption_t option)
 {
    fCanvasLayout=option;
+   swapWaveformButtonFunctionsAndTitles(fCanvasLayout);
+   
    switch(option) {
    case MagicDisplayCanvasLayoutOption::kSurfOnly:
-      fVertButton->SetFillColor(kGray);
-      fHorizButton->SetFillColor(kGray);
-      fBothButton->SetFillColor(kGray);
-      fSurfButton->SetFillColor(kGray+3);
-      fPayloadButton->SetFillColor(kGray);
-      break;
+     fVertButton->SetFillColor(kGray);
+     fHorizButton->SetFillColor(kGray);
+     fBothButton->SetFillColor(kGray);
+     fSurfButton->SetFillColor(kGray+3);
+     fPayloadButton->SetFillColor(kGray);
+     fInterferometryButton->SetFillColor(kGray);
+     break;
    case MagicDisplayCanvasLayoutOption::kPhiVerticalOnly:
-      fVertButton->SetFillColor(kGray+3);
-      fHorizButton->SetFillColor(kGray);
-      fBothButton->SetFillColor(kGray);
-      fSurfButton->SetFillColor(kGray);
-      fPayloadButton->SetFillColor(kGray);
-      break;
+     fVertButton->SetFillColor(kGray+3);
+     fHorizButton->SetFillColor(kGray);
+     fBothButton->SetFillColor(kGray);
+     fSurfButton->SetFillColor(kGray);
+     fPayloadButton->SetFillColor(kGray);
+     fInterferometryButton->SetFillColor(kGray);
+     break;
    case MagicDisplayCanvasLayoutOption::kPhiHorizontalOnly:
-      fHorizButton->SetFillColor(kGray+3);
-      fVertButton->SetFillColor(kGray);
-      fBothButton->SetFillColor(kGray);
-      fSurfButton->SetFillColor(kGray);
-      fPayloadButton->SetFillColor(kGray);
-      break;
+     fHorizButton->SetFillColor(kGray+3);
+     fVertButton->SetFillColor(kGray);
+     fBothButton->SetFillColor(kGray);
+     fSurfButton->SetFillColor(kGray);
+     fPayloadButton->SetFillColor(kGray);
+     fInterferometryButton->SetFillColor(kGray);
+     break;
    case MagicDisplayCanvasLayoutOption::kPhiCombined:
-      fHorizButton->SetFillColor(kGray);
-      fVertButton->SetFillColor(kGray);
-      fBothButton->SetFillColor(kGray+3);
-      fSurfButton->SetFillColor(kGray);
-      fPayloadButton->SetFillColor(kGray);
-      break;
+     fHorizButton->SetFillColor(kGray);
+     fVertButton->SetFillColor(kGray);
+     fBothButton->SetFillColor(kGray+3);
+     fSurfButton->SetFillColor(kGray);
+     fPayloadButton->SetFillColor(kGray);
+     fInterferometryButton->SetFillColor(kGray);
+     break;
    case MagicDisplayCanvasLayoutOption::kPayloadView:
-      fHorizButton->SetFillColor(kGray);
-      fVertButton->SetFillColor(kGray);
-      fBothButton->SetFillColor(kGray);
-      fSurfButton->SetFillColor(kGray);
-      fPayloadButton->SetFillColor(kGray+3);
-      break;
+     fHorizButton->SetFillColor(kGray);
+     fVertButton->SetFillColor(kGray);
+     fBothButton->SetFillColor(kGray);
+     fSurfButton->SetFillColor(kGray);
+     fPayloadButton->SetFillColor(kGray+3);
+     fInterferometryButton->SetFillColor(kGray);
+     break;
+   case MagicDisplayCanvasLayoutOption::kInterferometry:
+     fHorizButton->SetFillColor(kGray);
+     fVertButton->SetFillColor(kGray);
+     fBothButton->SetFillColor(kGray);
+     fSurfButton->SetFillColor(kGray);
+     fPayloadButton->SetFillColor(kGray);
+     fInterferometryButton->SetFillColor(kGray+3);
+     break;
    default:
-      break;
-   }   
+     break;
+   }
    fVertButton->Modified();
    fHorizButton->Modified();  
    fBothButton->Modified(); 
    fSurfButton->Modified(); 
    fPayloadButton->Modified();
+   fInterferometryButton->Modified();
 }
 
 

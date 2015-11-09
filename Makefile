@@ -40,15 +40,16 @@ FFTFLAG =
 endif
 
 #Generic and Site Specific Flags
-CXXFLAGS     += $(ROOTCFLAGS) $(FFTFLAG) $(SYSINCLUDES) $(INC_ANITA_UTIL)
+CXXFLAGS     += $(ROOTCFLAGS) $(FFTFLAG) $(SYSINCLUDES) $(INC_ANITA_UTIL) #-DANITA2
 LDFLAGS      += -g $(ROOTLDFLAGS) 
 
-LIBS          = $(ROOTLIBS) -lMathMore -lMinuit -lGeom -lGraf3d $(SYSLIBS) $(LD_ANITA_UTIL) $(FFTLIBS)
+LIBS          = $(ROOTLIBS) -lMathMore -lMinuit -lGeom -lGraf3d $(SYSLIBS) $(LD_ANITA_UTIL) $(FFTLIBS) -lGui
 GLIBS         = $(ROOTGLIBS) $(SYSLIBS)
 
 #Now the bits we're actually compiling
 ROOT_LIBRARY = libMagicDisplay.${DLLSUF}
-LIB_OBJS =  AnitaCanvasMaker.o WaveformGraph.o MagicDisplay.o MagicDisplayConventions.o AnitaRFCanvasMaker.o MagicControlPanel.o FFTGraph.o CorrelationFactory.o  AnitaGpsCanvasMaker.o magicDict.o
+DICT  = magicDict
+LIB_OBJS =  AnitaCanvasMaker.o WaveformGraph.o MagicDisplay.o MagicDisplayConventions.o AnitaRFCanvasMaker.o MagicControlPanel.o FFTGraph.o CorrelationFactory.o  AnitaGpsCanvasMaker.o $(DICT).o
 CLASS_HEADERS = AnitaCanvasMaker.h AnitaRFCanvasMaker.h WaveformGraph.h MagicDisplay.h MagicDisplayConventions.h MagicControlPanel.h FFTGraph.h CorrelationFactory.h AnitaGpsCanvasMaker.h
 
 
@@ -56,11 +57,11 @@ all : $(ROOT_LIBRARY)
 
 
 #The library
-$(ROOT_LIBRARY) : $(LIB_OBJS) 
+$(ROOT_LIBRARY) : $(LIB_OBJS)
 	@echo "Linking $@ ..."
 ifeq ($(PLATFORM),macosx)
 # We need to make both the .dylib and the .so
-		$(LD) $(SOFLAGS)$@ $(LDFLAGS) $^ $(OutPutOpt) $@
+		$(LD) $(SOFLAGS)$@ $(LDFLAGS) $(LIBS) $^ $(OutPutOpt) $@
 ifneq ($(subst $(MACOSX_MINOR),,1234),1234)
 ifeq ($(MACOSX_MINOR),4)
 		ln -sf $@ $(subst .$(DllSuf),.so,$@)
@@ -73,7 +74,7 @@ else
 	$(LD) $(SOFLAGS) $(LDFLAGS) $(LIBS) $(LIB_OBJS) -o $@
 endif
 
-%.$(OBJSUF) : %.$(SRCSUF)
+%.$(OBJSUF) : %.$(SRCSUF) %.h
 	@echo "<**Compiling**> "$<
 	$(CXX) $(CXXFLAGS) -c $< -o  $@
 
@@ -82,10 +83,11 @@ endif
 	$(CXX) $(CXXFLAGS) $ -c $< -o  $@
 
 
-magicDict.C: $(CLASS_HEADERS)
+$(DICT).C: $(CLASS_HEADERS)
 	@echo "Generating dictionary ..."
 	@ rm -f *Dict* 
-	rootcint $@ -c $(INC_ANITA_UTIL) $(CLASS_HEADERS) LinkDef.h
+#	rootcint $@ -c $(INC_ANITA_UTIL) $(CLASS_HEADERS) LinkDef.h
+	rootcint $@ -c -p $(INC_ANITA_UTIL) $(CLASS_HEADERS) LinkDef.h
 
 install: $(ROOT_LIBRARY)
 	install -d $(ANITA_UTIL_LIB_DIR)
@@ -97,6 +99,11 @@ else
 endif
 	install -c -m 644  $(CLASS_HEADERS) $(ANITA_UTIL_INC_DIR)
 	install -d $(ANITA_UTIL_MAP_DIR)
+
+	@if [ $(shell root-config --version | cut -c1) -ge 6 ]; then \
+	install -c -m 755 $(DICT)_rdict.pcm $(ANITA_UTIL_LIB_DIR) ;\
+	fi # Additional install command for ROOTv6
+
 	install -c -m 644 antarcticaIceMap.png $(ANITA_UTIL_MAP_DIR)
 	install -c -m 644 anitageom.root $(ANITA_UTIL_MAP_DIR)
 
