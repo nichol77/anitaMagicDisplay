@@ -28,8 +28,10 @@ void runMagicDisplay(int run=352) {
   gSystem->Load("libGraf3d.so");
   gSystem->Load("libPhysics.so");  
   gSystem->Load("libRootFftwWrapper.so");     	  
-  gSystem->Load("libAnitaEvent.so");   	  
+  gSystem->Load("libAnitaEvent.so");
+  gSystem->Load("libBensAnitaTools.so");    
   gSystem->Load("libMagicDisplay.so");
+
 
   TChain *fred=0; //Will this work?
   runMagicDisplayRun(run);
