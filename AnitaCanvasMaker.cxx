@@ -133,12 +133,6 @@ AnitaCanvasMaker::AnitaCanvasMaker(WaveCalType::WaveCalType_t calType)
   }
 
   fCrossCorr=new CrossCorrelator;
-  for(Int_t pol=0; pol<AnitaPol::kNotAPol; pol++){
-    hImage[pol] = NULL;
-    grL3Trig[pol] = NULL;
-    grPhiMask[pol] = NULL;        
-  }
-
 }
 
 AnitaCanvasMaker::~AnitaCanvasMaker()
@@ -409,14 +403,6 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr, RawAnitaHe
 	  delete hImage[polInd];
 	  hImage[polInd] = NULL;
 	}
-	if(grL3Trig[polInd]!=NULL){
-	  delete grL3Trig[polInd];
-	  grL3Trig[polInd] = NULL;
-	}
-	if(grPhiMask[polInd]!=NULL){
-	  delete grPhiMask[pol];
-	  grPhiMask[pol] = NULL;
-	}
 	fMinInterfLimit = 1;
 	fMaxInterfLimit = -1;
       }
@@ -442,13 +428,6 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr, RawAnitaHe
 	  }
 	  
 	}
-
-	TString polChar = pol==AnitaPol::kHorizontal ? "H" : "V";
-	TString name = "grL3Trig" + polChar + TString::Format("_%u", evPtr->eventNumber);
-	grL3Trig[polInd] = fCrossCorr->makeTrigPatternGraph(name, l3TrigPattern, kRed, 3345);
-	UShort_t phiTrigMask = pol==AnitaPol::kHorizontal ? hdPtr->phiTrigMaskH : hdPtr->phiTrigMask;
-	name = "grPhiTrigMask" + polChar + TString::Format("_%u", evPtr->eventNumber);
-	grPhiMask[pol] = fCrossCorr->makeTrigPatternGraph(name, phiTrigMask, kBlack, 3354);
       }
     }
   }
@@ -1331,8 +1310,6 @@ TPad *AnitaCanvasMaker::getInterferometryCanvas(RawAnitaHeader *hdPtr,TPad *useC
     paddy1->SetEditable(kTRUE);
     paddy1->cd();
     hImage[polInd]->Draw("colz");
-    grL3Trig[polInd]->Draw("samef");
-    grPhiMask[polInd]->Draw("samef");
 
     Double_t tempMax = hImage[polInd]->GetMaximum();
     Double_t tempMin = hImage[polInd]->GetMinimum();
