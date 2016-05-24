@@ -1,0 +1,73 @@
+<h3>Preparation</h3>
+<p>In order to use MagicDisplay remotely you need to have enabled ssh access to the server using keys. This isn't nearly as painful as it sounds (and once you've tried keys you'll never go back to nasty password access).</p>
+ 
+<dl>
+<dt>Step 1. -- Making an SSH Key</dt>
+<dd>Do this by typing:	
+<pre>
+ssh-keygen -t dsa	
+</pre>
+enter a passphrase when prompted. This will create two files:
+.ssh/id_dsa  (your private key)
+.ssh/id_dsa.pub   (your public key)
+</dd>
+
+<dt>Step 2. Putting it on the server</dt>
+<dd>Log on to your server using standard password ssh. Append (note append do not replace otherwise other users of the same account will get shirty) the contents of your id_dsa.pub key to the .ssh/authorized_keys2 on the server machine</dd>
+
+<dt>Step 3. Test it</dt>
+<dd>Log out and when you log back in, instead of being asked for the password you'll be asked for your passphrase.</dd>
+
+<dt>Step 4. Enable ssh-agent</dt>
+<dd>That way you only need to enter your pass phrase once a session. See <a href="http://mah.everybody.org/docs/ssh"></a>http://mah.everybody.org/docs/ssh</dd>
+
+<dt>Step 5. Edit your .ssh/config file</dt>
+<dd>You need to add a few magic lines to your .ssh/config to avoid nasty problems connecting, you need one set of entries per remote host. The important lines a
+re the first three but you may as well include the others. An added bonus of thi
+s setup os that you can connect to the server via <pre> ssh loki</pre>.
+<pre>
+host loki
+HostName 192.168.2.2
+User anita
+ForwardAgent yes
+ForwardX11Trusted yes
+ForwardX11 yes
+</pre>
+</dd>
+
+<dt>Step 6. (Optional) Edit your ~/.rootauthrc file</dt>
+<dd>If you get an annoying window popping up asking you for a password you need to tell root which authentication system you wish to use. To do this edit (or create) $HOME/.rootauthrc and make sure that the active line has ssh first eg.
+<pre>
+default list ssh
+</pre>
+There are more details about <a href="http://root.cern.ch/root/Auth.html">controlling authentication on the ROOT website.</a>
+</dd>
+
+</dl>
+
+<h3>Using MagicDisplay remotely</h3>
+
+<dl>
+<dt>Option A</dt>
+<dd>The server has rootd spawned from inetd (loki and larry in palestine are setup this way). All you need to do is edit the macros/runMagicDisplayRemote.C macro to point to your favourite server and run number and then run it</dd>
+
+<dt>Option B</dt>
+<dd>If the server isn't setup up to automatically spawn rootd, then one needs to ssh to the server and start rootd.
+<pre>
+rootd -p <port>       #(I recommend using a high numbered port (10000+))
+</pre>
+Log out and back on your local machine edit the macro to port to your favourite server and port.
+</dd>
+</dl>
+
+<h3>Brief TNetFile tutorial</h3>
+
+<p>MagicDisplay works using roots built in rootd support. The syntax for the filename is:</p>
+<pre>
+root://user@server:port//full/path/to/remote/data/file
+</pre>
+<p>For instance if you just wanted to look at a header file on larry you could do:</p
+<pre>
+TFile *fpHead = TFile::Open("root://anita@192.168.2.103:1234//TBdata/anita/palestine08/root/run3791/headFile3791.root");
+</pre>
+<p>Then fpHead looks just like a TFile you opened on your local machine</p>
