@@ -5,6 +5,13 @@
 ##############################################################################
 include Makefile.arch
 
+
+### Package subdirectories
+LIBDIR=lib
+BUILDDIR=build
+INCLUDEDIR=include
+BINDIR=bin
+
 #Site Specific  Flags
 SYSINCLUDES	=
 SYSLIBS         = 
@@ -47,14 +54,25 @@ LIBS          = $(ROOTLIBS) -lMathMore -lMinuit -lGeom -lGraf3d $(SYSLIBS) $(LD_
 GLIBS         = $(ROOTGLIBS) $(SYSLIBS)
 
 #Now the bits we're actually compiling
-ROOT_LIBRARY = libMagicDisplay.${DLLSUF}
+ROOT_LIBRARY = ${LIBDIR}/libMagicDisplay.${DLLSUF}
 DICT  = magicDict
-LIB_OBJS =  AnitaCanvasMaker.o WaveformGraph.o MagicDisplay.o MagicDisplayConventions.o AnitaRFCanvasMaker.o MagicControlPanel.o FFTGraph.o CorrelationFactory.o  AnitaGpsCanvasMaker.o $(DICT).o
-CLASS_HEADERS = AnitaCanvasMaker.h AnitaRFCanvasMaker.h WaveformGraph.h MagicDisplay.h MagicDisplayConventions.h MagicControlPanel.h FFTGraph.h CorrelationFactory.h AnitaGpsCanvasMaker.h
+LIB_OBJS =  $(addprefix $(BUILDDIR)/,  AnitaCanvasMaker.o WaveformGraph.o MagicDisplay.o MagicDisplayConventions.o AnitaRFCanvasMaker.o MagicControlPanel.o FFTGraph.o CorrelationFactory.o  AnitaGpsCanvasMaker.o $(DICT).o )
+CLASS_HEADERS = $(addprefix $(INCLUDEDIR)/, AnitaCanvasMaker.h AnitaRFCanvasMaker.h WaveformGraph.h MagicDisplay.h MagicDisplayConventions.h MagicControlPanel.h FFTGraph.h CorrelationFactory.h AnitaGpsCanvasMaker.h )
 
 
 all : $(ROOT_LIBRARY)
 
+
+$(LIB_OBJS): | $(BUILDDIR) 
+
+$(BINDIR): 
+	mkdir -p $(BINDIR)
+
+$(BUILDDIR): 
+	mkdir -p $(BUILDDIR)
+
+$(LIBDIR): 
+	mkdir -p $(LIBDIR) | $(LIBDIR)
 
 #The library
 $(ROOT_LIBRARY) : $(LIB_OBJS)
@@ -73,21 +91,24 @@ endif
 else
 	$(LD) $(SOFLAGS) $(LDFLAGS) $(LIBS) $(LIB_OBJS) -o $@
 endif
+	@if [ $(shell root-config --version | cut -c1) -ge 6 ]; then \
+	cp $(BUILDDIR)/*.pcm $(LIBDIR); \
+	fi; # Additional install command for ROOTv6
 
-%.$(OBJSUF) : %.$(SRCSUF) %.h
+
+$(BUILDDIR)/%.$(OBJSUF) : src/%.$(SRCSUF) $(CLASS_HEADERS) Makefile | $(BUILDDIR) 
 	@echo "<**Compiling**> "$<
-	$(CXX) $(CXXFLAGS) -c $< -o  $@
-
-%.$(OBJSUF) : %.C
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+$(BUILDDIR)/%.$(OBJSUF) : $(BUILDDIR)/%.C
 	@echo "<**Compiling**> "$<
 	$(CXX) $(CXXFLAGS) $ -c $< -o  $@
 
 
-$(DICT).C: $(CLASS_HEADERS)
+#eventDict.C: $(CLASS_HEADERS)
+$(BUILDDIR)/$(DICT).C: $(CLASS_HEADERS)
 	@echo "Generating dictionary ..."
 	@ rm -f *Dict* 
-#	rootcint $@ -c $(INC_ANITA_UTIL) $(CLASS_HEADERS) LinkDef.h
-	rootcint $@ -c -p $(INC_ANITA_UTIL) $(CLASS_HEADERS) LinkDef.h
+	rootcint $@ -c -p $(CINTFLAGS) -I./ $(INC_ANITA_UTIL) $(CLASS_HEADERS) LinkDef.h
 
 install: $(ROOT_LIBRARY)
 	install -d $(ANITA_UTIL_LIB_DIR)
@@ -101,7 +122,7 @@ endif
 	install -d $(ANITA_UTIL_MAP_DIR)
 
 	@if [ $(shell root-config --version | cut -c1) -ge 6 ]; then \
-	install -c -m 755 $(DICT)_rdict.pcm $(ANITA_UTIL_LIB_DIR) ;\
+	install -c -m 755 $(BUILDDIR)/$(DICT)_rdict.pcm $(ANITA_UTIL_LIB_DIR) ;\
 	fi # Additional install command for ROOTv6
 
 	install -c -m 644 antarcticaIceMap.png $(ANITA_UTIL_MAP_DIR)
