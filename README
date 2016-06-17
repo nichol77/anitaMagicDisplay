@@ -2,7 +2,7 @@
 #### Magic Display   
 ####	   Marvellous Anita Graphical Interface & Classy Display
 ####
-####  May 2008 -- Ryan Nichol <rjn@hep.ucl.ac.uk>
+####  May 2008 -- Ryan Nichol <r.nichol@ucl.ac.uk>
 ################################################################################
 
 Introduction
@@ -20,42 +20,39 @@ A. My preferred way to look at the data is using the ROOT trees rather than the 
 
 Q. How do I get it?
 A. Read on, you can also visit the website at:
-http://www.hep.ucl.ac.uk/uhen/anita/magicDisplay
+https://github.com/anitaNeutrino/anitaMagicDisplay
 
 Prerequisites
 =============
 There are, unfortunately, several pre requisites for installing and running Magic Display.
 i) ROOT -- If you don't have it installed get the latest version from http://root.cern.ch
 ii) FFTW3 -- The Fastest Fourier Transform in the west. If you don't have libfftw3.so on your machine then you need to install it. Most linux distributions have a package ready to install, otherwise head to http://www.fftw.org/
-iii) libRootFftwWrapper -- A wrapper that makes i) and ii) play nicely together. You can get it from our very own SVN repository. You'll either want R1.2 or the development version. So
-    svn co https://delos.mps.ohio-state.edu/anitaGround/libRootFftwWrapper/branches/R1.2 myLRFWDirWithWhateverNameIWant
-or 
-   svn co https://delos.mps.ohio-state.edu/anitaGround/libRootFftwWrapper/trunk myLRFWDirWithWhateverNameIWant
+iii) libRootFftwWrapper -- A wrapper that makes i) and ii) play nicely together. You can get it from github.
+    git clone https://github.com/nichol77/libRootFftwWrapper.git
 then see the README file for how to install and compile
-iv) eventReaderRoot -- The ANITA event reader program. You can get it from our lovely SVN repository. You'll want either the development version or version 4.0 So:
-    svn co https://delos.mps.ohio-state.edu/anitaGround/eventReaderRoot/branches/anitaII/R4.0 myEventReaderDirWithWhateverNameIWant
-or 
-    svn co https://delos.mps.ohio-state.edu/anitaGround/eventReaderRoot/trunk myEventReaderDirWithWhateverNameIWant
-
-
+iv) eventReaderRoot -- The ANITA event reader program. You can get it from github
+    git clone https://github.com/anitaNeutrino/eventReaderRoot.git
 Downloading
 ===========
-The recommended way to download the program is from the svn repository. Try doing:
-   svn co https://delos.mps.ohio-state.edu/anitaGround/magicDisplay/trunk (or branches/R0.1)  mySillyNamedMagicDisplayDir
-Alternatively tar files of the releases can be obtained from:
-http://www.hep.ucl.ac.uk/uhen/anita/magicDisplay
+The recommended way to download the program is from the git repository. Try doing:
+git clone https://github.com/anitaNeutrino/anitaMagicDisplay.git
 
 Installing
 ===========
 Four steps to installation happiness:
 i) Make sure the prerequisites are installed and accessible from your LD_LIBRARY_PATH
 ii) Make SURE ANITA_UTIL_INSTALL_DIR is set and that the eventReader and libRootFftwWrapper files are installed there. (You probably want $ANITA_UTIL_INSTALL_DIR/lib in your LD_LIBRARY_PATH)
-iii) type: make
-iv) type: make install
+iii) type <from the magic display directory:
+mkdir build
+cd build
+cmake ..
+make
+make install
+
 
 Running
 =======
-i) Get some ANITA II data -- there's a tar file for testing on the website
+i) Get some ANITA III/IV data -- there's a tar file for testing on the website
 http://www.hep.ucl.ac.uk/uhen/anita/magicDisplay
 ii) Edit macros/runMagicDisplay.C to point to your data and run number
 iii) Type:

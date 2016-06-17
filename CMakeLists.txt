@@ -36,6 +36,7 @@ else()
     set(INC_UTIL /usr/local/include)
 endif()
 
+set(ANITA_UTIL_MAP_DIR ${UTIL_SHARE_DIR}/anitaMap)
 
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${UTIL_SHARE_DIR}/cmake/Modules/")
@@ -110,4 +111,6 @@ install (TARGETS ${libname}
 if( ${ROOT_VERSION} VERSION_GREATER "5.99.99")
   install (FILES ${PROJECT_BINARY_DIR}/${DICTNAME}_rdict.pcm DESTINATION ${UTIL_LIB_DIR})
   install (FILES ${PROJECT_BINARY_DIR}/lib${libname}.rootmap DESTINATION ${UTIL_LIB_DIR})
-endif() 
+endif()
+install (FILES antarcticaIceMap.png DESTINATION ${ANITA_UTIL_MAP_DIR} )
+install (FILES anitageom.root DESTINATION ${ANITA_UTIL_MAP_DIR} )

@@ -1,8 +1,21 @@
-// gSystem->Reset();
+#include "AnitaConventions.h"
+
+
+void runMagicDisplayRun(int run);
+
+void runMagicDisplay(int run=1002) {
+  cout << "runMagicDisplay(" << run << ")\n";
+
+
+
+  TChain *fred=0; //Will this work?
+  runMagicDisplayRun(run);
+}
+
 
 void runMagicDisplayRun(int run) {
 
-  MagicDisplay *magicPtr = new MagicDisplay("~/UCL/ANITA/flight1415/root",run,WaveCalType::kDefault);
+  MagicDisplay *magicPtr = new MagicDisplay("/data/palestine2016/root",run,WaveCalType::kDefault);
 
   //magicPtr->startSurfDisplay();
   //  magicPtr->startAvgSurfDisplay();
@@ -15,24 +28,4 @@ void runMagicDisplayRun(int run) {
   //  magicPtr->startGpsDisplay();
   //  magicPtr->startControlPanel();
 
-}
-
-void runMagicDisplay(int run=352) {
-  //  gSystem->AddIncludePath(gSystem->ExpandPathName("-I${EVENT_READER_DIR}"));
-  gSystem->AddIncludePath("-I${ANITA_UTIL_INSTALL_DIR}/include");
-  //  cout << gSystem->GetIncludePath() <<endl;
-		
-  gSystem->Load("libfftw3.so");
-  gSystem->Load("libMathMore.so");
-  gSystem->Load("libGeom.so");;
-  gSystem->Load("libGraf3d.so");
-  gSystem->Load("libPhysics.so");  
-  gSystem->Load("libRootFftwWrapper.so");     	  
-  gSystem->Load("libAnitaEvent.so");
-  gSystem->Load("libBensAnitaTools.so");    
-  gSystem->Load("libMagicDisplay.so");
-
-
-  TChain *fred=0; //Will this work?
-  runMagicDisplayRun(run);
 }
