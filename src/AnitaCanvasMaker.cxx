@@ -132,12 +132,14 @@ AnitaCanvasMaker::AnitaCanvasMaker(WaveCalType::WaveCalType_t calType)
     break;
   }
 
-  fCrossCorr=new CrossCorrelator;
+  //RJN chnge to try and speed up web plotter
+  fCrossCorr=NULL;
+  //  fCrossCorr=new CrossCorrelator();
 }
 
 AnitaCanvasMaker::~AnitaCanvasMaker()
 {
-  delete fCrossCorr;
+  if(fCrossCorr)delete fCrossCorr;
    //Default destructor
 }
 
@@ -395,6 +397,7 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr, RawAnitaHe
   static UInt_t lastEventNumber=0;
 
   if(fCanvasView==MagicDisplayCanvasLayoutOption::kInterferometry){
+    if(!fCrossCorr)  fCrossCorr=new CrossCorrelator();
     for(Int_t polInd=0; polInd<AnitaPol::kNotAPol; polInd++){
       AnitaPol::AnitaPol_t pol = AnitaPol::AnitaPol_t(polInd);
       if(fCrossCorr->eventNumber[polInd] != evPtr->eventNumber || fInterferometryMapMode!=fLastInterferometryMapMode || fInterferometryZoomMode!=fLastInterferometryZoomMode){
