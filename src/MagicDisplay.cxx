@@ -318,8 +318,10 @@ int MagicDisplay::loadEventTree()
    char eventName[FILENAME_MAX];
    char headerName[FILENAME_MAX];  
    char telemHeaderName[FILENAME_MAX];  
+   char simHeaderName[FILENAME_MAX];  
    sprintf(headerName,"%s/run%d/headFile%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);
    sprintf(telemHeaderName,"%s/run%d/eventHeadFile%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);
+   sprintf(simHeaderName,"%s/run%d/SimulatedAnitaHeadFile%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);
 
    //Step one try calEventFile
    //Will try and use calibrated event files  
@@ -343,15 +345,15 @@ int MagicDisplay::loadEventTree()
      }
      else {
        ///Now check mcTree  
-       sprintf(eventName,"%s/run%d/mcEventFile%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);    
+       sprintf(eventName,"%s/run%d/SimulatedAnitaEventFile%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);    
        fEventFile = TFile::Open(eventName);
        if(fEventFile==NULL) {
-	 cout << "Couldn't find calEventFile, eventFile or mcEventFile!" << endl;
+	 cout << "Couldn't find calEventFile, eventFile or SimulatedEventFile!" << endl;
 	 return -1;
        }
        fEventTree = (TTree*) fEventFile->Get("eventTree");   
        fWhichEventFileKind=MagicDisplayFileType::kMcEvent;
-       fEventTree->SetBranchAddress("event",&fUsefulEventPtr);
+       fEventTree->SetBranchAddress("UsefulAnitaEvent",&fUsefulEventPtr);
      }
    }
    
@@ -364,16 +366,17 @@ int MagicDisplay::loadEventTree()
    fHeadFile = TFile::Open(telemHeaderName);
    if(!fHeadFile) {
      fHeadFile = TFile::Open(headerName);
-     if(!fHeadFile) {
-       cout << "Couldn't open: " << headerName << "\n";
-       return -1;
-     }
+     if(!fHeadFile) fHeadFile = TFile::Open(simHeaderName);
+       if(!fHeadFile) {
+	 cout << "Couldn't open: " << headerName << "\n";
+	 return -1;
+       }
    }
-  fHeadTree = (TTree*) fHeadFile->Get("headTree");
-  if(!fHeadTree) {
-    cout << "Couldn't get headTree from " << headerName << endl;
-    return -1;
-  }
+   fHeadTree = (TTree*) fHeadFile->Get("headTree");
+   if(!fHeadTree) {
+     cout << "Couldn't get headTree from " << headerName << endl;
+     return -1;
+   }
   fHeadTree->SetBranchAddress("header",&fHeadPtr);
   fEventEntry=0;
   fHeadTree->BuildIndex("eventNumber");
