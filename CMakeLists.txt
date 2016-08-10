@@ -39,7 +39,7 @@ endif()
 set(ANITA_UTIL_MAP_DIR ${UTIL_SHARE_DIR}/anitaMap)
 
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${UTIL_SHARE_DIR}/cmake/Modules/")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${UTIL_SHARE_DIR}/cmake/modules/")
 
 
 #---Locate the ROOT package and defines a number of variables (e.g. ROOT_INCLUDE_DIRS)
