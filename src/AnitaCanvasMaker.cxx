@@ -680,7 +680,7 @@ TPad *AnitaCanvasMaker::getHorizontalCanvas(RawAnitaHeader *hdPtr,
       }
 
      
-      if(hdPtr->isInPhiMask(phi,AnitaPol::kVertical)) {
+      if(hdPtr->isInPhiMask(phi,AnitaPol::kVertical) || hdPtr->isInL1Mask(phi,AnitaPol::kVertical)) {
 	grSurf[surf][chan]->SetLineStyle(2);
       }
       else {
@@ -816,7 +816,7 @@ TPad *AnitaCanvasMaker::getVerticalCanvas(RawAnitaHeader *hdPtr,
 	grSurf[surf][chan]->SetLineColor(kRed-3);
 
 
-      if(hdPtr->isInPhiMask(phi,AnitaPol::kVertical)) {
+      if(hdPtr->isInPhiMask(phi,AnitaPol::kVertical) || hdPtr->isInL1Mask(phi,AnitaPol::kVertical) ) {
 	grSurf[surf][chan]->SetLineStyle(2);
       }
       else {
@@ -964,7 +964,7 @@ TPad *AnitaCanvasMaker::getVerticalCanvasForWebPlotter(RawAnitaHeader *hdPtr,
 	grSurf[surf][chan]->SetLineColor(kRed-3);
 
 
-      if(hdPtr->isInPhiMask(phi,AnitaPol::kVertical)) {
+      if(hdPtr->isInPhiMask(phi,AnitaPol::kVertical) || hdPtr->isInL1Mask(phi,AnitaPol::kVertical)) {
 	grSurf[surf][chan]->SetLineStyle(2);
       }
       else {
@@ -1102,13 +1102,13 @@ TPad *AnitaCanvasMaker::getCombinedCanvasForWebPlotter(RawAnitaHeader *hdPtr,
 	grSurf[surf][chan]->SetLineColor(kRed-3);
       if(hdPtr->isInL3Pattern(phi,AnitaPol::kHorizontal))
 	grSurf[surfH][chanH]->SetLineColor(kGreen-3);
-      if(hdPtr->isInPhiMask(phi,AnitaPol::kVertical)) {
+      if(hdPtr->isInPhiMask(phi,AnitaPol::kVertical) || hdPtr->isInL1Mask(phi,AnitaPol::kVertical) ) {
 	grSurf[surf][chan]->SetLineStyle(2);
       }
       else {
 	grSurf[surf][chan]->SetLineStyle(1);
       }
-      if(hdPtr->isInPhiMask(phi,AnitaPol::kHorizontal)) {
+      if(hdPtr->isInPhiMask(phi,AnitaPol::kHorizontal) || hdPtr->isInL1Mask(phi,AnitaPol::kHorizontal)) {
 	grSurf[surfH][chanH]->SetLineStyle(2);
       }
       else {
@@ -1216,7 +1216,7 @@ TPad *AnitaCanvasMaker::getSurfChanCanvas(RawAnitaHeader *hdPtr,TPad *useCan)
 	if(hdPtr->isInL3Pattern(phi,pol))
 	  grSurf[surf][chan]->SetLineColor(kRed-3);
 
-	if(hdPtr->isInPhiMask(phi,pol)) {
+	if(hdPtr->isInPhiMask(phi,pol) || hdPtr->isInL1Mask(phi,pol)) {
 	  grSurf[surf][chan]->SetLineStyle(2);
 	}
 	else {
@@ -1639,13 +1639,13 @@ TPad *AnitaCanvasMaker::getCombinedCanvas(RawAnitaHeader *hdPtr,
 	grSurf[surf][chanV]->SetLineColor(kRed-3);
       if(hdPtr->isInL3Pattern(phi,AnitaPol::kHorizontal))
 	grSurf[surf][chanH]->SetLineColor(kGreen-3);
-      if(hdPtr->isInPhiMask(phi,AnitaPol::kVertical)) {
+      if(hdPtr->isInPhiMask(phi,AnitaPol::kVertical) || hdPtr->isInL1Mask(phi,AnitaPol::kVertical) ) {
 	grSurf[surf][chanV]->SetLineStyle(2);
       }
       else {
 	grSurf[surf][chanV]->SetLineStyle(1);
       }
-      if(hdPtr->isInPhiMask(phi,AnitaPol::kHorizontal)) {
+      if(hdPtr->isInPhiMask(phi,AnitaPol::kHorizontal) || hdPtr->isInL1Mask(phi,AnitaPol::kHorizontal)) {
 	grSurf[surf][chanH]->SetLineStyle(2);
       }
       else {
