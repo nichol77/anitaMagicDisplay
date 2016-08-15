@@ -41,6 +41,17 @@
 #include "TView3D.h"
 
 #include "FFTtools.h"
+#include "MagicDisplay.h" 
+
+#include "FilteredAnitaEvent.h" 
+
+#include "AnitaDataset.h" 
+
+//This is filthy, but I want to match the analysis exactly, so getting the header from
+//MagicDisplay won't do until it gets the timedHeader and gpsEvent, which should be done at some point, but 
+//I'll figure it out later. 
+static AnitaDataset * dataset = 0; 
+static int current_run = 0; 
 
 
 AnitaCanvasMaker*  AnitaCanvasMaker::fgInstance = 0;
@@ -435,6 +446,32 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr, RawAnitaHe
     }
   }
 
+  if (fCanvasView==MagicDisplayCanvasLayoutOption::kUCorrelator)
+  {
+
+    //filthy filthy filthy 
+    int run = hdPtr->run; 
+    int ev = hdPtr->eventNumber;
+    if (run !=current_run || !dataset) 
+    {
+      if (dataset)
+      {
+        dataset->loadRun(run); 
+      }
+      else
+      {
+        dataset = new AnitaDataset(run); 
+      }
+      current_run = run; 
+    }
+
+    dataset->getEvent(ev); 
+
+    FilteredAnitaEvent fev( evPtr, MagicDisplay::Instance()->getStrategy(), dataset->gps(), dataset->header()); 
+    AnitaEventSummary sum; 
+    MagicDisplay::Instance()->getUCorr()->analyze(&fev,&sum);
+  }
+
   
   if(evPtr->eventNumber!=lastEventNumber || fWaveformOption!=fLastWaveformFormat) {
     lastEventNumber=evPtr->eventNumber;
@@ -592,6 +629,7 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr, RawAnitaHe
   else if(fCanvasView==MagicDisplayCanvasLayoutOption::kSurfOnly) retCan=AnitaCanvasMaker::getSurfChanCanvas(hdPtr,useCan);
   else if(fCanvasView==MagicDisplayCanvasLayoutOption::kPayloadView) retCan=AnitaCanvasMaker::getPayloadCanvas(hdPtr,useCan);
   else if(fCanvasView==MagicDisplayCanvasLayoutOption::kInterferometry) retCan=AnitaCanvasMaker::getInterferometryCanvas(hdPtr,useCan);
+  else if(fCanvasView==MagicDisplayCanvasLayoutOption::kUCorrelator) retCan=AnitaCanvasMaker::getUCorrelatorCanvas(hdPtr,useCan);
 
   fLastWaveformFormat=fWaveformOption;
   fLastCanvasView=fCanvasView;
@@ -1268,6 +1306,45 @@ TPad *AnitaCanvasMaker::getSurfChanCanvas(RawAnitaHeader *hdPtr,TPad *useCan)
   
 
   if(!useCan)
+    return canSurf;
+  else 
+    return plotPad;
+  
+}
+
+TPad * AnitaCanvasMaker::getUCorrelatorCanvas(RawAnitaHeader *hdPtr, TPad *useCan)
+{
+
+  gStyle->SetOptTitle(1); 
+  TPad *canSurf=0;
+  TPad * plotPad = 0; 
+  char textLabel[180]; 
+
+  if(!useCan) {
+    canSurf = (TPad*) gROOT->FindObject("canUCorr");
+    if(!canSurf) {
+      canSurf = new TCanvas("canUCorr","canUCorr",1000,600);
+    }
+    canSurf->Clear();
+    canSurf->SetTopMargin(0);
+    TPaveText *leftPave = new TPaveText(0.05,0.92,0.95,0.98);
+    leftPave->SetBorderSize(0);
+    sprintf(textLabel,"Event %d",hdPtr->eventNumber);
+    TText *eventText = leftPave->AddText(textLabel);
+    eventText->SetTextColor(50);
+    leftPave->Draw();
+    plotPad = new TPad("canUCorrMain","canUCorrMain",0,0,1,0.9);
+    plotPad->Draw();
+  }
+  else {
+    plotPad=useCan;
+  }
+  plotPad->cd();
+  plotPad->Clear(); 
+  plotPad->Divide(1,2); 
+  MagicDisplay::Instance()->getUCorr()->drawSummary((TPad*) plotPad->GetPad(1), (TPad*) plotPad->GetPad(2)); 
+
+ if(!useCan)
     return canSurf;
   else 
     return plotPad;

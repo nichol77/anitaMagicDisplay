@@ -71,6 +71,9 @@
 #include "TEventList.h"
 #include <TGClient.h>
 
+
+#include "UCFilters.h" 
+#include "BasicFilters.h" 
 using namespace std;
 
 MagicDisplay*  MagicDisplay::fgInstance = 0;
@@ -81,6 +84,11 @@ MagicControlPanel *fControlPanel=0;
 //Leave these as global variables for now
 
 
+
+static FilterStrategy default_strategy; 
+static int default_strategy_init = 0; 
+static FilterStrategy no_filter_strategy; 
+static int no_filter_strategy_init = 0; 
 
 void MagicDisplay::zeroPointers() 
 {
@@ -172,7 +180,49 @@ void MagicDisplay::zeroPointers()
    fInterferometryMapMode=CrossCorrelator::kGlobal;
    fInterferometryZoomMode=CrossCorrelator::kZoomedOut;   
 
+   
+   if (!default_strategy_init)
+   {
+     default_strategy_init = 1; 
+     default_strategy.addOperation(new UCorrelator::SineSubtractFilter);
+     default_strategy.addOperation(new ALFAFilter); 
+   }
+
+   if (!no_filter_strategy_init)
+   {
+     no_filter_strategy_init = 1; 
+     no_filter_strategy.addOperation(new ALFAFilter); 
+   }
+
+
+   setFilterStrategy(&default_strategy); 
+
+   fUCorr = new UCorrelator::Analyzer(0,true); 
 }
+
+
+void MagicDisplay::drawUCorrelatorFilterButtons() 
+{
+    if (fStrategy == &no_filter_strategy) fWaveformButton->SetFillColor(kGray + 3); 
+    else fWaveformButton->SetFillColor(kGray); 
+    if (fStrategy == &default_strategy) fPowerButton->SetFillColor(kGray + 3); 
+    else fPowerButton->SetFillColor(kGray); 
+
+    fWaveformButton->Modified(); 
+    fPowerButton->Modified(); 
+}
+
+void MagicDisplay::setFilterStrategy(FilterStrategy * s)
+{ 
+  fStrategy = s; 
+
+  //TODO: do a smarter job of this 
+  if (fCanvasLayout == MagicDisplayCanvasLayoutOption::kUCorrelator) 
+  {
+    drawUCorrelatorFilterButtons(); 
+  }
+} 
+
 
 MagicDisplay::MagicDisplay()
 {
@@ -183,6 +233,9 @@ MagicDisplay::MagicDisplay()
 MagicDisplay::~MagicDisplay()
 {
    //Default destructor
+   //
+
+  delete fUCorr; 
 }
 
 
@@ -197,6 +250,7 @@ MagicDisplay::MagicDisplay(const char *baseDir, int run, WaveCalType::WaveCalTyp
   fCalType=calType;
   
 }
+
 
 
 //______________________________________________________________________________
@@ -789,10 +843,19 @@ void MagicDisplay::drawEventButtons() {
    fPayloadButton->SetTextSize(0.5);
    fPayloadButton->SetFillColor(kGray);
    fPayloadButton->Draw();
+
    fInterferometryButton = new TButton("Interferometry","MagicDisplay::Instance()->setCanvasLayout(MagicDisplayCanvasLayoutOption::kInterferometry); MagicDisplay::Instance()->refreshEventDisplay();",0.05,0.9,0.1,0.933);
    fInterferometryButton->SetTextSize(0.33);
    fInterferometryButton->SetFillColor(kGray);
    fInterferometryButton->Draw();
+
+   ///yeah just cover up the payload button 
+   fUCorrelatorButton = new TButton("UCorrelator","MagicDisplay::Instance()->setCanvasLayout(MagicDisplayCanvasLayoutOption::kUCorrelator); MagicDisplay::Instance()->refreshEventDisplay();",0.05,0.933,0.1,0.966);
+   fUCorrelatorButton->SetTextSize(0.33);
+   fUCorrelatorButton->SetFillColor(kGray);
+   fUCorrelatorButton->Draw();
+
+
 
    //NEW BUTTONS
    fWaveformButton = new TButton("Waveform","MagicDisplay::Instance()->setWaveformFormat(MagicDisplayFormatOption::kWaveform); MagicDisplay::Instance()->refreshEventDisplay();",0.1,0.975,0.2,1);
@@ -864,6 +927,9 @@ void MagicDisplay::setInterferometryTypeFlags(CrossCorrelator::mapMode_t mapMode
 }
 
 
+FilterStrategy * MagicDisplay::getNoFilterStrategy() { return &no_filter_strategy; } 
+FilterStrategy * MagicDisplay::getDefaultFilterStrategy() { return &default_strategy; } 
+
 
 void MagicDisplay::swapWaveformButtonFunctionsAndTitles(MagicDisplayCanvasLayoutOption::MagicDisplayCanvasLayoutOption_t option){
 
@@ -883,6 +949,28 @@ void MagicDisplay::swapWaveformButtonFunctionsAndTitles(MagicDisplayCanvasLayout
     fAverageFFTButton->SetTitle("");
     fAverageFFTButton->SetMethod("");
     fAverageFFTButton->SetTextSize(0.4);
+  }
+  else if (option = MagicDisplayCanvasLayoutOption::kUCorrelator)
+  {
+    fWaveformButton->SetTitle("NoFilter");
+    fWaveformButton->SetMethod("MagicDisplay::Instance()->setFilterStrategy(MagicDisplay::Instance()->getNoFilterStrategy()); MagicDisplay::Instance()->refreshEventDisplay();");
+    fWaveformButton->SetTextSize(0.4);
+
+
+    fPowerButton->SetTitle("SineSubtract");
+    fPowerButton->SetMethod("MagicDisplay::Instance()->setFilterStrategy(MagicDisplay::Instance()->getDefaultFilterStrategy()); MagicDisplay::Instance()->refreshEventDisplay();");
+    fPowerButton->SetTextSize(0.4);
+
+    fHilbertButton->SetTitle("");
+    fHilbertButton->SetMethod("");
+    fHilbertButton->SetTextSize(0.4);
+  
+    fAverageFFTButton->SetTitle("");
+    fAverageFFTButton->SetMethod("");
+    fAverageFFTButton->SetTextSize(0.4);
+  
+    drawUCorrelatorFilterButtons(); 
+
   }
   else{
     fWaveformButton->SetTitle("Waveform");
@@ -921,6 +1009,7 @@ void MagicDisplay::setCanvasLayout(MagicDisplayCanvasLayoutOption::MagicDisplayC
      fSurfButton->SetFillColor(kGray+3);
      fPayloadButton->SetFillColor(kGray);
      fInterferometryButton->SetFillColor(kGray);
+     fUCorrelatorButton->SetFillColor(kGray);
      break;
    case MagicDisplayCanvasLayoutOption::kPhiVerticalOnly:
      fVertButton->SetFillColor(kGray+3);
@@ -929,6 +1018,7 @@ void MagicDisplay::setCanvasLayout(MagicDisplayCanvasLayoutOption::MagicDisplayC
      fSurfButton->SetFillColor(kGray);
      fPayloadButton->SetFillColor(kGray);
      fInterferometryButton->SetFillColor(kGray);
+     fUCorrelatorButton->SetFillColor(kGray);
      break;
    case MagicDisplayCanvasLayoutOption::kPhiHorizontalOnly:
      fHorizButton->SetFillColor(kGray+3);
@@ -937,6 +1027,7 @@ void MagicDisplay::setCanvasLayout(MagicDisplayCanvasLayoutOption::MagicDisplayC
      fSurfButton->SetFillColor(kGray);
      fPayloadButton->SetFillColor(kGray);
      fInterferometryButton->SetFillColor(kGray);
+     fUCorrelatorButton->SetFillColor(kGray);
      break;
    case MagicDisplayCanvasLayoutOption::kPhiCombined:
      fHorizButton->SetFillColor(kGray);
@@ -945,6 +1036,7 @@ void MagicDisplay::setCanvasLayout(MagicDisplayCanvasLayoutOption::MagicDisplayC
      fSurfButton->SetFillColor(kGray);
      fPayloadButton->SetFillColor(kGray);
      fInterferometryButton->SetFillColor(kGray);
+     fUCorrelatorButton->SetFillColor(kGray);
      break;
    case MagicDisplayCanvasLayoutOption::kPayloadView:
      fHorizButton->SetFillColor(kGray);
@@ -953,6 +1045,7 @@ void MagicDisplay::setCanvasLayout(MagicDisplayCanvasLayoutOption::MagicDisplayC
      fSurfButton->SetFillColor(kGray);
      fPayloadButton->SetFillColor(kGray+3);
      fInterferometryButton->SetFillColor(kGray);
+     fUCorrelatorButton->SetFillColor(kGray);
      break;
    case MagicDisplayCanvasLayoutOption::kInterferometry:
      fHorizButton->SetFillColor(kGray);
@@ -961,7 +1054,18 @@ void MagicDisplay::setCanvasLayout(MagicDisplayCanvasLayoutOption::MagicDisplayC
      fSurfButton->SetFillColor(kGray);
      fPayloadButton->SetFillColor(kGray);
      fInterferometryButton->SetFillColor(kGray+3);
+     fUCorrelatorButton->SetFillColor(kGray);
      break;
+     case MagicDisplayCanvasLayoutOption::kUCorrelator:
+     fHorizButton->SetFillColor(kGray);
+     fVertButton->SetFillColor(kGray);
+     fBothButton->SetFillColor(kGray);
+     fSurfButton->SetFillColor(kGray);
+     fPayloadButton->SetFillColor(kGray);
+     fInterferometryButton->SetFillColor(kGray);
+     fUCorrelatorButton->SetFillColor(kGray+3);
+     break;
+ 
    default:
      break;
    }
@@ -971,6 +1075,7 @@ void MagicDisplay::setCanvasLayout(MagicDisplayCanvasLayoutOption::MagicDisplayC
    fSurfButton->Modified(); 
    fPayloadButton->Modified();
    fInterferometryButton->Modified();
+   fUCorrelatorButton->Modified();
 }
 
 
@@ -2255,6 +2360,12 @@ void MagicDisplay::drawGpsButtons()
 
 }
 
+
+void MagicDisplay::setAnalysisConfig(const UCorrelator::AnalysisConfig * config)
+{
+  delete fUCorr; 
+  fUCorr = new UCorrelator::Analyzer(config, true); 
+}
 
 void MagicDisplay::startGpsPlaying()
 {

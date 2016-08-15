@@ -87,6 +87,7 @@ class AnitaCanvasMaker
      /param useCan Optional pointer to a canvas to draw in (if zero a canvas will be created).
    */
   TPad *getInterferometryCanvas(RawAnitaHeader *hdPtr,TPad *useCan=NULL);
+  TPad *getUCorrelatorCanvas(RawAnitaHeader *hdPtr,TPad *useCan=NULL);
 
 
   //!  The main event view canvas getter used by QnDWBOM.
