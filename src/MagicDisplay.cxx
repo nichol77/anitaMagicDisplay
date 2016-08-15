@@ -249,6 +249,9 @@ MagicDisplay::MagicDisplay(const char *baseDir, int run, WaveCalType::WaveCalTyp
   strncpy(fCurrentBaseDir,baseDir,179);
   fCalType=calType;
   
+
+  // AnitaDataset needs this, so set it
+  setenv("ANITA_ROOT_DATA", baseDir,1); 
 }
 
 
@@ -950,7 +953,7 @@ void MagicDisplay::swapWaveformButtonFunctionsAndTitles(MagicDisplayCanvasLayout
     fAverageFFTButton->SetMethod("");
     fAverageFFTButton->SetTextSize(0.4);
   }
-  else if (option = MagicDisplayCanvasLayoutOption::kUCorrelator)
+  else if (option == MagicDisplayCanvasLayoutOption::kUCorrelator)
   {
     fWaveformButton->SetTitle("NoFilter");
     fWaveformButton->SetMethod("MagicDisplay::Instance()->setFilterStrategy(MagicDisplay::Instance()->getNoFilterStrategy()); MagicDisplay::Instance()->refreshEventDisplay();");
@@ -2365,6 +2368,12 @@ void MagicDisplay::setAnalysisConfig(const UCorrelator::AnalysisConfig * config)
 {
   delete fUCorr; 
   fUCorr = new UCorrelator::Analyzer(config, true); 
+
+  if (fCanvasLayout == MagicDisplayCanvasLayoutOption::kUCorrelator) 
+  {
+      this->refreshEventDisplay();   
+  }
+
 }
 
 void MagicDisplay::startGpsPlaying()
