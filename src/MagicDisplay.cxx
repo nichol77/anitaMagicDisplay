@@ -410,7 +410,7 @@ int MagicDisplay::loadEventTree()
        }
        fEventTree = (TTree*) fEventFile->Get("eventTree");   
        fWhichEventFileKind=MagicDisplayFileType::kMcEvent;
-       fEventTree->SetBranchAddress("UsefulAnitaEvent",&fUsefulEventPtr);
+       fEventTree->SetBranchAddress("event",&fUsefulEventPtr);
      }
    }
    
