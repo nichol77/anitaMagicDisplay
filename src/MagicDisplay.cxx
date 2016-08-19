@@ -73,7 +73,8 @@
 
 
 #include "UCFilters.h" 
-#include "BasicFilters.h" 
+#include "BasicFilters.h"
+#include "CrossCorrelator.h"
 using namespace std;
 
 MagicDisplay*  MagicDisplay::fgInstance = 0;
@@ -2391,3 +2392,11 @@ void MagicDisplay::stopGpsPlaying()
  {
    fInGpsPlayMode=0;
  }
+
+CrossCorrelator& MagicDisplay::getCrossCorrelator(){
+
+  if(fEventCanMaker==NULL){
+    startEventDisplay();
+  }
+  return fEventCanMaker->getCrossCorrelator();
+}

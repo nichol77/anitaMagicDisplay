@@ -238,6 +238,9 @@ class MagicDisplay
   UInt_t fCurrentRun; ///< The current run number.
   Char_t fCurrentBaseDir[180]; ///< The base directory for the ROOT files.
 
+
+  CrossCorrelator& getCrossCorrelator(); /// < for command line interface
+
  
   UCorrelator::Analyzer * getUCorr() { return fUCorr; } 
   FilterStrategy * getStrategy() { return fStrategy; } 

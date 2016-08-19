@@ -56,7 +56,7 @@ static int current_run = 0;
 
 AnitaCanvasMaker*  AnitaCanvasMaker::fgInstance = 0;
 AnitaGeomTool *fACMGeomTool=0;
-CrossCorrelator* fCrossCorr = 0;
+CrossCorrelator* AnitaCanvasMaker::fCrossCorr = 0;
 
 int phiMap[6][8]={{0,2,4,6,8,10,12,14},
 		  {1,3,5,7,9,11,13,15},
@@ -150,7 +150,9 @@ AnitaCanvasMaker::AnitaCanvasMaker(WaveCalType::WaveCalType_t calType)
 
 AnitaCanvasMaker::~AnitaCanvasMaker()
 {
-  if(fCrossCorr)delete fCrossCorr;
+  if(fCrossCorr) {
+    delete fCrossCorr;
+  }
    //Default destructor
 }
 
@@ -400,7 +402,6 @@ TPad *AnitaCanvasMaker::quickGetEventViewerCanvasForWebPlottter(UsefulAnitaEvent
 }
 
 
-
 TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr, RawAnitaHeader *hdPtr, TPad *useCan){
   // std::cerr << __PRETTY_FUNCTION__ << std::endl;
 
@@ -408,40 +409,39 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr, RawAnitaHe
   static UInt_t lastEventNumber=0;
 
   if(fCanvasView==MagicDisplayCanvasLayoutOption::kInterferometry){
-    if(!fCrossCorr)  fCrossCorr=new CrossCorrelator();
+
+    if(!fCrossCorr){
+      fCrossCorr=new CrossCorrelator();
+    }
+
+    const int numPeaksCoarse = 1;
+    const int numPeaksFine = 1;
+    fCrossCorr->reconstructEvent(evPtr, numPeaksCoarse, numPeaksFine);
+    
     for(Int_t polInd=0; polInd<AnitaPol::kNotAPol; polInd++){
-      AnitaPol::AnitaPol_t pol = AnitaPol::AnitaPol_t(polInd);
-      if(fCrossCorr->eventNumber[polInd] != evPtr->eventNumber || fInterferometryMapMode!=fLastInterferometryMapMode || fInterferometryZoomMode!=fLastInterferometryZoomMode){
-	fCrossCorr->correlateEvent(evPtr, pol);
-	if(hImage[polInd]!=NULL){
-	  delete hImage[polInd];
-	  hImage[polInd] = NULL;
-	}
-	fMinInterfLimit = 1;
-	fMaxInterfLimit = -1;
+      if(hImage[polInd]!=NULL){
+	delete hImage[polInd];
+	hImage[polInd] = NULL;
       }
+      fMinInterfLimit = 1;
+      fMaxInterfLimit = -1;
     }
   
     for(Int_t polInd=0; polInd<AnitaPol::kNotAPol; polInd++){
       AnitaPol::AnitaPol_t pol = AnitaPol::AnitaPol_t(polInd);
       if(hImage[polInd]==NULL){
 	Double_t imagePeak, peakPhiDeg, peakThetaDeg;
-	UShort_t l3TrigPattern = pol==AnitaPol::kHorizontal ? hdPtr->l3TrigPatternH : hdPtr->l3TrigPattern;
-
-	if(fInterferometryMapMode==CrossCorrelator::kGlobal){
-	  hImage[polInd] = fCrossCorr->makeGlobalImage(pol, imagePeak, peakPhiDeg, peakThetaDeg);
+	// UShort_t l3TrigPattern = pol==AnitaPol::kHorizontal ? hdPtr->l3TrigPatternH : hdPtr->l3TrigPattern;
+	
+	if(fInterferometryZoomMode!=CrossCorrelator::kZoomedIn){	
+	  hImage[polInd] = fCrossCorr->getMap(pol, imagePeak,
+					      peakPhiDeg, peakThetaDeg);
 	}
 	else{
-	  hImage[polInd] = fCrossCorr->makeTriggeredImage(pol, imagePeak, peakPhiDeg,
-							  peakThetaDeg, l3TrigPattern);
-
-	  if(fInterferometryZoomMode==CrossCorrelator::kZoomedIn){
-	    delete hImage[polInd];
-	    hImage[polInd] = fCrossCorr->makeZoomedImage(pol, l3TrigPattern,
-							 peakPhiDeg, peakThetaDeg);
-	  }
-	  
+	  // if(fInterferometryZoomMode==CrossCorrelator::kZoomedIn){
+	  hImage[polInd] = fCrossCorr->getZoomMap(pol);
 	}
+	hImage[polInd]->SetTitleSize(0.1);
       }
     }
   }
@@ -2261,4 +2261,11 @@ void AnitaCanvasMaker::loadPayloadViewSutff()
     std::cerr << "Couldn't find anita geometry\n";
   }
 
+}
+
+CrossCorrelator& AnitaCanvasMaker::getCrossCorrelator(){
+  if(fCrossCorr==NULL){
+    fCrossCorr = new CrossCorrelator();
+  }
+  return (*fCrossCorr);
 }
