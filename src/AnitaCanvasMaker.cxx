@@ -41,11 +41,22 @@
 #include "TView3D.h"
 
 #include "FFTtools.h"
+#include "MagicDisplay.h" 
+
+#include "FilteredAnitaEvent.h" 
+
+#include "AnitaDataset.h" 
+
+//This is filthy, but I want to match the analysis exactly, so getting the header from
+//MagicDisplay won't do until it gets the timedHeader and gpsEvent, which should be done at some point, but 
+//I'll figure it out later. 
+static AnitaDataset * dataset = 0; 
+static int current_run = 0; 
 
 
 AnitaCanvasMaker*  AnitaCanvasMaker::fgInstance = 0;
 AnitaGeomTool *fACMGeomTool=0;
-CrossCorrelator* fCrossCorr = 0;
+CrossCorrelator* AnitaCanvasMaker::fCrossCorr = 0;
 
 int phiMap[6][8]={{0,2,4,6,8,10,12,14},
 		  {1,3,5,7,9,11,13,15},
@@ -139,7 +150,9 @@ AnitaCanvasMaker::AnitaCanvasMaker(WaveCalType::WaveCalType_t calType)
 
 AnitaCanvasMaker::~AnitaCanvasMaker()
 {
-  if(fCrossCorr)delete fCrossCorr;
+  if(fCrossCorr) {
+    delete fCrossCorr;
+  }
    //Default destructor
 }
 
@@ -389,7 +402,6 @@ TPad *AnitaCanvasMaker::quickGetEventViewerCanvasForWebPlottter(UsefulAnitaEvent
 }
 
 
-
 TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr, RawAnitaHeader *hdPtr, TPad *useCan){
   // std::cerr << __PRETTY_FUNCTION__ << std::endl;
 
@@ -397,42 +409,67 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr, RawAnitaHe
   static UInt_t lastEventNumber=0;
 
   if(fCanvasView==MagicDisplayCanvasLayoutOption::kInterferometry){
-    if(!fCrossCorr)  fCrossCorr=new CrossCorrelator();
+
+    if(!fCrossCorr){
+      fCrossCorr=new CrossCorrelator();
+    }
+
+    const int numPeaksCoarse = 1;
+    const int numPeaksFine = 1;
+    fCrossCorr->reconstructEvent(evPtr, numPeaksCoarse, numPeaksFine);
+    
     for(Int_t polInd=0; polInd<AnitaPol::kNotAPol; polInd++){
-      AnitaPol::AnitaPol_t pol = AnitaPol::AnitaPol_t(polInd);
-      if(fCrossCorr->eventNumber[polInd] != evPtr->eventNumber || fInterferometryMapMode!=fLastInterferometryMapMode || fInterferometryZoomMode!=fLastInterferometryZoomMode){
-	fCrossCorr->correlateEvent(evPtr, pol);
-	if(hImage[polInd]!=NULL){
-	  delete hImage[polInd];
-	  hImage[polInd] = NULL;
-	}
-	fMinInterfLimit = 1;
-	fMaxInterfLimit = -1;
+      if(hImage[polInd]!=NULL){
+	delete hImage[polInd];
+	hImage[polInd] = NULL;
       }
+      fMinInterfLimit = 1;
+      fMaxInterfLimit = -1;
     }
   
     for(Int_t polInd=0; polInd<AnitaPol::kNotAPol; polInd++){
       AnitaPol::AnitaPol_t pol = AnitaPol::AnitaPol_t(polInd);
       if(hImage[polInd]==NULL){
 	Double_t imagePeak, peakPhiDeg, peakThetaDeg;
-	UShort_t l3TrigPattern = pol==AnitaPol::kHorizontal ? hdPtr->l3TrigPatternH : hdPtr->l3TrigPattern;
-
-	if(fInterferometryMapMode==CrossCorrelator::kGlobal){
-	  hImage[polInd] = fCrossCorr->makeGlobalImage(pol, imagePeak, peakPhiDeg, peakThetaDeg);
+	// UShort_t l3TrigPattern = pol==AnitaPol::kHorizontal ? hdPtr->l3TrigPatternH : hdPtr->l3TrigPattern;
+	
+	if(fInterferometryZoomMode!=CrossCorrelator::kZoomedIn){	
+	  hImage[polInd] = fCrossCorr->getMap(pol, imagePeak,
+					      peakPhiDeg, peakThetaDeg);
 	}
 	else{
-	  hImage[polInd] = fCrossCorr->makeTriggeredImage(pol, imagePeak, peakPhiDeg,
-							  peakThetaDeg, l3TrigPattern);
-
-	  if(fInterferometryZoomMode==CrossCorrelator::kZoomedIn){
-	    delete hImage[polInd];
-	    hImage[polInd] = fCrossCorr->makeZoomedImage(pol, l3TrigPattern,
-							 peakPhiDeg, peakThetaDeg);
-	  }
-	  
+	  // if(fInterferometryZoomMode==CrossCorrelator::kZoomedIn){
+	  hImage[polInd] = fCrossCorr->getZoomMap(pol);
 	}
+	hImage[polInd]->SetTitleSize(0.1);
       }
     }
+  }
+
+  if (fCanvasView==MagicDisplayCanvasLayoutOption::kUCorrelator)
+  {
+
+    //filthy filthy filthy 
+    int run = hdPtr->run; 
+    int ev = hdPtr->eventNumber;
+    if (run !=current_run || !dataset) 
+    {
+      if (dataset)
+      {
+        dataset->loadRun(run); 
+      }
+      else
+      {
+        dataset = new AnitaDataset(run); 
+      }
+      current_run = run; 
+    }
+
+    dataset->getEvent(ev); 
+
+    FilteredAnitaEvent fev( evPtr, MagicDisplay::Instance()->getStrategy(), dataset->gps(), dataset->header()); 
+    AnitaEventSummary sum; 
+    MagicDisplay::Instance()->getUCorr()->analyze(&fev,&sum);
   }
 
   
@@ -592,6 +629,7 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr, RawAnitaHe
   else if(fCanvasView==MagicDisplayCanvasLayoutOption::kSurfOnly) retCan=AnitaCanvasMaker::getSurfChanCanvas(hdPtr,useCan);
   else if(fCanvasView==MagicDisplayCanvasLayoutOption::kPayloadView) retCan=AnitaCanvasMaker::getPayloadCanvas(hdPtr,useCan);
   else if(fCanvasView==MagicDisplayCanvasLayoutOption::kInterferometry) retCan=AnitaCanvasMaker::getInterferometryCanvas(hdPtr,useCan);
+  else if(fCanvasView==MagicDisplayCanvasLayoutOption::kUCorrelator) retCan=AnitaCanvasMaker::getUCorrelatorCanvas(hdPtr,useCan);
 
   fLastWaveformFormat=fWaveformOption;
   fLastCanvasView=fCanvasView;
@@ -680,7 +718,7 @@ TPad *AnitaCanvasMaker::getHorizontalCanvas(RawAnitaHeader *hdPtr,
       }
 
      
-      if(hdPtr->isInPhiMask(phi,AnitaPol::kVertical)) {
+      if(hdPtr->isInPhiMask(phi,AnitaPol::kVertical) || hdPtr->isInL1Mask(phi,AnitaPol::kVertical)) {
 	grSurf[surf][chan]->SetLineStyle(2);
       }
       else {
@@ -816,7 +854,7 @@ TPad *AnitaCanvasMaker::getVerticalCanvas(RawAnitaHeader *hdPtr,
 	grSurf[surf][chan]->SetLineColor(kRed-3);
 
 
-      if(hdPtr->isInPhiMask(phi,AnitaPol::kVertical)) {
+      if(hdPtr->isInPhiMask(phi,AnitaPol::kVertical) || hdPtr->isInL1Mask(phi,AnitaPol::kVertical) ) {
 	grSurf[surf][chan]->SetLineStyle(2);
       }
       else {
@@ -964,7 +1002,7 @@ TPad *AnitaCanvasMaker::getVerticalCanvasForWebPlotter(RawAnitaHeader *hdPtr,
 	grSurf[surf][chan]->SetLineColor(kRed-3);
 
 
-      if(hdPtr->isInPhiMask(phi,AnitaPol::kVertical)) {
+      if(hdPtr->isInPhiMask(phi,AnitaPol::kVertical) || hdPtr->isInL1Mask(phi,AnitaPol::kVertical)) {
 	grSurf[surf][chan]->SetLineStyle(2);
       }
       else {
@@ -1102,13 +1140,13 @@ TPad *AnitaCanvasMaker::getCombinedCanvasForWebPlotter(RawAnitaHeader *hdPtr,
 	grSurf[surf][chan]->SetLineColor(kRed-3);
       if(hdPtr->isInL3Pattern(phi,AnitaPol::kHorizontal))
 	grSurf[surfH][chanH]->SetLineColor(kGreen-3);
-      if(hdPtr->isInPhiMask(phi,AnitaPol::kVertical)) {
+      if(hdPtr->isInPhiMask(phi,AnitaPol::kVertical) || hdPtr->isInL1Mask(phi,AnitaPol::kVertical) ) {
 	grSurf[surf][chan]->SetLineStyle(2);
       }
       else {
 	grSurf[surf][chan]->SetLineStyle(1);
       }
-      if(hdPtr->isInPhiMask(phi,AnitaPol::kHorizontal)) {
+      if(hdPtr->isInPhiMask(phi,AnitaPol::kHorizontal) || hdPtr->isInL1Mask(phi,AnitaPol::kHorizontal)) {
 	grSurf[surfH][chanH]->SetLineStyle(2);
       }
       else {
@@ -1216,7 +1254,7 @@ TPad *AnitaCanvasMaker::getSurfChanCanvas(RawAnitaHeader *hdPtr,TPad *useCan)
 	if(hdPtr->isInL3Pattern(phi,pol))
 	  grSurf[surf][chan]->SetLineColor(kRed-3);
 
-	if(hdPtr->isInPhiMask(phi,pol)) {
+	if(hdPtr->isInPhiMask(phi,pol) || hdPtr->isInL1Mask(phi,pol)) {
 	  grSurf[surf][chan]->SetLineStyle(2);
 	}
 	else {
@@ -1268,6 +1306,45 @@ TPad *AnitaCanvasMaker::getSurfChanCanvas(RawAnitaHeader *hdPtr,TPad *useCan)
   
 
   if(!useCan)
+    return canSurf;
+  else 
+    return plotPad;
+  
+}
+
+TPad * AnitaCanvasMaker::getUCorrelatorCanvas(RawAnitaHeader *hdPtr, TPad *useCan)
+{
+
+  gStyle->SetOptTitle(1); 
+  TPad *canSurf=0;
+  TPad * plotPad = 0; 
+  char textLabel[180]; 
+
+  if(!useCan) {
+    canSurf = (TPad*) gROOT->FindObject("canUCorr");
+    if(!canSurf) {
+      canSurf = new TCanvas("canUCorr","canUCorr",1000,600);
+    }
+    canSurf->Clear();
+    canSurf->SetTopMargin(0);
+    TPaveText *leftPave = new TPaveText(0.05,0.92,0.95,0.98);
+    leftPave->SetBorderSize(0);
+    sprintf(textLabel,"Event %d",hdPtr->eventNumber);
+    TText *eventText = leftPave->AddText(textLabel);
+    eventText->SetTextColor(50);
+    leftPave->Draw();
+    plotPad = new TPad("canUCorrMain","canUCorrMain",0,0,1,0.9);
+    plotPad->Draw();
+  }
+  else {
+    plotPad=useCan;
+  }
+  plotPad->cd();
+  plotPad->Clear(); 
+  plotPad->Divide(1,2); 
+  MagicDisplay::Instance()->getUCorr()->drawSummary((TPad*) plotPad->GetPad(1), (TPad*) plotPad->GetPad(2)); 
+
+ if(!useCan)
     return canSurf;
   else 
     return plotPad;
@@ -1639,13 +1716,13 @@ TPad *AnitaCanvasMaker::getCombinedCanvas(RawAnitaHeader *hdPtr,
 	grSurf[surf][chanV]->SetLineColor(kRed-3);
       if(hdPtr->isInL3Pattern(phi,AnitaPol::kHorizontal))
 	grSurf[surf][chanH]->SetLineColor(kGreen-3);
-      if(hdPtr->isInPhiMask(phi,AnitaPol::kVertical)) {
+      if(hdPtr->isInPhiMask(phi,AnitaPol::kVertical) || hdPtr->isInL1Mask(phi,AnitaPol::kVertical) ) {
 	grSurf[surf][chanV]->SetLineStyle(2);
       }
       else {
 	grSurf[surf][chanV]->SetLineStyle(1);
       }
-      if(hdPtr->isInPhiMask(phi,AnitaPol::kHorizontal)) {
+      if(hdPtr->isInPhiMask(phi,AnitaPol::kHorizontal) || hdPtr->isInL1Mask(phi,AnitaPol::kHorizontal)) {
 	grSurf[surf][chanH]->SetLineStyle(2);
       }
       else {
@@ -2184,4 +2261,11 @@ void AnitaCanvasMaker::loadPayloadViewSutff()
     std::cerr << "Couldn't find anita geometry\n";
   }
 
+}
+
+CrossCorrelator& AnitaCanvasMaker::getCrossCorrelator(){
+  if(fCrossCorr==NULL){
+    fCrossCorr = new CrossCorrelator();
+  }
+  return (*fCrossCorr);
 }
