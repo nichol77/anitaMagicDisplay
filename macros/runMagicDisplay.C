@@ -15,7 +15,7 @@ void runMagicDisplay(int run=1002) {
 
 void runMagicDisplayRun(int run) {
 
-  MagicDisplay *magicPtr = new MagicDisplay("/data/palestine2016/root",run,WaveCalType::kDefault);
+  MagicDisplay *magicPtr = new MagicDisplay("/data/ldb2016/root",run,WaveCalType::kDefault);
 
   //magicPtr->startSurfDisplay();
   //  magicPtr->startAvgSurfDisplay();
