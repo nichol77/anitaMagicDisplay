@@ -87,6 +87,7 @@ class AnitaCanvasMaker
      /param useCan Optional pointer to a canvas to draw in (if zero a canvas will be created).
    */
   TPad *getInterferometryCanvas(RawAnitaHeader *hdPtr,TPad *useCan=NULL);
+  TPad *getUCorrelatorCanvas(RawAnitaHeader *hdPtr,TPad *useCan=NULL);
 
 
   //!  The main event view canvas getter used by QnDWBOM.
@@ -125,7 +126,11 @@ class AnitaCanvasMaker
    */
    AnitaCanvasMaker(WaveCalType::WaveCalType_t calType=WaveCalType::kVoltageTime);
    ~AnitaCanvasMaker(); ///<Destructor.
-   
+
+
+  CrossCorrelator& getCrossCorrelator(); ///< get command line access with a reference
+
+  
    //Instance generator
    static AnitaCanvasMaker*  Instance(); ///< The instance generator.
    
@@ -136,13 +141,18 @@ class AnitaCanvasMaker
    void setNotchBandLimits(Double_t low, Double_t high)
    { fLowNotchEdge=low; fHighNotchEdge=high;} ///<Sets the limits of the notched band (235-500) in MHz
 
-   
+
+  
+  
    WaveCalType::WaveCalType_t fCalType; ///< The calibration type.
    
  protected:
    static AnitaCanvasMaker *fgInstance; ///< To protect against multiple instances.
 
  private:
+
+  static CrossCorrelator* fCrossCorr; ///< Might return a reference to this to allow interaction but not deletion
+  
    Int_t fPhiMax;
    TFile *fAnitaGeomFile;
    TGeoManager *fAnitaGeomManager;

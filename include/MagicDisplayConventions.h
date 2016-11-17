@@ -28,7 +28,8 @@ namespace MagicDisplayCanvasLayoutOption {
     kPhiCombined, ///< View of both polarisations arranged by phi.
     kSurfOnly, ///< View of all channels arranged by SURF. 
     kPayloadView, ///< View of Jiwoo's pretty 3-d payload
-    kInterferometry
+    kInterferometry, 
+    kUCorrelator
   } MagicDisplayCanvasLayoutOption_t; ///< Enumeration for canvas layout.
 };
 

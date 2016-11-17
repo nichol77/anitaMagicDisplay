@@ -19,6 +19,9 @@
 #include "AnitaConventions.h"
 #include "CalibratedAnitaEvent.h"
 #include "CrossCorrelator.h"
+#include "Analyzer.h" 
+#include "FilterStrategy.h"
+
 
 class TCanvas;
 class TPad;
@@ -109,6 +112,11 @@ class MagicDisplay
   void setWaveformFormat(MagicDisplayFormatOption::MagicDisplayFormatOption_t waveformView);
   void setInterferometryTypeFlags(CrossCorrelator::mapMode_t mapMode, CrossCorrelator::zoomMode_t zoomMode);
   
+  // For UCorrelator integration 
+  void setFilterStrategy(FilterStrategy * filter_strategy); 
+  void setAnalysisConfig(const UCorrelator::AnalysisConfig * config); 
+
+
   void toggleTimeEventOrdering(); ///< Toggles between time and event ordering
   void applyCut(const char *cutString); ///< Applies a cut to the head tree
 
@@ -231,6 +239,15 @@ class MagicDisplay
   Char_t fCurrentBaseDir[180]; ///< The base directory for the ROOT files.
 
 
+  CrossCorrelator& getCrossCorrelator(); /// < for command line interface
+
+ 
+  UCorrelator::Analyzer * getUCorr() { return fUCorr; } 
+  FilterStrategy * getStrategy() { return fStrategy; } 
+  FilterStrategy * getNoFilterStrategy(); 
+  FilterStrategy * getDefaultFilterStrategy(); 
+
+
  protected:
   static MagicDisplay *fgInstance;  ///< The pointer to the current MagicDisplay
    // protect against multiple instances
@@ -288,6 +305,7 @@ class MagicDisplay
    TButton *fSurfButton; ///< The SURF view button.
    TButton *fPayloadButton; ///< The payload view button.
    TButton *fInterferometryButton; ///< The Interferometry view button.  
+   TButton *fUCorrelatorButton; ///< The UCorrelator view button
 
    TButton *fWaveformButton; ///< The waveform view button.
    TButton *fPowerButton; ///< The FFT view button.
@@ -333,6 +351,10 @@ class MagicDisplay
   CrossCorrelator::mapMode_t fInterferometryMapMode;
   CrossCorrelator::zoomMode_t fInterferometryZoomMode;  
 
+
+  void drawUCorrelatorFilterButtons(); 
+  UCorrelator::Analyzer * fUCorr; 
+  FilterStrategy * fStrategy; 
 };
 
 
