@@ -2,8 +2,8 @@
 /////  AnitaCanvasMaker.cxx        ANITA Event Canvas make               /////
 /////                                                                    /////
 /////  Description:                                                      /////
-/////     Class for making pretty event canvases for ANITA-II            /////
-/////  Author: Ryan Nichol (rjn@hep.ucl.ac.uk)                           /////
+/////     Class for making pretty event canvases for ANITA-4             /////
+/////  Author: Ryan Nichol (r.nichol@ucl.ac.uk)                          /////
 //////////////////////////////////////////////////////////////////////////////
 
 #include <fstream>
@@ -260,10 +260,14 @@ TPad *AnitaCanvasMaker::getEventInfoCanvas(UsefulAnitaEvent *evPtr, RawAnitaHead
      rightPave = new TPaveText(0,0,1,0.95);
      rightPave->SetBorderSize(0);
      rightPave->SetTextAlign(13);
-     sprintf(textLabel,"TURF This Hold: %#x",hdPtr->reserved[0]&0xf);
+     //     sprintf(textLabel,"TURF This Hold: %#x",hdPtr->reserved[0]&0xf);
+     //     rightPave->AddText(textLabel);
+     //     sprintf(textLabel,"TURF Active Holds: %#x",(hdPtr->reserved[0]&0xf0)>>4);
+     //     rightPave->AddText(textLabel);
+     sprintf(textLabel,"Trig Mask: %#x",hdPtr->l3TrigPattern);
      rightPave->AddText(textLabel);
-     sprintf(textLabel,"TURF Active Holds: %#x",(hdPtr->reserved[0]&0xf0)>>4);
-     rightPave->AddText(textLabel);
+     //     sprintf(textLabel,"H Trig Mask: %#x",hdPtr->l3TrigPatternH);
+     //     rightPave->AddText(textLabel);
 
      char labLetter[4]={'A','B','C','D'};
      sprintf(textLabel,"Labrador ");
@@ -278,7 +282,9 @@ TPad *AnitaCanvasMaker::getEventInfoCanvas(UsefulAnitaEvent *evPtr, RawAnitaHead
      if(!good)
        labText->SetTextColor(6);
 
-     sprintf(textLabel,"Phi Mask: %#x",(hdPtr->phiTrigMask));
+     sprintf(textLabel,"V Phi Mask: %#x",(hdPtr->phiTrigMask));
+     rightPave->AddText(textLabel);
+     sprintf(textLabel,"H Phi Mask: %#x",(hdPtr->phiTrigMaskH));
      rightPave->AddText(textLabel);     
      rightPave->Draw();
      topPad->Update();
@@ -711,14 +717,14 @@ TPad *AnitaCanvasMaker::getHorizontalCanvas(RawAnitaHeader *hdPtr,
 
 
       if(hdPtr->isInL3Pattern(phi,AnitaPol::kHorizontal)){
-	  grSurf[surf][chan]->SetLineColor(kRed-2);
+	  grSurf[surf][chan]->SetLineColor(kRed-3);
       }
       else{
 	grSurf[surf][chan]->SetLineColor(kBlack);
       }
 
      
-      if(hdPtr->isInPhiMask(phi,AnitaPol::kVertical) || hdPtr->isInL1Mask(phi,AnitaPol::kVertical)) {
+      if(hdPtr->isInPhiMask(phi,AnitaPol::kHorizontal) || hdPtr->isInL1Mask(phi,AnitaPol::kHorizontal)) {
 	grSurf[surf][chan]->SetLineStyle(2);
       }
       else {
@@ -1146,12 +1152,12 @@ TPad *AnitaCanvasMaker::getCombinedCanvasForWebPlotter(RawAnitaHeader *hdPtr,
       else {
 	grSurf[surf][chan]->SetLineStyle(1);
       }
-      if(hdPtr->isInPhiMask(phi,AnitaPol::kHorizontal) || hdPtr->isInL1Mask(phi,AnitaPol::kHorizontal)) {
-	grSurf[surfH][chanH]->SetLineStyle(2);
-      }
-      else {
-	grSurf[surfH][chanH]->SetLineStyle(1);
-      }
+      // if(hdPtr->isInPhiMask(phi,AnitaPol::kHorizontal) || hdPtr->isInL1Mask(phi,AnitaPol::kHorizontal)) {
+      // 	grSurf[surfH][chanH]->SetLineStyle(2);
+      // }
+      // else {
+      // 	grSurf[surfH][chanH]->SetLineStyle(1);
+      // }
       if(moreVpol) {
 	grSurf[surfH][chanH]->Draw("l");
 	grSurf[surf][chan]->Draw("l");

@@ -97,6 +97,8 @@ class AnitaRFCanvasMaker
   void addToTimePlots(SurfHk *surfPtr);
   
   Int_t  fNumSurfHks;
+  Double_t fL2ScalerVals[NUM_SURF][L2S_PER_SURF][MAX_SURF_HK_TIME_POINTS];
+  Double_t fL1ScalerVals[NUM_SURF][L1S_PER_SURF][MAX_SURF_HK_TIME_POINTS];
   Double_t fScalerVals[NUM_SURF][SCALERS_PER_SURF][MAX_SURF_HK_TIME_POINTS];
   Double_t fThreshVals[NUM_SURF][SCALERS_PER_SURF][MAX_SURF_HK_TIME_POINTS];
   Double_t fRfPowVals[NUM_SURF][RFCHAN_PER_SURF][MAX_SURF_HK_TIME_POINTS];

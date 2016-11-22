@@ -1,9 +1,9 @@
 //////////////////////////////////////////////////////////////////////////////
-/////  AnitaRFCanvasMaker.cxx        ANITA Event Canvas make               /////
+/////  AnitaRFCanvasMaker.cxx        ANITA RF Canvas maker               /////
 /////                                                                    /////
 /////  Description:                                                      /////
-/////     Class for making pretty event canvases for ANITA-II            /////
-/////  Author: Ryan Nichol (rjn@hep.ucl.ac.uk)                           /////
+/////     Class for making pretty event canvases for ANITA-4             /////
+/////  Author: Ryan Nichol (r.nichol@ucl.ac.uk)                          /////
 //////////////////////////////////////////////////////////////////////////////
 #include <fstream>
 #include <iostream>
@@ -43,32 +43,34 @@
 AnitaRFCanvasMaker*  AnitaRFCanvasMaker::fgInstance = 0;
 AnitaGeomTool *fARFCGeomTool=0;
 
-TH1F *histTurfRate[6]={0};
-TH1F *histSumTurfRate[6]={0};
-TH1F *histAntMask[2]={0};
-TH1F *histSumAntMask[2]={0};
-TH1F *histPhiMask=0;
-TH1F *histSumPhiMask=0;
+TH1D *histTurfRate[6]={0};
+TH1D *histSumTurfRate[6]={0};
+TH1D *histAntMask[2]={0};
+TH1D *histSumAntMask[2]={0};
+TH1D *histPhiMask=0;
+TH1D *histSumPhiMask=0;
 
 
-TH1F *histSurfHk[3][ACTIVE_SURFS]={{0}};
-TH1F *histSurfHkPhi[3][PHI_SECTORS]={{0}};
-TH1F *histBadThreshold=0;
-TH1F *histBandMask=0;
-THStack *histSurfHkStack[3];
-THStack *histSurfHkPhiStack[3];
-TH1F *surfHkFramey[3]={0};
-TH1F *surfHkTimeFramey[3]={0};
-TMultiGraph *mgSurfTime[3]={0};
-TGraph *grSurfScaler[NUM_SURF][SCALERS_PER_SURF]={{0}};
-TGraph *grSurfThresh[NUM_SURF][SCALERS_PER_SURF]={{0}};
-TGraph *grSurfRfPwr[NUM_SURF][RFCHAN_PER_SURF]={{0}};
+TH1D *histSurfHk[5][ACTIVE_SURFS]={{0}};
+TH1D *histSurfHkPhi[5][PHI_SECTORS]={{0}};
+TH1D *histBadThreshold=0;
+TH1D *histBandMask=0;
+THStack *histSurfHkStack[5];
+THStack *histSurfHkPhiStack[5];
+TH1F *surfHkFramey[5]={0};
+TH1F *surfHkTimeFramey[5]={0};
+TMultiGraph *mgSurfTime[5]={0};
+TGraph *grSurfL2Scaler[TRIGGER_SURFS][L2S_PER_SURF]={{0}};
+TGraph *grSurfL1Scaler[TRIGGER_SURFS][L2S_PER_SURF]={{0}};
+TGraph *grSurfScaler[TRIGGER_SURFS][SCALERS_PER_SURF]={{0}};
+TGraph *grSurfThresh[TRIGGER_SURFS][SCALERS_PER_SURF]={{0}};
+TGraph *grSurfRfPwr[ACTIVE_SURFS][RFCHAN_PER_SURF]={{0}};
 
 
-TH1F *histAvgSurfHk[3][ACTIVE_SURFS]={{0}};
-TH1F *histAvgSurfHkPhi[3][PHI_SECTORS]={{0}};
-TH1F *histAvgSurfBadThreshold=0;
-TH1F *histAvgSurfBandMask=0;
+TH1D *histAvgSurfHk[3][ACTIVE_SURFS]={{0}};
+TH1D *histAvgSurfHkPhi[3][PHI_SECTORS]={{0}};
+TH1D *histAvgSurfBadThreshold=0;
+TH1D *histAvgSurfBandMask=0;
 THStack *histAvgSurfHkStack[3];
 THStack *histAvgSurfHkPhiStack[3];
 TH1F *avgSurfHkFramey[3]={0};
@@ -142,7 +144,7 @@ TPad *AnitaRFCanvasMaker::getTurfRateCanvas(TurfRate *turfPtr, TPad *useCan)
       histTurfRate[i]->Reset();
     }
     else {
-      histTurfRate[i]= new TH1F(histNames[i],histTitles[i],PHI_SECTORS,0.5,PHI_SECTORS+0.5);
+      histTurfRate[i]= new TH1D(histNames[i],histTitles[i],PHI_SECTORS,0.5,PHI_SECTORS+0.5);
     }
   }
   const char *maskNames[2]={"histAntMask0","histAntMask1"};
@@ -150,13 +152,13 @@ TPad *AnitaRFCanvasMaker::getTurfRateCanvas(TurfRate *turfPtr, TPad *useCan)
     if(histAntMask[i])
       histAntMask[i]->Reset();
     else {
-      histAntMask[i] = new TH1F(maskNames[i],maskNames[i],PHI_SECTORS,0.5,PHI_SECTORS+0.5);
+      histAntMask[i] = new TH1D(maskNames[i],maskNames[i],PHI_SECTORS,0.5,PHI_SECTORS+0.5);
     }
   }
   if(histPhiMask) 
     histPhiMask->Reset();
   else
-    histPhiMask = new TH1F("histPhiMask","histPhiMask",PHI_SECTORS,0.5,PHI_SECTORS+0.5);
+    histPhiMask = new TH1D("histPhiMask","histPhiMask",PHI_SECTORS,0.5,PHI_SECTORS+0.5);
       
 
 
@@ -363,108 +365,108 @@ void AnitaRFCanvasMaker::getSurfHkSurfCanvas(SurfHk *surfPtr,TPad *plotPad) {
   //   plotPad->Clear();
 
   char actualName[180];
-  const char *histNames[3]={"histScaler","histThreshold","histRFPower"};
-  const char *histTitles[3]={"Scaler","Threshold","RF Power"};
+  const char *histNames[5]={"histL2Scaler","histL1Scaler","histScaler","histThreshold","histRFPower"};
+  const char *histTitles[5]={"L2 Scaler","L1 Scaler","Scaler","Threshold","RF Power"};
+  const char *histYTitles[5]={"Rate (kHz)","Rate (kHz)","Rate (kHz)","DAC","RF Power (ADC)"};
+  int numBins[5]={ACTIVE_SURFS*L2S_PER_SURF,
+		  ACTIVE_SURFS*L1S_PER_SURF,
+		  ACTIVE_SURFS*SCALERS_PER_SURF,
+		  ACTIVE_SURFS*SCALERS_PER_SURF,
+		  ACTIVE_SURFS*RFCHAN_PER_SURF};
 
+  
   if(histBadThreshold)
     delete histBadThreshold;
   //  histBadThreshold->Reset();
   //  else
-  histBadThreshold = new TH1F("histBadThreshold","histBadThreshold",
+  histBadThreshold = new TH1D("histBadThreshold","histBadThreshold",
 			      ACTIVE_SURFS*SCALERS_PER_SURF,-0.5,
 			      (ACTIVE_SURFS*SCALERS_PER_SURF)-0.5);
   if(histBandMask)
     delete histBandMask;
   //    histBandMask->Reset();
   //  else
-  histBandMask = new TH1F("histBandMask","histBandMask",
+  histBandMask = new TH1D("histBandMask","histBandMask",
 			  ACTIVE_SURFS*SCALERS_PER_SURF,-0.5,
 			  (ACTIVE_SURFS*SCALERS_PER_SURF)-0.5);
   Int_t maskedBands[ACTIVE_SURFS*SCALERS_PER_SURF]={0};
 
-  for(int i=0;i<3;i++) {
+  for(int i=0;i<5;i++) {
     if(histSurfHkStack[i])
       delete histSurfHkStack[i];    
     sprintf(actualName,"%s_base",histNames[i]);  
     histSurfHkStack[i] = new THStack(actualName,histTitles[i]);
-      
-
+    
+    
     for(int surf=0;surf<ACTIVE_SURFS;surf++){
       if(histSurfHk[i][surf]) {
 	delete histSurfHk[i][surf];
-	//	histSurfHk[i][surf]->Reset();
       }
       
       sprintf(actualName,"%s_%d",histNames[i],surf);
-      if(i<2) {
-	histSurfHk[i][surf]= new TH1F(actualName,histTitles[i],
-				      ACTIVE_SURFS*SCALERS_PER_SURF,-0.5,
-				      (ACTIVE_SURFS*SCALERS_PER_SURF)-0.5);
-      }
-      else {
-	histSurfHk[i][surf]= new TH1F(actualName,histTitles[i],
-				      ACTIVE_SURFS*RFCHAN_PER_SURF,-0.5,
-				      (ACTIVE_SURFS*RFCHAN_PER_SURF)-0.5);
-      }
-
-      
+      histSurfHk[i][surf]= new TH1D(actualName,histTitles[i],numBins[i],-0.5,numBins[i]-0.5);
     }
   }
 
    
 
   for(int surf=0;surf<ACTIVE_SURFS;surf++) {
+    for(int l2=0;l2<L2S_PER_SURF;l2++) {
+      histSurfHk[0][surf]->Fill(l2+L2S_PER_SURF*surf,surfPtr->getL2ScalerFromSurfChan(surf,l2));      
+    }
+    for(int l1=0;l1<L1S_PER_SURF;l1++) {
+      histSurfHk[1][surf]->Fill(l1+L1S_PER_SURF*surf,surfPtr->getL1ScalerFromSurfChan(surf,l1));      
+    }
+    
     for(int scl=0;scl<SCALERS_PER_SURF;scl++) {
-      maskedBands[scl+surf*SCALERS_PER_SURF]=
-	surfPtr->isBandMasked(surf,scl);
-
-      histSurfHk[0][surf]->Fill(scl+surf*SCALERS_PER_SURF,
-				surfPtr->scaler[surf][scl]);
-
-      histSurfHk[1][surf]->Fill(scl+surf*SCALERS_PER_SURF,
-				surfPtr->threshold[surf][scl]);
-	 
+      maskedBands[scl+surf*SCALERS_PER_SURF]=surfPtr->isBandMasked(surf,scl);
+      histSurfHk[2][surf]->Fill(scl+surf*SCALERS_PER_SURF,
+				surfPtr->getScalerFromSurfChan(surf,scl));      
+      histSurfHk[3][surf]->Fill(scl+surf*SCALERS_PER_SURF,
+				surfPtr->getThresholdFromSurfChan(surf,scl));
+      
       if(!surfPtr->globalThreshold && 
-	 (surfPtr->threshold[surf][scl]!=surfPtr->setThreshold[surf][scl])){
+	 (surfPtr->getThresholdFromSurfChan(surf,scl)!=surfPtr->getSetThresholdFromSurfChan(surf,scl))){
 	histBadThreshold->Fill(scl+surf*SCALERS_PER_SURF,
-			       surfPtr->threshold[surf][scl]);
+			       surfPtr->getThresholdFromSurfChan(surf,scl));
       }
-	 
+      
     }
     for(int chan=0;chan<RFCHAN_PER_SURF;chan++) {
       if(fSurfKelvinView==1) {
-	histSurfHk[2][surf]->Fill(chan+surf*RFCHAN_PER_SURF,
+	histSurfHk[4][surf]->Fill(chan+surf*RFCHAN_PER_SURF,
 				  surfPtr->getRFPowerInK(surf,chan));
       }
       else {
-	histSurfHk[2][surf]->Fill(chan+surf*RFCHAN_PER_SURF,
-				  surfPtr->rfPower[surf][chan]);
-      }
-
+	histSurfHk[4][surf]->Fill(chan+surf*RFCHAN_PER_SURF,
+				  surfPtr->getRawRFPower(surf,chan));
+      }      
     }
-    histSurfHk[0][surf]->SetFillColor(getNiceColour(surf%2));
+    
+    
+    for(int i=0;i<5;i++) { 
+      histSurfHk[i][surf]->SetFillColor(getNiceColour(surf%2));
+      histSurfHkStack[i]->Add(histSurfHk[i][surf]);
+    }
 
-
-    histSurfHk[1][surf]->SetFillColor(getNiceColour(surf%2));
-    histSurfHk[2][surf]->SetFillColor(getNiceColour(surf%2));
-    histSurfHkStack[0]->Add(histSurfHk[0][surf]);
-    histSurfHkStack[1]->Add(histSurfHk[1][surf]);
-    histSurfHkStack[2]->Add(histSurfHk[2][surf]);
-  }   
+  }
+  
   histBadThreshold->SetFillColor(kRed+1);
-  histSurfHkStack[1]->Add(histBadThreshold);
+  histSurfHkStack[3]->Add(histBadThreshold);
 
    
-  if(!plotPad->cd(3)) {
+  if(!plotPad->cd(5)) {
     plotPad->Clear();
     surfHkFramey[0]=0;
     surfHkFramey[1]=0;
-    surfHkFramey[2]=0;    
+    surfHkFramey[2]=0;
+    surfHkFramey[3]=0;
+    surfHkFramey[4]=0;    
     plotPad->SetRightMargin(0.0);
     plotPad->SetLeftMargin(0.1);
     plotPad->SetTopMargin(0.05);
     plotPad->SetBottomMargin(0.0);
-    plotPad->Divide(1,3,0,0);
+    plotPad->Divide(1,5,0,0);
   }
    
   TLatex texy;
@@ -474,7 +476,7 @@ void AnitaRFCanvasMaker::getSurfHkSurfCanvas(SurfHk *surfPtr,TPad *plotPad) {
 
    
 
-  for(int i=0;i<3;i++) {
+  for(int i=0;i<5;i++) {
     Double_t maxVal=histSurfHkStack[i]->GetMaximum("nostack");
     TPad* paddy = (TPad*)plotPad->cd(i+1);      
     if(!surfHkFramey[i]) {      
@@ -482,40 +484,29 @@ void AnitaRFCanvasMaker::getSurfHkSurfCanvas(SurfHk *surfPtr,TPad *plotPad) {
       paddy->Clear();
       paddy->SetBottomMargin(0.18);
       paddy->SetRightMargin(0.05);
+
+      surfHkFramey[i]=paddy->DrawFrame(0,0,numBins[i],maxVal*1.05);
       
-    if(i<2) {
-      surfHkFramey[i]=paddy->DrawFrame(0,0,ACTIVE_SURFS*SCALERS_PER_SURF,maxVal*1.05);
-    }
-    else {
-      surfHkFramey[i]=paddy->DrawFrame(0,0,ACTIVE_SURFS*RFCHAN_PER_SURF,maxVal*1.05);
-    }
-
-
-    if(i==0)
-      surfHkFramey[i]->GetYaxis()->SetTitle("Rate (kHz)");
-    if(i==1)
-      surfHkFramey[i]->GetYaxis()->SetTitle("Threshold (DAC)");
-    if(i==2) {
-      if(fSurfKelvinView) {
-	surfHkFramey[i]->GetYaxis()->SetTitle("RF Power (K)");
+      
+      surfHkFramey[i]->GetYaxis()->SetTitle(histYTitles[i]);
+      if(i==4) {
+	if(fSurfKelvinView) {
+	  surfHkFramey[i]->GetYaxis()->SetTitle("RF Power (K)");
+	}
       }
-      else {
-	surfHkFramey[i]->GetYaxis()->SetTitle("RF Power (ADC)");
-      }
-    }
-    surfHkFramey[i]->GetXaxis()->SetTitle("Logical Channel");
-    surfHkFramey[i]->GetYaxis()->SetNoExponent(1);
-    surfHkFramey[i]->GetXaxis()->SetLabelSize(0.08);
-    surfHkFramey[i]->GetYaxis()->SetLabelSize(0.08);
-    surfHkFramey[i]->GetXaxis()->SetTitleSize(0.09);
-    surfHkFramey[i]->GetYaxis()->SetTitleSize(0.09);
-    surfHkFramey[i]->GetXaxis()->SetTitleOffset(0.8);
-    surfHkFramey[i]->GetYaxis()->SetTitleOffset(0.6);
-    surfHkFramey[i]->GetYaxis()->SetTickLength(-0.01);
-    surfHkFramey[i]->GetYaxis()->SetLabelOffset(0.015);
-    surfHkFramey[i]->GetXaxis()->SetTickLength(-0.01);
-    surfHkFramey[i]->GetXaxis()->SetLabelOffset(0.015);
-    surfHkFramey[i]->SetTitle("");
+      surfHkFramey[i]->GetXaxis()->SetTitle("Logical Channel");
+      surfHkFramey[i]->GetYaxis()->SetNoExponent(1);
+      surfHkFramey[i]->GetXaxis()->SetLabelSize(0.08);
+      surfHkFramey[i]->GetYaxis()->SetLabelSize(0.08);
+      surfHkFramey[i]->GetXaxis()->SetTitleSize(0.09);
+      surfHkFramey[i]->GetYaxis()->SetTitleSize(0.09);
+      surfHkFramey[i]->GetXaxis()->SetTitleOffset(0.8);
+      surfHkFramey[i]->GetYaxis()->SetTitleOffset(0.6);
+      surfHkFramey[i]->GetYaxis()->SetTickLength(-0.01);
+      surfHkFramey[i]->GetYaxis()->SetLabelOffset(0.015);
+      surfHkFramey[i]->GetXaxis()->SetTickLength(-0.01);
+      surfHkFramey[i]->GetXaxis()->SetLabelOffset(0.015);
+      surfHkFramey[i]->SetTitle("");
     }
     else {
       if(!fFixSurfYScale) {
@@ -529,7 +520,7 @@ void AnitaRFCanvasMaker::getSurfHkSurfCanvas(SurfHk *surfPtr,TPad *plotPad) {
       
     }
     for(int surf=0;surf<ACTIVE_SURFS;surf++) {
-      histSurfHk[i][surf]->Draw("same");
+      histSurfHk[i][surf]->Draw("same hist");
     }
     if(i==0) {
       maxVal*=1.1;
@@ -540,7 +531,7 @@ void AnitaRFCanvasMaker::getSurfHkSurfCanvas(SurfHk *surfPtr,TPad *plotPad) {
       histBandMask->SetLineWidth(0);
       histBandMask->SetFillColor(kGray);
       histBandMask->SetFillStyle(3001);
-      histBandMask->Draw("same");
+      histBandMask->Draw("same hist");
     }
   }
   plotPad->Update();
@@ -553,26 +544,30 @@ void AnitaRFCanvasMaker::getSurfHkPhiCanvas(SurfHk *surfPtr,TPad *plotPad) {
   if(!fARFCGeomTool)
     fARFCGeomTool=AnitaGeomTool::Instance();
   char actualName[180];
-  const char *histNames[3]={"histScalerPhi","histThresholdPhi","histRFPowerPhi"};
-  const char *histTitles[3]={"Scaler","Threshold","RF Power"};
-
+  
+  const int numPhiHistBins=PHI_SECTORS*4*2;  // phi * ring * pol with an extra space
+  
+  const char *histNames[5]={"histL2ScalerPhi","histL1ScalerPhi","histScalerPhi","histThresholdPhi","histRFPowerPhi"};
+  const char *histTitles[5]={"L2 Scaler","L1 Scaler","Scaler","Threshold","RF Power"};
+  const char *histYTitles[5]={"Rate (kHz)","Rate (kHz)","Rate (kHz)","DAC","RF Power (ADC)"};
+  int numBins[5]={PHI_SECTORS,PHI_SECTORS*3,
+		  numPhiHistBins,numPhiHistBins,numPhiHistBins};
+  
   if(histBadThreshold)
     delete histBadThreshold;
-  //  histBadThreshold->Reset();
-  //  else
-  histBadThreshold = new TH1F("histBadThreshold","histBadThreshold",
-			      ACTIVE_SURFS*SCALERS_PER_SURF,-0.5,
-			      (ACTIVE_SURFS*SCALERS_PER_SURF)-0.5);
+  histBadThreshold = new TH1D("histBadThreshold","histBadThreshold",
+			      numPhiHistBins,-0.5,
+			      (numPhiHistBins)-0.5);
   if(histBandMask)
     delete histBandMask;
   //  histBandMask->Reset();
   //  else
-  histBandMask = new TH1F("histBandMask","histBandMask",
-			  ACTIVE_SURFS*SCALERS_PER_SURF,-0.5,
-			  (ACTIVE_SURFS*SCALERS_PER_SURF)-0.5);
-  Int_t maskedBands[ACTIVE_SURFS*SCALERS_PER_SURF]={0};
+  histBandMask = new TH1D("histBandMask","histBandMask",
+			  numPhiHistBins,-0.5,
+			  (numPhiHistBins)-0.5);
+  Int_t maskedBands[numPhiHistBins]={0};
 
-  for(int i=0;i<3;i++) {
+  for(int i=0;i<5;i++) {
     if(histSurfHkPhiStack[i])
       delete histSurfHkPhiStack[i];      
     histSurfHkPhiStack[i] = new THStack(histNames[i],histTitles[i]);
@@ -584,30 +579,37 @@ void AnitaRFCanvasMaker::getSurfHkPhiCanvas(SurfHk *surfPtr,TPad *plotPad) {
 	delete histSurfHkPhi[i][phi];
 	//	histSurfHkPhi[i][phi]->Reset();
       }
-      {
-	sprintf(actualName,"%s_%d",histNames[i],phi);
-	if(i<2) {
-	  histSurfHkPhi[i][phi]= new TH1F(actualName,histTitles[i],
-				       ACTIVE_SURFS*SCALERS_PER_SURF,-0.5,
-				       (ACTIVE_SURFS*SCALERS_PER_SURF)-0.5);
-	}
-	else {
-	  histSurfHkPhi[i][phi]= new TH1F(actualName,histTitles[i],
-					  3*PHI_SECTORS*2,-0.5,
-					  (3*PHI_SECTORS*2)-0.5);
-	}
+      
+      sprintf(actualName,"%s_%d",histNames[i],phi);
+      histSurfHkPhi[i][phi]= new TH1D(actualName,histTitles[i],
+				      numBins[i],-0.5,
+				      numBins[i]-0.5);
 
-      }
     }
   }
 
    
-  for(int ring=0;ring<3;ring++) {
-    for(int phi=0;phi<PHI_SECTORS;phi++) {     
-      if(ring==2) {
-	if(phi%2)
-	  continue;
+  for(int phi=0;phi<PHI_SECTORS;phi++) {
+    histSurfHkPhi[0][phi]->Fill(phi,surfPtr->getL2Scaler(phi));
+    for(int ring=0;ring<3;ring++) {
+      //First step is the scalers and thresholds
+      histSurfHkPhi[1][phi]->Fill(ring+3*phi,surfPtr->getL1Scaler(phi,(AnitaRing::AnitaRing_t)ring));           
+      
+      for(int pol=0;pol<2;pol++) {
+	int binIndex=pol+ring*2+phi*8;
+	maskedBands[binIndex]=surfPtr->isMasked(phi,(AnitaRing::AnitaRing_t)ring,
+						(AnitaTrigPol::AnitaTrigPol_t)pol);
+	histSurfHkPhi[2][phi]->Fill(binIndex,surfPtr->getScaler(phi,(AnitaRing::AnitaRing_t)ring,
+								(AnitaTrigPol::AnitaTrigPol_t)pol));
+	histSurfHkPhi[3][phi]->Fill(binIndex,surfPtr->getThreshold(phi,(AnitaRing::AnitaRing_t)ring,
+								   (AnitaTrigPol::AnitaTrigPol_t)pol));
+	
+	//	std::cout << binIndex << "\t" << maskedBands[binIndex] << "\n";
+	
       }
+      
+      
+      
       //Now for the RF power
       //Argh
       for(int pol=0;pol<2;pol++) {
@@ -615,42 +617,44 @@ void AnitaRFCanvasMaker::getSurfHkPhiCanvas(SurfHk *surfPtr,TPad *plotPad) {
 	Int_t chanIndex=
 	  fARFCGeomTool->getChanIndexFromRingPhiPol((AnitaRing::AnitaRing_t)ring,phi,(AnitaPol::AnitaPol_t)pol);
 	fARFCGeomTool->getSurfChanFromChanIndex(chanIndex,surf,rfChan);
-	Int_t index=pol + 2 *phi + 32*ring;
+	Int_t index=pol + ring*2 + phi*8;
 
 	if(fSurfKelvinView==1) {
-	  histSurfHkPhi[2][surf]->Fill(index,
-				    surfPtr->getRFPowerInK(surf,rfChan));
+	  histSurfHkPhi[4][phi]->Fill(index,
+				      surfPtr->getRFPowerInK(surf,rfChan));
 	}
 	else {
-	  histSurfHkPhi[2][surf]->Fill(index,
-				    surfPtr->rfPower[surf][rfChan]);
+	  histSurfHkPhi[4][phi]->Fill(index,
+				      surfPtr->getRawRFPower(surf,rfChan));
 	}
-	 
+	
       }
     }
-  }
-  for(int phi=0;phi<PHI_SECTORS;phi++) {
-    histSurfHkPhi[0][phi]->SetFillColor(getNiceColour(phi%4));            
-    histSurfHkPhi[1][phi]->SetFillColor(getNiceColour(phi%4));
-    histSurfHkPhi[2][phi]->SetFillColor(getNiceColour(phi%4));
-    histSurfHkPhiStack[0]->Add(histSurfHkPhi[0][phi]);
-    histSurfHkPhiStack[1]->Add(histSurfHkPhi[1][phi]);
-    histSurfHkPhiStack[2]->Add(histSurfHkPhi[2][phi]);
+
+    for(int i=0;i<5;i++) {
+      histSurfHkPhi[i][phi]->SetFillColor(getNiceColour(phi%8));
+      histSurfHkPhiStack[i]->Add(histSurfHkPhi[i][phi]);
+    } 
   }   
   histBadThreshold->SetFillColor(kRed+1);
   histSurfHkPhiStack[1]->Add(histBadThreshold);
      
-   
-  if(!plotPad->cd(3)) {
+
+  
+
+  
+  if(!plotPad->cd(5)) {
     plotPad->Clear();    
     surfHkFramey[0]=0;
     surfHkFramey[1]=0;
-    surfHkFramey[2]=0;    
+    surfHkFramey[2]=0;
+    surfHkFramey[3]=0;
+    surfHkFramey[4]=0;    
     plotPad->SetRightMargin(0.0);
     plotPad->SetLeftMargin(0.1);
     plotPad->SetTopMargin(0.05);
     plotPad->SetBottomMargin(0.0);
-    plotPad->Divide(1,3,0,0);
+    plotPad->Divide(1,5,0,0);
   }
      
   TLatex texy;
@@ -660,7 +664,7 @@ void AnitaRFCanvasMaker::getSurfHkPhiCanvas(SurfHk *surfPtr,TPad *plotPad) {
      
 
   char label[10];
-  for(int i=0;i<3;i++) {
+  for(int i=0;i<5;i++) {
     Double_t maxVal=histSurfHkPhiStack[i]->GetMaximum("nostack");
     TPad* paddy = (TPad*)plotPad->cd(i+1);      
     if(!surfHkFramey[i]) {      
@@ -669,20 +673,9 @@ void AnitaRFCanvasMaker::getSurfHkPhiCanvas(SurfHk *surfPtr,TPad *plotPad) {
       paddy->SetBottomMargin(0.18);
       paddy->SetRightMargin(0.05);
       
-      if(i<2) {
-	surfHkFramey[i]=paddy->DrawFrame(0,0,ACTIVE_SURFS*SCALERS_PER_SURF,maxVal*1.05);
-	//      surfHkFramey[i]->GetXaxis()->SetNdivisions(PHI_SECTORS);
-      }
-      else {
-	surfHkFramey[i]=paddy->DrawFrame(0,0,3*PHI_SECTORS*2,maxVal*1.05);
-      }
-
-      
-      if(i==0)
-	surfHkFramey[i]->GetYaxis()->SetTitle("Rate (kHz)");
-      if(i==1)
-	surfHkFramey[i]->GetYaxis()->SetTitle("Threshold (DAC)");
-      if(i==2) {
+      surfHkFramey[i]=paddy->DrawFrame(0,0,numBins[i],maxVal*1.05);
+      surfHkFramey[i]->GetYaxis()->SetTitle(histYTitles[i]);;
+      if(i==4) {
 	if(fSurfKelvinView) {
 	  surfHkFramey[i]->GetYaxis()->SetTitle("RF Power (K)");
 	}
@@ -690,45 +683,27 @@ void AnitaRFCanvasMaker::getSurfHkPhiCanvas(SurfHk *surfPtr,TPad *plotPad) {
 	  surfHkFramey[i]->GetYaxis()->SetTitle("RF Power (ADC)");
 	}
       }
-      surfHkFramey[i]->GetXaxis()->SetTitle("Phi Sector");
-      if(i<2) {
-	//      surfHkFramey[i]->GetXaxis()->SetNdivisions(-16);
-	surfHkFramey[i]->SetBins(ACTIVE_SURFS*SCALERS_PER_SURF,-0.5,
-		   		 (ACTIVE_SURFS*SCALERS_PER_SURF)-0.5);
-	for(int phi=0;phi<16;phi+=2) {
-	  sprintf(label,"%d",phi+1);
-	  surfHkFramey[i]->GetXaxis()->SetBinLabel(4*phi+2,label);
-	  surfHkFramey[i]->GetXaxis()->SetBinLabel(4*phi+66,label);
-	  if(phi%4==0) {
-	    surfHkFramey[i]->GetXaxis()->SetBinLabel(2*phi+130,label);
-	  }
-	}
-
+      surfHkFramey[i]->GetXaxis()->SetTitle("Phi Sector");      
+      surfHkFramey[i]->SetBins(numBins[i],-0.5,
+			       (numBins[i])-0.5);      
+      for(int phi=0;phi<16;phi++) {
+	sprintf(label,"%d",phi+1);
+	surfHkFramey[i]->GetXaxis()->SetBinLabel((numBins[i]/16)*phi+(numBins[i]/32)+1,label);
       }
-      else {
-	surfHkFramey[i]->SetBins(3*PHI_SECTORS*2,-0.5,
-				 (3*PHI_SECTORS*2)-0.5);
-	for(int phi=0;phi<16;phi+=2) {
-	  sprintf(label,"%d",phi+1);	  
-	  surfHkFramey[i]->GetXaxis()->SetBinLabel(2*phi +1,label);
-	  surfHkFramey[i]->GetXaxis()->SetBinLabel(2*phi +33,label);
-	  surfHkFramey[i]->GetXaxis()->SetBinLabel(2*phi +65,label);
-	}
-      }
-	
+    	
 
-    surfHkFramey[i]->GetYaxis()->SetNoExponent(1);
-    surfHkFramey[i]->GetXaxis()->SetLabelSize(0.08);
-    surfHkFramey[i]->GetYaxis()->SetLabelSize(0.08);
-    surfHkFramey[i]->GetXaxis()->SetTitleSize(0.09);
-    surfHkFramey[i]->GetYaxis()->SetTitleSize(0.09);
-    surfHkFramey[i]->GetXaxis()->SetTitleOffset(0.8);
-    surfHkFramey[i]->GetYaxis()->SetTitleOffset(0.6);
-    surfHkFramey[i]->GetYaxis()->SetTickLength(-0.01);
-    surfHkFramey[i]->GetYaxis()->SetLabelOffset(0.015);
-    surfHkFramey[i]->GetXaxis()->SetTickLength(-0.01);
-    surfHkFramey[i]->GetXaxis()->SetLabelOffset(0.015);
-    surfHkFramey[i]->SetTitle("");
+      surfHkFramey[i]->GetYaxis()->SetNoExponent(1);
+      surfHkFramey[i]->GetXaxis()->SetLabelSize(0.08);
+      surfHkFramey[i]->GetYaxis()->SetLabelSize(0.08);
+      surfHkFramey[i]->GetXaxis()->SetTitleSize(0.09);
+      surfHkFramey[i]->GetYaxis()->SetTitleSize(0.09);
+      surfHkFramey[i]->GetXaxis()->SetTitleOffset(0.8);
+      surfHkFramey[i]->GetYaxis()->SetTitleOffset(0.6);
+      surfHkFramey[i]->GetYaxis()->SetTickLength(-0.01);
+      surfHkFramey[i]->GetYaxis()->SetLabelOffset(0.015);
+      surfHkFramey[i]->GetXaxis()->SetTickLength(-0.01);
+      surfHkFramey[i]->GetXaxis()->SetLabelOffset(0.015);
+      surfHkFramey[i]->SetTitle("");
     }
     else {
       if(!fFixSurfYScale) {
@@ -741,18 +716,18 @@ void AnitaRFCanvasMaker::getSurfHkPhiCanvas(SurfHk *surfPtr,TPad *plotPad) {
       }
     }
     for(int phi=0;phi<PHI_SECTORS;phi++) {
-      histSurfHkPhi[i][phi]->Draw("same");
+      histSurfHkPhi[i][phi]->Draw("same hist");
     }
     if(i==0) {
       maxVal*=1.1;
-      for(int i=0;i<ACTIVE_SURFS*SCALERS_PER_SURF;i++) {
+      for(int i=0;i<numPhiHistBins;i++) {
 	if(maskedBands[i])
 	  histBandMask->Fill(i,maxVal);
       }
       histBandMask->SetLineWidth(0);
       histBandMask->SetFillColor(kGray);
       histBandMask->SetFillStyle(3001);
-      histBandMask->Draw("same");
+      histBandMask->Draw("same hist");
     }
   }
   plotPad->Update();
@@ -761,17 +736,17 @@ void AnitaRFCanvasMaker::getSurfHkPhiCanvas(SurfHk *surfPtr,TPad *plotPad) {
 void AnitaRFCanvasMaker::getSurfHkTimeCanvas(TPad *plotPad) {
   char graphName[180];
   plotPad->Clear();
-  for(int i=0;i<3;i++) {
+  for(int i=0;i<5;i++) {
     if(mgSurfTime[i]) delete mgSurfTime[i];
     mgSurfTime[i]=0;
   }
-  if(!plotPad->cd(3)) {
+  if(!plotPad->cd(4)) {
     plotPad->Clear();    
     plotPad->SetRightMargin(0);
     plotPad->SetLeftMargin(0.1);
     plotPad->SetTopMargin(0.05);
     plotPad->SetBottomMargin(0.1);
-    plotPad->Divide(1,3,0,0);
+    plotPad->Divide(1,5,0,0);
   //   for(int pad=1;pad<=3;pad++) {
 //       plotPad->cd(pad);
 //       gPad->SetRightMargin(0.05);
@@ -783,10 +758,10 @@ void AnitaRFCanvasMaker::getSurfHkTimeCanvas(TPad *plotPad) {
  //  Double_t minTime=TMath::MinElement(numPoints,fTimeVals);
 //   Double_t maxTime=TMath::MaxElement(numPoints,fTimeVals);
 
-//   Double_t minScaler=TMath::MinElement(numPoints*NUM_SURF*SCALERS_PER_SURF,fScalerVals[0][0]);
-//   Double_t maxScaler=TMath::MaxElement(numPoints*NUM_SURF*SCALERS_PER_SURF,fScalerVals[0][0]);
-//   Double_t minThresh=TMath::MinElement(numPoints*NUM_SURF*SCALERS_PER_SURF,fThreshVals[0][0]);
-//   Double_t maxThresh=TMath::MaxElement(numPoints*NUM_SURF*SCALERS_PER_SURF,fThreshVals[0][0]);
+//   Double_t minScaler=TMath::MinElement(numPoints*TRIGGER_SURFS*SCALERS_PER_SURF,fScalerVals[0][0]);
+//   Double_t maxScaler=TMath::MaxElement(numPoints*TRIGGER_SURFS*SCALERS_PER_SURF,fScalerVals[0][0]);
+//   Double_t minThresh=TMath::MinElement(numPoints*TRIGGER_SURFS*SCALERS_PER_SURF,fThreshVals[0][0]);
+//   Double_t maxThresh=TMath::MaxElement(numPoints*TRIGGER_SURFS*SCALERS_PER_SURF,fThreshVals[0][0]);
 //   Double_t minRfPwr=TMath::MinElement(numPoints*NUM_SURF*RFCHAN_PER_SURF,fRfPowVals[0][0]);
 //   Double_t maxRfPwr=TMath::MaxElement(numPoints*NUM_SURF*RFCHAN_PER_SURF,fRfPowVals[0][0]);
   
@@ -795,7 +770,58 @@ void AnitaRFCanvasMaker::getSurfHkTimeCanvas(TPad *plotPad) {
   gPad->SetRightMargin(0.05);
   //  if(mgSurfTime[0]) delete mgSurfTime[0];
   mgSurfTime[0] = new TMultiGraph();
-  for(int surf=0;surf<NUM_SURF;surf++) {
+  for(int surf=0;surf<TRIGGER_SURFS;surf++) {
+    for(int scl=0;scl<L2S_PER_SURF;scl++) {
+      //Will change this in a bit
+      grSurfL2Scaler[surf][scl] = new TGraph(numPoints,fTimeVals,fL2ScalerVals[surf][scl]);
+      grSurfL2Scaler[surf][scl]->SetLineColor(getNiceColour(surf));
+      grSurfL2Scaler[surf][scl]->SetMarkerColor(getNiceColour(surf));
+      grSurfL2Scaler[surf][scl]->SetMarkerStyle(getMarker(scl));
+      
+      sprintf(graphName,"grSurfL2Scaler%d_%d",surf,scl);
+      grSurfL2Scaler[surf][scl]->SetName(graphName);
+
+      mgSurfTime[0]->Add(grSurfL2Scaler[surf][scl],"lp");
+    }
+  }
+  mgSurfTime[0]->Draw("alp");
+  mgSurfTime[0]->GetYaxis()->SetTitle("L2 Scaler (kHz)");
+  mgSurfTime[0]->GetXaxis()->SetTimeDisplay(1);
+  plotPad->Update();
+
+  
+  plotPad->cd(2);
+  gPad->Clear();
+  gPad->SetRightMargin(0.05);
+  //  if(mgSurfTime[1]) delete mgSurfTime[1];
+  mgSurfTime[1] = new TMultiGraph();
+  for(int surf=0;surf<TRIGGER_SURFS;surf++) {
+    for(int scl=0;scl<L1S_PER_SURF;scl++) {
+      //Will change this in a bit
+      grSurfL1Scaler[surf][scl] = new TGraph(numPoints,fTimeVals,fL1ScalerVals[surf][scl]);
+      grSurfL1Scaler[surf][scl]->SetLineColor(getNiceColour(surf));
+      grSurfL1Scaler[surf][scl]->SetMarkerColor(getNiceColour(surf));
+      grSurfL1Scaler[surf][scl]->SetMarkerStyle(getMarker(scl));
+      
+      sprintf(graphName,"grSurfL2Scaler%d_%d",surf,scl);
+      grSurfL1Scaler[surf][scl]->SetName(graphName);
+
+      mgSurfTime[1]->Add(grSurfL1Scaler[surf][scl],"lp");
+    }
+  }
+  mgSurfTime[1]->Draw("alp");
+  mgSurfTime[1]->GetYaxis()->SetTitle("L1 Scaler (kHz)");
+  mgSurfTime[1]->GetXaxis()->SetTimeDisplay(1);
+  plotPad->Update();
+
+
+
+  plotPad->cd(3);
+  gPad->Clear();
+  gPad->SetRightMargin(0.05);
+  //  if(mgSurfTime[0]) delete mgSurfTime[0];
+  mgSurfTime[2] = new TMultiGraph();
+  for(int surf=0;surf<TRIGGER_SURFS;surf++) {
     for(int scl=0;scl<SCALERS_PER_SURF;scl++) {
       //Will change this in a bit
       grSurfScaler[surf][scl] = new TGraph(numPoints,fTimeVals,fScalerVals[surf][scl]);
@@ -806,19 +832,22 @@ void AnitaRFCanvasMaker::getSurfHkTimeCanvas(TPad *plotPad) {
       sprintf(graphName,"grSurfScaler%d_%d",surf,scl);
       grSurfScaler[surf][scl]->SetName(graphName);
 
-      mgSurfTime[0]->Add(grSurfScaler[surf][scl],"lp");
+      mgSurfTime[2]->Add(grSurfScaler[surf][scl],"lp");
     }
   }
-  mgSurfTime[0]->Draw("alp");
-  mgSurfTime[0]->GetYaxis()->SetTitle("Scaler (kHz)");
-  mgSurfTime[0]->GetXaxis()->SetTimeDisplay(1);
+  mgSurfTime[2]->Draw("alp");
+  mgSurfTime[2]->GetYaxis()->SetTitle("Scaler (kHz)");
+  mgSurfTime[2]->GetXaxis()->SetTimeDisplay(1);
   plotPad->Update();
-  plotPad->cd(2);
+
+
+  
+  plotPad->cd(4);
   gPad->Clear();
   gPad->SetRightMargin(0.05);
   //  if(mgSurfTime[1]) delete mgSurfTime[1];
-  mgSurfTime[1] = new TMultiGraph();
-  for(int surf=0;surf<NUM_SURF;surf++) {
+  mgSurfTime[3] = new TMultiGraph();
+  for(int surf=0;surf<TRIGGER_SURFS;surf++) {
     for(int scl=0;scl<SCALERS_PER_SURF;scl++) {
       //Will change this in a bit
       //      if(grSurfThresh[surf][scl]) delete grSurfThresh[surf][scl];
@@ -832,20 +861,20 @@ void AnitaRFCanvasMaker::getSurfHkTimeCanvas(TPad *plotPad) {
       grSurfThresh[surf][scl]->SetName(graphName);
 
 
-      mgSurfTime[1]->Add(grSurfThresh[surf][scl],"lp");
+      mgSurfTime[3]->Add(grSurfThresh[surf][scl],"lp");
     }
   }
-  mgSurfTime[1]->Draw("alp");
-  mgSurfTime[1]->GetYaxis()->SetTitle("Threshold (DAC)");
+  mgSurfTime[3]->Draw("alp");
+  mgSurfTime[3]->GetYaxis()->SetTitle("Threshold (DAC)");
   plotPad->Update();
   
 
-  plotPad->cd(3);
+  plotPad->cd(5);
   gPad->Clear();
   gPad->SetRightMargin(0.05);
   //   if(mgSurfTime[2]) delete mgSurfTime[2];
-  mgSurfTime[2] = new TMultiGraph();
-  for(int surf=0;surf<NUM_SURF;surf++) {
+  mgSurfTime[4] = new TMultiGraph();
+  for(int surf=0;surf<ACTIVE_SURFS;surf++) {
     for(int scl=0;scl<RFCHAN_PER_SURF;scl++) {
       //Will change this in a bit
       grSurfRfPwr[surf][scl] = new TGraph(numPoints,fTimeVals,fRfPowVals[surf][scl]);
@@ -857,13 +886,13 @@ void AnitaRFCanvasMaker::getSurfHkTimeCanvas(TPad *plotPad) {
       sprintf(graphName,"grSurfRfPwr%d_%d",surf,scl);
       grSurfRfPwr[surf][scl]->SetName(graphName);
 
-      mgSurfTime[2]->Add(grSurfRfPwr[surf][scl],"lp");
+      mgSurfTime[4]->Add(grSurfRfPwr[surf][scl],"lp");
     }
   }
-  mgSurfTime[2]->Draw("alp");
-  mgSurfTime[2]->GetXaxis()->SetTitle("Time");
-  mgSurfTime[2]->GetYaxis()->SetTitle("RF Power (K)");
-  mgSurfTime[2]->GetXaxis()->SetTimeDisplay(1);
+  mgSurfTime[4]->Draw("alp");
+  mgSurfTime[4]->GetXaxis()->SetTitle("Time");
+  mgSurfTime[4]->GetYaxis()->SetTitle("RF Power (K)");
+  mgSurfTime[4]->GetXaxis()->SetTimeDisplay(1);
   
 
 
@@ -956,7 +985,7 @@ TPad *AnitaRFCanvasMaker::getSumTurfRateCanvas(SummedTurfRate *sumTurfPtr, TPad 
       //      histSumTurfRate[i]->Reset();
     }
     //    else {
-    histSumTurfRate[i]= new TH1F(histNames[i],histTitles[i],PHI_SECTORS,0.5,PHI_SECTORS+0.5);
+    histSumTurfRate[i]= new TH1D(histNames[i],histTitles[i],PHI_SECTORS,0.5,PHI_SECTORS+0.5);
       //    }
   }
   const char *maskNames[2]={"histSumAntMask0","histSumAntMask1"};
@@ -965,7 +994,7 @@ TPad *AnitaRFCanvasMaker::getSumTurfRateCanvas(SummedTurfRate *sumTurfPtr, TPad 
       delete histSumAntMask[i];
     //    histSumAntMask[i]->Reset();
     //    else {
-    histSumAntMask[i] = new TH1F(maskNames[i],maskNames[i],PHI_SECTORS,0.5,PHI_SECTORS+0.5);
+    histSumAntMask[i] = new TH1D(maskNames[i],maskNames[i],PHI_SECTORS,0.5,PHI_SECTORS+0.5);
     //  }
   }
 
@@ -973,7 +1002,7 @@ TPad *AnitaRFCanvasMaker::getSumTurfRateCanvas(SummedTurfRate *sumTurfPtr, TPad 
     delete histSumPhiMask;
   //  histSumPhiMask->Reset();
   //  else
-  histSumPhiMask = new TH1F("histSumPhiMask","histSumPhiMask",PHI_SECTORS,0.5,PHI_SECTORS+0.5);
+  histSumPhiMask = new TH1D("histSumPhiMask","histSumPhiMask",PHI_SECTORS,0.5,PHI_SECTORS+0.5);
 
   Double_t l1Max=0;
   Double_t l2Max=0;
@@ -1195,14 +1224,14 @@ void AnitaRFCanvasMaker::getAvgSurfHkSurfCanvas(AveragedSurfHk *avgSurfPtr,TPad 
     delete histAvgSurfBadThreshold;
   //  histAvgSurfBadThreshold->Reset();
   //  else
-  histAvgSurfBadThreshold = new TH1F("histAvgSurfBadThreshold","histAvgSurfBadThreshold",
+  histAvgSurfBadThreshold = new TH1D("histAvgSurfBadThreshold","histAvgSurfBadThreshold",
 				     ACTIVE_SURFS*SCALERS_PER_SURF,-0.5,
 				     (ACTIVE_SURFS*SCALERS_PER_SURF)-0.5);
   if(histAvgSurfBandMask)
     delete histAvgSurfBandMask;
   //  histAvgSurfBandMask->Reset();
   //  else
-  histAvgSurfBandMask = new TH1F("histAvgSurfBandMask","histAvgSurfBandMask",
+  histAvgSurfBandMask = new TH1D("histAvgSurfBandMask","histAvgSurfBandMask",
 				 ACTIVE_SURFS*SCALERS_PER_SURF,-0.5,
 				 (ACTIVE_SURFS*SCALERS_PER_SURF)-0.5);
   Int_t maskedBands[ACTIVE_SURFS*SCALERS_PER_SURF]={0};
@@ -1222,12 +1251,12 @@ void AnitaRFCanvasMaker::getAvgSurfHkSurfCanvas(AveragedSurfHk *avgSurfPtr,TPad 
       //      else {
       sprintf(actualName,"%s_%d",histNames[i],surf);
       if(i<2) {
-	histAvgSurfHk[i][surf]= new TH1F(actualName,histTitles[i],
+	histAvgSurfHk[i][surf]= new TH1D(actualName,histTitles[i],
 					 ACTIVE_SURFS*SCALERS_PER_SURF,-0.5,
 					 (ACTIVE_SURFS*SCALERS_PER_SURF)-0.5);
       }
       else {
-	histAvgSurfHk[i][surf]= new TH1F(actualName,histTitles[i],
+	histAvgSurfHk[i][surf]= new TH1D(actualName,histTitles[i],
 					 ACTIVE_SURFS*RFCHAN_PER_SURF,-0.5,
 					(ACTIVE_SURFS*RFCHAN_PER_SURF)-0.5);
       }
@@ -1413,14 +1442,14 @@ void AnitaRFCanvasMaker::getAvgSurfHkPhiCanvas(AveragedSurfHk *avgSurfPtr,TPad *
     delete histAvgSurfBadThreshold;
   //    histAvgSurfBadThreshold->Reset();
   //  else
-  histAvgSurfBadThreshold = new TH1F("histAvgSurfBadThreshold","histAvgSurfBadThreshold",
+  histAvgSurfBadThreshold = new TH1D("histAvgSurfBadThreshold","histAvgSurfBadThreshold",
 				     ACTIVE_SURFS*SCALERS_PER_SURF,-0.5,
 				     (ACTIVE_SURFS*SCALERS_PER_SURF)-0.5);
   if(histAvgSurfBandMask)
     delete histAvgSurfBandMask;
   //  histAvgSurfBandMask->Reset();
   //  else
-  histAvgSurfBandMask = new TH1F("histAvgSurfBandMask","histAvgSurfBandMask",
+  histAvgSurfBandMask = new TH1D("histAvgSurfBandMask","histAvgSurfBandMask",
 				 ACTIVE_SURFS*SCALERS_PER_SURF,-0.5,
 				 (ACTIVE_SURFS*SCALERS_PER_SURF)-0.5);
   Int_t maskedBands[ACTIVE_SURFS*SCALERS_PER_SURF]={0};
@@ -1440,12 +1469,12 @@ void AnitaRFCanvasMaker::getAvgSurfHkPhiCanvas(AveragedSurfHk *avgSurfPtr,TPad *
       //      else {
 	sprintf(actualName,"%s_%d",histNames[i],phi);
 	if(i<2) {
-	  histAvgSurfHkPhi[i][phi]= new TH1F(actualName,histTitles[i],
+	  histAvgSurfHkPhi[i][phi]= new TH1D(actualName,histTitles[i],
 				       ACTIVE_SURFS*SCALERS_PER_SURF,-0.5,
 				       (ACTIVE_SURFS*SCALERS_PER_SURF)-0.5);
 	}
 	else {
-	  histAvgSurfHkPhi[i][phi]= new TH1F(actualName,histTitles[i],
+	  histAvgSurfHkPhi[i][phi]= new TH1D(actualName,histTitles[i],
 					  3*PHI_SECTORS*2,-0.5,
 					  (3*PHI_SECTORS*2)-0.5);
 	}
@@ -1525,9 +1554,9 @@ void AnitaRFCanvasMaker::getAvgSurfHkPhiCanvas(AveragedSurfHk *avgSurfPtr,TPad *
     }
   }
   for(int phi=0;phi<PHI_SECTORS;phi++) {
-    histAvgSurfHkPhi[0][phi]->SetFillColor(getNiceColour(phi%4));            
-    histAvgSurfHkPhi[1][phi]->SetFillColor(getNiceColour(phi%4));
-    histAvgSurfHkPhi[2][phi]->SetFillColor(getNiceColour(phi%4));
+    histAvgSurfHkPhi[0][phi]->SetFillColor(getNiceColour(phi%8));            
+    histAvgSurfHkPhi[1][phi]->SetFillColor(getNiceColour(phi%8));
+    histAvgSurfHkPhi[2][phi]->SetFillColor(getNiceColour(phi%8));
     histAvgSurfHkPhiStack[0]->Add(histAvgSurfHkPhi[0][phi]);
     histAvgSurfHkPhiStack[1]->Add(histAvgSurfHkPhi[1][phi]);
     histAvgSurfHkPhiStack[2]->Add(histAvgSurfHkPhi[2][phi]);
@@ -1702,9 +1731,9 @@ TPad *AnitaRFCanvasMaker::getAvgSurfInfoCanvas(AveragedSurfHk *avgSurfPtr,TPad *
   sprintf(textLabel,"Global: %d",avgSurfPtr->globalThreshold);
   TText *globalText = rightPave->AddText(textLabel);
   globalText->SetTextColor(1);
-  sprintf(textLabel,"Goal Rates: (%d %d %d %d) kHz",
+  sprintf(textLabel,"Goal Rates: (%d %d %d) kHz",
 	  avgSurfPtr->scalerGoals[0],avgSurfPtr->scalerGoals[1],
-	  avgSurfPtr->scalerGoals[2],avgSurfPtr->scalerGoals[3]);
+	  avgSurfPtr->scalerGoals[2]);
   TText *goalText = rightPave->AddText(textLabel);
   goalText->SetTextColor(1);
   sprintf(textLabel,"Had Error: %#x (%d)",avgSurfPtr->hadError,avgSurfPtr->hadError);
@@ -1718,10 +1747,16 @@ TPad *AnitaRFCanvasMaker::getAvgSurfInfoCanvas(AveragedSurfHk *avgSurfPtr,TPad *
 void AnitaRFCanvasMaker::addToTimePlots(SurfHk *surfPtr) {
   //  std::cout <<fNumSurfHks << "\n";
   if(fNumSurfHks<MAX_SURF_HK_TIME_POINTS) {
-    for(int surf=0;surf<NUM_SURF;surf++) {
+    for(int surf=0;surf<TRIGGER_SURFS;surf++) {
+      for(int l2=0;l2<L2S_PER_SURF;l2++) {
+	fL2ScalerVals[surf][l2][fNumSurfHks]=surfPtr->getL2ScalerFromSurfChan(surf,l2);
+      }
+      for(int l1=0;l1<L1S_PER_SURF;l1++) {
+	fL1ScalerVals[surf][l1][fNumSurfHks]=surfPtr->getL1ScalerFromSurfChan(surf,l1);
+      }
       for(int scl=0;scl<SCALERS_PER_SURF;scl++) {
-	fScalerVals[surf][scl][fNumSurfHks]=surfPtr->scaler[surf][scl];
-	fThreshVals[surf][scl][fNumSurfHks]=surfPtr->threshold[surf][scl];
+	fScalerVals[surf][scl][fNumSurfHks]=surfPtr->getScalerFromSurfChan(surf,scl);
+	fThreshVals[surf][scl][fNumSurfHks]=surfPtr->getThresholdFromSurfChan(surf,scl);
       }
       for(int chan=0;chan<RFCHAN_PER_SURF;chan++) {
 	fRfPowVals[surf][chan][fNumSurfHks]=surfPtr->getRFPowerInK(surf,chan);
@@ -1730,7 +1765,15 @@ void AnitaRFCanvasMaker::addToTimePlots(SurfHk *surfPtr) {
     fTimeVals[fNumSurfHks]=surfPtr->realTime+Double_t(1e-6*surfPtr->payloadTimeUs);
   }
   else {
-    for(int surf=0;surf<NUM_SURF;surf++) {
+    for(int surf=0;surf<TRIGGER_SURFS;surf++) {
+      for(int l2=0;l2<L2S_PER_SURF;l2++) {
+	memmove(&fL2ScalerVals[surf][l2][0],&fL2ScalerVals[surf][l2][1],sizeof(Double_t)*(MAX_SURF_HK_TIME_POINTS-1));
+	fL2ScalerVals[surf][l2][fNumSurfHks]=surfPtr->getL2ScalerFromSurfChan(surf,l2);
+      }
+      for(int l1=0;l1<L1S_PER_SURF;l1++) {
+	memmove(&fL1ScalerVals[surf][l1][0],&fL1ScalerVals[surf][l1][1],sizeof(Double_t)*(MAX_SURF_HK_TIME_POINTS-1));
+	fL1ScalerVals[surf][l1][fNumSurfHks]=surfPtr->getL1ScalerFromSurfChan(surf,l1);
+      }
       for(int scl=0;scl<SCALERS_PER_SURF;scl++) {
 	memmove(&fScalerVals[surf][scl][0],&fScalerVals[surf][scl][1],sizeof(Double_t)*(MAX_SURF_HK_TIME_POINTS-1));
 	memmove(&fThreshVals[surf][scl][0],&fThreshVals[surf][scl][1],sizeof(Double_t)*(MAX_SURF_HK_TIME_POINTS-1));
