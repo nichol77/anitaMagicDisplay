@@ -1312,13 +1312,15 @@ int MagicDisplay::loadSurfTree()
 void MagicDisplay::startSurfDisplay()
 {
   
-
-
    if(!fRFCanMaker)
-      fRFCanMaker=AnitaRFCanvasMaker::Instance();
+      fRFCanMaker=AnitaRFCanvasMaker::Instance();   
    int retVal=getSurfEntry();
-   if(retVal==0)
-      refreshSurfDisplay();   
+   fRFCanMaker->setSurfHkDisplay(MagicDisplaySurfHkDisplay::kSurfView);
+   std::cout << "RetVal: " << retVal << "\n";
+   if(retVal==0) {
+     refreshSurfDisplay();
+   }
+   
 }
 
 int MagicDisplay::getSurfEntry() 
