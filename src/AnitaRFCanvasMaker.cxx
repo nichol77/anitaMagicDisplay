@@ -1491,25 +1491,26 @@ void AnitaRFCanvasMaker::getAvgSurfHkPhiCanvas(AveragedSurfHk *avgSurfPtr,TPad *
 	if(phi%2)
 	  continue;
       }
-      for(int band=0;band<4;band++) {
-	Int_t index=band+4*phi+64*ring;
+      
+      for(int trigPol=0;trigPol<2;trigPol++) {
+	Int_t index=trigPol+4*phi+64*ring;
 	if(ring==2)
-	  index=128 + band+4*(phi/2);
+	  index=128 + trigPol+4*(phi/2);
 	maskedBands[index]=
-	  avgSurfPtr->isBandMasked(phi,(AnitaRing::AnitaRing_t)ring,(AnitaBand::AnitaBand_t)band);
+	  avgSurfPtr->isBandMasked(phi,(AnitaRing::AnitaRing_t)ring,(AnitaTrigPol::AnitaTrigPol_t)trigPol);
 	 
-	histAvgSurfHkPhi[0][phi]->Fill(index,avgSurfPtr->getScaler(phi,(AnitaRing::AnitaRing_t)ring,(AnitaBand::AnitaBand_t)band));
-	histAvgSurfHkPhi[0][phi]->SetBinError(index+1,avgSurfPtr->getScalerRMS(phi,(AnitaRing::AnitaRing_t)ring,(AnitaBand::AnitaBand_t)band));
+	histAvgSurfHkPhi[0][phi]->Fill(index,avgSurfPtr->getScaler(phi,(AnitaRing::AnitaRing_t)ring,(AnitaTrigPol::AnitaTrigPol_t)trigPol));
+	histAvgSurfHkPhi[0][phi]->SetBinError(index+1,avgSurfPtr->getScalerRMS(phi,(AnitaRing::AnitaRing_t)ring,(AnitaTrigPol::AnitaTrigPol_t)trigPol));
 	 
-	if(avgSurfPtr->getScaler(phi,(AnitaRing::AnitaRing_t)ring,(AnitaBand::AnitaBand_t)band)>maxVals[0])
-	  maxVals[0]=avgSurfPtr->getScaler(phi,(AnitaRing::AnitaRing_t)ring,(AnitaBand::AnitaBand_t)band);
+	if(avgSurfPtr->getScaler(phi,(AnitaRing::AnitaRing_t)ring,(AnitaTrigPol::AnitaTrigPol_t)trigPol)>maxVals[0])
+	  maxVals[0]=avgSurfPtr->getScaler(phi,(AnitaRing::AnitaRing_t)ring,(AnitaTrigPol::AnitaTrigPol_t)trigPol);
 
-	histAvgSurfHkPhi[1][phi]->Fill(index,avgSurfPtr->getThreshold(phi,(AnitaRing::AnitaRing_t)ring,(AnitaBand::AnitaBand_t)band));
-	histAvgSurfHkPhi[1][phi]->SetBinError(index+1,avgSurfPtr->getThresholdRMS(phi,(AnitaRing::AnitaRing_t)ring,(AnitaBand::AnitaBand_t)band));
+	histAvgSurfHkPhi[1][phi]->Fill(index,avgSurfPtr->getThreshold(phi,(AnitaRing::AnitaRing_t)ring,(AnitaTrigPol::AnitaTrigPol_t)trigPol));
+	histAvgSurfHkPhi[1][phi]->SetBinError(index+1,avgSurfPtr->getThresholdRMS(phi,(AnitaRing::AnitaRing_t)ring,(AnitaTrigPol::AnitaTrigPol_t)trigPol));
 	
 
-	if(avgSurfPtr->getThreshold(phi,(AnitaRing::AnitaRing_t)ring,(AnitaBand::AnitaBand_t)band)>maxVals[1])
-	  maxVals[1]=avgSurfPtr->getThreshold(phi,(AnitaRing::AnitaRing_t)ring,(AnitaBand::AnitaBand_t)band);
+	if(avgSurfPtr->getThreshold(phi,(AnitaRing::AnitaRing_t)ring,(AnitaTrigPol::AnitaTrigPol_t)trigPol)>maxVals[1])
+	  maxVals[1]=avgSurfPtr->getThreshold(phi,(AnitaRing::AnitaRing_t)ring,(AnitaTrigPol::AnitaTrigPol_t)trigPol);
 	
 	 
       }
