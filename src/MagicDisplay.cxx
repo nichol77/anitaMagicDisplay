@@ -94,7 +94,7 @@ static int no_filter_strategy_init = 0;
 void MagicDisplay::zeroPointers() 
 {
   fApplyEventCut=0;
-  fOrderByEventNumber=0;
+  fOrderByEventNumber=1;
   fEventCutListEntry=-1;
   fEventTreeIndexEntry=-1;
    fHeadFile=0;
@@ -298,13 +298,20 @@ int MagicDisplay::getEventEntry()
     return -1;
   }
             
-   if(fEventEntry<fHeadTree->GetEntries())
-      fHeadTree->GetEntry(fEventEntry);
+  if(fEventEntry<fHeadTree->GetEntries())  {
+    Int_t headEntry=fHeadIndex->GetEntryNumberWithIndex(fRawEventPtr->eventNumber,0);
+    //    std::cout << headEntry << "\t" << fEventEntry << "\n";
+    fHeadTree->GetEntry(headEntry);
+
+    if(fRawEventPtr->eventNumber!=fHeadPtr->eventNumber) {      
+      std::cout << "Mismatched Event: " << fRawEventPtr->eventNumber << "\t" << fHeadPtr->eventNumber << "\n";
+    }
+  }
    else {
       std::cout << "No more entries in header tree" << endl;
       return -1;
    }
-   //   std::cout << fEventEntry << "\t" << fWhichEventFileKind << "\n";
+   std::cout << fEventEntry << "\t" << fWhichEventFileKind << "\n";
    //Now need to make a UsefulAnitaEvent
    switch(fWhichEventFileKind) {
    case MagicDisplayFileType::kCalEvent:
@@ -420,7 +427,9 @@ int MagicDisplay::loadEventTree()
      cout << "Couldn't open: " << eventName << "\n";
      return -1;
    }
-   
+
+
+   std::cout << telemHeaderName << "\n";
    fHeadFile = TFile::Open(telemHeaderName);
    if(!fHeadFile) {
      fHeadFile = TFile::Open(headerName);
