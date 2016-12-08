@@ -448,7 +448,7 @@ int MagicDisplay::loadEventTree()
   fEventEntry=0;
   fHeadTree->BuildIndex("eventNumber");
   fHeadIndex = (TTreeIndex*) fHeadTree->GetTreeIndex();
-  std::cerr << fEventTree << "\t" << fHeadTree << "\n";
+  //  std::cerr << fEventTree << "\t" << fHeadTree << "\n";
   std::cerr << fHeadTree->GetEntries() << "\t"
 	    << fEventTree->GetEntries() << "\n";
   return 0;
