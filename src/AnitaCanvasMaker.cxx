@@ -1175,7 +1175,7 @@ TPad *AnitaCanvasMaker::getCombinedCanvasForWebPlotter(RawAnitaHeader *hdPtr,
 	    TH1F *tempHist = (TH1F*) fred;
 	    if(tempHist->InheritsFrom("TH1")) {
 	      if(chan<8) {
-		tempHist->GetYaxis()->SetRangeUser(fMinVertVoltLimit,fMaxVertVoltLimit);
+		tempHist->GetYaxis()->SetRangeUser(fMinVoltLimit,fMaxVoltLimit);
 	      }
 	      else {
 		tempHist->GetYaxis()->SetRangeUser(fMinClockVoltLimit,fMaxClockVoltLimit);
