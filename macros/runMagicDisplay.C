@@ -6,7 +6,7 @@ void runMagicDisplayRun(int run);
 void runMagicDisplay(int run=1002) {
   cout << "runMagicDisplay(" << run << ")\n";
 
-
+  gSystem->Load("libNet.so");
 
   TChain *fred=0; //Will this work?
   runMagicDisplayRun(run);
@@ -15,7 +15,11 @@ void runMagicDisplay(int run=1002) {
 
 void runMagicDisplayRun(int run) {
 
-  MagicDisplay *magicPtr = new MagicDisplay("/data/ldb2016/root",run,WaveCalType::kDefault);
+
+
+  // MagicDisplay *magicPtr = new MagicDisplay("/data/palestine2016/root",run,WaveCalType::kDefault);
+  MagicDisplay *magicPtr = new MagicDisplay("~/UCL/ANITA/flight1415/root",run,WaveCalType::kDefault);
+  // MagicDisplay *magicPtr = new MagicDisplay("https://anita:IceRadio@www.hep.ucl.ac.uk/uhen/anita/private/anita3/flight1415/root/",run,WaveCalType::kDefault);
 
   //magicPtr->startSurfDisplay();
   //  magicPtr->startAvgSurfDisplay();
