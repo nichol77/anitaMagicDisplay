@@ -299,19 +299,21 @@ int MagicDisplay::getEventEntry()
   }
             
   if(fEventEntry<fHeadTree->GetEntries())  {
-    Int_t headEntry=fHeadIndex->GetEntryNumberWithIndex(fRawEventPtr->eventNumber,0);
+//    printf("fRawEventPtr->eventNumber: %d\n", fRawEventPtr->eventNumber); 
+    int evNum = fRawEventPtr ? fRawEventPtr->eventNumber : fCalEventPtr->eventNumber ;
+    Int_t headEntry=fHeadIndex->GetEntryNumberWithIndex(evNum,0);
     //    std::cout << headEntry << "\t" << fEventEntry << "\n";
     fHeadTree->GetEntry(headEntry);
 
-    if(fRawEventPtr->eventNumber!=fHeadPtr->eventNumber) {      
-      std::cout << "Mismatched Event: " << fRawEventPtr->eventNumber << "\t" << fHeadPtr->eventNumber << "\n";
+    if(evNum!=fHeadPtr->eventNumber) {      
+      std::cout << "Mismatched Event: " << evNum << "\t" << fHeadPtr->eventNumber << "\n";
     }
   }
    else {
       std::cout << "No more entries in header tree" << endl;
       return -1;
    }
-   std::cout << fEventEntry << "\t" << fWhichEventFileKind << "\n";
+//   std::cout << fEventEntry << "\t" << fWhichEventFileKind << "\n";
    //Now need to make a UsefulAnitaEvent
    switch(fWhichEventFileKind) {
    case MagicDisplayFileType::kCalEvent:
