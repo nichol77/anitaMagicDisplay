@@ -41,7 +41,6 @@
 #include "TMultiGraph.h"
 
 AnitaRFCanvasMaker*  AnitaRFCanvasMaker::fgInstance = 0;
-AnitaGeomTool *fARFCGeomTool=0;
 
 TH1D *histTurfRate[6]={0};
 TH1D *histSumTurfRate[6]={0};
@@ -541,8 +540,7 @@ void AnitaRFCanvasMaker::getSurfHkSurfCanvas(SurfHk *surfPtr,TPad *plotPad) {
 
 void AnitaRFCanvasMaker::getSurfHkPhiCanvas(SurfHk *surfPtr,TPad *plotPad) {
   //   plotPad->Clear();
-  if(!fARFCGeomTool)
-    fARFCGeomTool=AnitaGeomTool::Instance();
+  AnitaGeomTool*  fARFCGeomTool=AnitaGeomTool::Instance();
   char actualName[180];
   
   const int numPhiHistBins=PHI_SECTORS*4*2;  // phi * ring * pol with an extra space
@@ -1432,8 +1430,7 @@ void AnitaRFCanvasMaker::getAvgSurfHkSurfCanvas(AveragedSurfHk *avgSurfPtr,TPad 
 
 void AnitaRFCanvasMaker::getAvgSurfHkPhiCanvas(AveragedSurfHk *avgSurfPtr,TPad *plotPad) {
   //   plotPad->Clear();
-  if(!fARFCGeomTool)
-    fARFCGeomTool=AnitaGeomTool::Instance();
+  AnitaGeomTool*  fARFCGeomTool=AnitaGeomTool::Instance();
   char actualName[180];
   const char *histNames[3]={"histAvgScalerPhi","histAvgThresholdPhi","histAvgRFPowerPhi"};
   const char *histTitles[3]={"Scaler","Threshold","RF Power"};

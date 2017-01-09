@@ -55,7 +55,6 @@ static int current_run = 0;
 
 
 AnitaCanvasMaker*  AnitaCanvasMaker::fgInstance = 0;
-AnitaGeomTool *fACMGeomTool=0;
 CrossCorrelator* AnitaCanvasMaker::fCrossCorr = 0;
 
 int phiMap[6][8]={{0,2,4,6,8,10,12,14},
@@ -90,7 +89,6 @@ TGraph* grPhiMask[AnitaPol::kNotAPol] = {0};
 AnitaCanvasMaker::AnitaCanvasMaker(WaveCalType::WaveCalType_t calType)
 {
   //Default constructor
-  fACMGeomTool=AnitaGeomTool::Instance();
   fPassBandFilter=0;
   fNotchFilter=0;
   fLowPassEdge=200;
@@ -175,8 +173,7 @@ TPad *AnitaCanvasMaker::getEventInfoCanvas(UsefulAnitaEvent *evPtr, RawAnitaHead
    static TPaveText *rightPave=0;
 
 
-   if(!fACMGeomTool)
-      fACMGeomTool=AnitaGeomTool::Instance();
+   AnitaGeomTool * fACMGeomTool=AnitaGeomTool::Instance();
    char textLabel[180];
    TPad *topPad;
    if(!useCan) {
@@ -654,8 +651,7 @@ TPad *AnitaCanvasMaker::getHorizontalCanvas(RawAnitaHeader *hdPtr,
    //  gStyle->SetTitleH(0.1);
   gStyle->SetOptTitle(0); 
 
-  if(!fACMGeomTool)
-    fACMGeomTool=AnitaGeomTool::Instance();
+  AnitaGeomTool* fACMGeomTool=AnitaGeomTool::Instance();
   char textLabel[180];
   char padName[180];
   TPad *canHoriz=0;
@@ -794,8 +790,7 @@ TPad *AnitaCanvasMaker::getVerticalCanvas(RawAnitaHeader *hdPtr,
   //  gStyle->SetTitleH(0.1);
   gStyle->SetOptTitle(0); 
 
-  if(!fACMGeomTool)
-    fACMGeomTool=AnitaGeomTool::Instance();
+  AnitaGeomTool* fACMGeomTool=AnitaGeomTool::Instance();
   char textLabel[180];
   char padName[180];
   TPad *canVert=0;
@@ -933,8 +928,7 @@ TPad *AnitaCanvasMaker::getVerticalCanvasForWebPlotter(RawAnitaHeader *hdPtr,
   //  gStyle->SetTitleH(0.1);
   gStyle->SetOptTitle(0); 
 
-  if(!fACMGeomTool)
-    fACMGeomTool=AnitaGeomTool::Instance();
+  AnitaGeomTool * fACMGeomTool=AnitaGeomTool::Instance();
   char textLabel[180];
   char padName[180];
   TPad *canVert=0;
@@ -1054,8 +1048,7 @@ TPad *AnitaCanvasMaker::getCombinedCanvasForWebPlotter(RawAnitaHeader *hdPtr,
   //  gStyle->SetTitleH(0.1);
   gStyle->SetOptTitle(0); 
 
-  if(!fACMGeomTool)
-    fACMGeomTool=AnitaGeomTool::Instance();
+  AnitaGeomTool * fACMGeomTool=AnitaGeomTool::Instance();
   char textLabel[180];
   char padName[180];
   TPad *canBoth=0;
@@ -1203,8 +1196,7 @@ TPad *AnitaCanvasMaker::getSurfChanCanvas(RawAnitaHeader *hdPtr,TPad *useCan)
    //  gStyle->SetTitleH(0.1);
   gStyle->SetOptTitle(0); 
 
-  if(!fACMGeomTool)
-    fACMGeomTool=AnitaGeomTool::Instance();
+  AnitaGeomTool * fACMGeomTool=AnitaGeomTool::Instance();
   char textLabel[180];
   char padName[180];
   TPad *canSurf=0;
@@ -1434,8 +1426,7 @@ TPad *AnitaCanvasMaker::getPayloadCanvas(RawAnitaHeader *hdPtr,TPad *useCan)
    //  gStyle->SetTitleH(0.1);
   gStyle->SetOptTitle(0); 
 
-  if(!fACMGeomTool)
-    fACMGeomTool=AnitaGeomTool::Instance();
+  AnitaGeomTool*  fACMGeomTool=AnitaGeomTool::Instance();
   char textLabel[180];
   char padName[180];
   TPad *canPayload=0;
@@ -1634,8 +1625,7 @@ TPad *AnitaCanvasMaker::getCombinedCanvas(RawAnitaHeader *hdPtr,
 {
   gStyle->SetOptTitle(0); 
 
-  if(!fACMGeomTool)
-    fACMGeomTool=AnitaGeomTool::Instance();
+  AnitaGeomTool*  fACMGeomTool=AnitaGeomTool::Instance();
   char textLabel[180];
   char padName[180];
   TPad *canBoth=0;
