@@ -18,6 +18,7 @@
 #include "SurfHk.h"
 #include "AveragedSurfHk.h"
 
+#include "AnitaVersion.h" 
 #include "TString.h"
 #include "TObjArray.h"
 #include "TObjString.h"
@@ -591,10 +592,17 @@ void AnitaRFCanvasMaker::getSurfHkPhiCanvas(SurfHk *surfPtr,TPad *plotPad) {
     histSurfHkPhi[0][phi]->Fill(phi,surfPtr->getL2Scaler(phi));
     for(int ring=0;ring<3;ring++) {
       //First step is the scalers and thresholds
-      histSurfHkPhi[1][phi]->Fill(ring+3*phi,surfPtr->getL1Scaler(phi,(AnitaRing::AnitaRing_t)ring));           
+
       
       for(int pol=0;pol<2;pol++) {
 	int binIndex=pol+ring*2+phi*8;
+        int v = AnitaVersion::get(); 
+
+        if (v == 3 && ring == 0 || v ==4 && pol == 0) //avoid counting too many times 
+        {
+          histSurfHkPhi[1][phi]->Fill(ring+3*phi,surfPtr->getL1Scaler(phi,AnitaPol::AnitaPol_t(pol), (AnitaRing::AnitaRing_t)ring));           
+        }
+
 	maskedBands[binIndex]=surfPtr->isMasked(phi,(AnitaRing::AnitaRing_t)ring,
 						(AnitaTrigPol::AnitaTrigPol_t)pol);
 	histSurfHkPhi[2][phi]->Fill(binIndex,surfPtr->getScaler(phi,(AnitaRing::AnitaRing_t)ring,
