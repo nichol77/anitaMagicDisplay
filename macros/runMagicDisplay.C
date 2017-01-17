@@ -6,7 +6,7 @@ void runMagicDisplayRun(int run);
 void runMagicDisplay(int run=1002) {
   cout << "runMagicDisplay(" << run << ")\n";
 
-
+  gSystem->Load("libNet.so");
 
   TChain *fred=0; //Will this work?
   runMagicDisplayRun(run);

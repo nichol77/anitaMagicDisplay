@@ -17,7 +17,7 @@
  * -# <A HREF="http://www.fftw.org/">FFTW 3 -- Fastest Fourier Transform in the West</a>
  * -# <A HREF="http://www.hep.ucl.ac.uk/uhen/anita/libRootFftwWrapper">libRootFftwWrapper -- a ROOT wrapper for FFTW 3</a>
  * -# <A HREF="http://www.hep.ucl.ac.uk/uhen/anita/eventReader">ANITA-II Event Reader</a>
- * 
+ *
  * \section install_sec Installation
  * -# Ensure all the prerequisites are installed and in LD_LIBRARY_PATH or system paths.
  * -# Checkout the code from the SVN repository, eg.: <BR><PRE>svn co https://delos.mps.ohio-state.edu/anitaGround/magicDisplay/trunk mySillyNamedMagicDisplayDir</PRE>
@@ -72,7 +72,7 @@
 #include <TGClient.h>
 
 
-#include "UCFilters.h" 
+#include "UCFilters.h"
 #include "BasicFilters.h"
 #include "CrossCorrelator.h"
 using namespace std;
@@ -86,12 +86,12 @@ MagicControlPanel *fControlPanel=0;
 
 
 
-static FilterStrategy default_strategy; 
-static int default_strategy_init = 0; 
-static FilterStrategy no_filter_strategy; 
-static int no_filter_strategy_init = 0; 
+static FilterStrategy default_strategy;
+static int default_strategy_init = 0;
+static FilterStrategy no_filter_strategy;
+static int no_filter_strategy_init = 0;
 
-void MagicDisplay::zeroPointers() 
+void MagicDisplay::zeroPointers()
 {
   fApplyEventCut=0;
   fOrderByEventNumber=1;
@@ -117,7 +117,7 @@ void MagicDisplay::zeroPointers()
    fSurfPtr=0;
    fSurfHkEntry=0;
    fSurfHkTree=0;
-   
+
    //GPS stuff
    fGpsFile=0;
    fG12PosTree=0;
@@ -155,11 +155,11 @@ void MagicDisplay::zeroPointers()
    fTurfCanvas=0;
    fTurfMainPad=0;
    fTurfInfoPad=0;
-   
+
    fSumTurfCanvas=0;
    fSumTurfMainPad=0;
    fSumTurfInfoPad=0;
-   
+
    fSurfCanvas=0;
    fSurfMainPad=0;
    fSurfInfoPad=0;
@@ -179,50 +179,50 @@ void MagicDisplay::zeroPointers()
    fWaveformFormat=MagicDisplayFormatOption::kWaveform;
    fCanvasLayout=MagicDisplayCanvasLayoutOption::kPhiVerticalOnly;
    fInterferometryMapMode=CrossCorrelator::kGlobal;
-   fInterferometryZoomMode=CrossCorrelator::kZoomedOut;   
+   fInterferometryZoomMode=CrossCorrelator::kZoomedOut;
 
-   
+
    if (!default_strategy_init)
    {
-     default_strategy_init = 1; 
+     default_strategy_init = 1;
      default_strategy.addOperation(new UCorrelator::SineSubtractFilter);
-     default_strategy.addOperation(new ALFAFilter); 
+     default_strategy.addOperation(new ALFAFilter);
    }
 
    if (!no_filter_strategy_init)
    {
-     no_filter_strategy_init = 1; 
-     no_filter_strategy.addOperation(new ALFAFilter); 
+     no_filter_strategy_init = 1;
+     no_filter_strategy.addOperation(new ALFAFilter);
    }
 
 
-   setFilterStrategy(&default_strategy); 
+   setFilterStrategy(&default_strategy);
 
-   fUCorr = new UCorrelator::Analyzer(0,true); 
+   fUCorr = new UCorrelator::Analyzer(0,true);
 }
 
 
-void MagicDisplay::drawUCorrelatorFilterButtons() 
+void MagicDisplay::drawUCorrelatorFilterButtons()
 {
-    if (fStrategy == &no_filter_strategy) fWaveformButton->SetFillColor(kGray + 3); 
-    else fWaveformButton->SetFillColor(kGray); 
-    if (fStrategy == &default_strategy) fPowerButton->SetFillColor(kGray + 3); 
-    else fPowerButton->SetFillColor(kGray); 
+    if (fStrategy == &no_filter_strategy) fWaveformButton->SetFillColor(kGray + 3);
+    else fWaveformButton->SetFillColor(kGray);
+    if (fStrategy == &default_strategy) fPowerButton->SetFillColor(kGray + 3);
+    else fPowerButton->SetFillColor(kGray);
 
-    fWaveformButton->Modified(); 
-    fPowerButton->Modified(); 
+    fWaveformButton->Modified();
+    fPowerButton->Modified();
 }
 
 void MagicDisplay::setFilterStrategy(FilterStrategy * s)
-{ 
-  fStrategy = s; 
+{
+  fStrategy = s;
 
-  //TODO: do a smarter job of this 
-  if (fCanvasLayout == MagicDisplayCanvasLayoutOption::kUCorrelator) 
+  //TODO: do a smarter job of this
+  if (fCanvasLayout == MagicDisplayCanvasLayoutOption::kUCorrelator)
   {
-    drawUCorrelatorFilterButtons(); 
+    drawUCorrelatorFilterButtons();
   }
-} 
+}
 
 
 MagicDisplay::MagicDisplay()
@@ -236,7 +236,7 @@ MagicDisplay::~MagicDisplay()
    //Default destructor
    //
 
-  delete fUCorr; 
+  delete fUCorr;
 }
 
 
@@ -249,10 +249,10 @@ MagicDisplay::MagicDisplay(const char *baseDir, int run, WaveCalType::WaveCalTyp
   fCurrentRun=run;
   strncpy(fCurrentBaseDir,baseDir,179);
   fCalType=calType;
-  
+
 
   // AnitaDataset needs this, so set it
-  setenv("ANITA_ROOT_DATA", baseDir,1); 
+  setenv("ANITA_ROOT_DATA", baseDir,1);
 }
 
 
@@ -264,10 +264,10 @@ MagicDisplay*  MagicDisplay::Instance()
    return (fgInstance) ? (MagicDisplay*) fgInstance : new MagicDisplay();
 }
 
-void MagicDisplay::startControlPanel() 
+void MagicDisplay::startControlPanel()
 {
   fControlPanel=MagicControlPanel::Instance();
-  //  
+  //
   //  fControlPanel=new MagicControlPanel(gClient->GetRoot(), 400, 200);
   //  fControlPanel->DrawControlPanel();
   //  fControlPanel->Draw();
@@ -276,11 +276,11 @@ void MagicDisplay::startControlPanel()
 
 void MagicDisplay::startEventDisplay()
 {
- 
+
   fEventCanMaker=new AnitaCanvasMaker(this->fCalType);
   int retVal=this->getEventEntry();
   if(retVal==0)
-      this->refreshEventDisplay();   
+      this->refreshEventDisplay();
 }
 
 int MagicDisplay::getEventEntry()
@@ -291,56 +291,72 @@ int MagicDisplay::getEventEntry()
       return -1;
     }
   }
+
   if(fEventEntry<fEventTree->GetEntries())
     fEventTree->GetEntry(fEventEntry);
   else {
     std::cout << "No more entries in event tree " << fEventEntry << "\t" << fEventTree->GetEntries() << endl;
     return -1;
   }
-            
+
+  // This is where we're crashing.
+  // In the MC case, we don't have a fRawEventPtr.
+  // Let's get the eventNumber more carefully.
+  UInt_t eventNumber = 0;
+  if(fRawEventPtr){
+    eventNumber = fRawEventPtr->eventNumber;
+  }
+  else if(fCalEventPtr){
+    eventNumber = fCalEventPtr->eventNumber;
+  }
+  else{
+    eventNumber = fUsefulEventPtr->eventNumber;
+  }
+
+  //  std::cout << fEventEntry << "\t" << fHeadTree << "\t" << fHeadTree->GetEntries() << "\t" << fRawEventPtr << "\t" << fUsefulEventPtr << "\t" << eventNumber << std::endl;
+
   if(fEventEntry<fHeadTree->GetEntries())  {
-//    printf("fRawEventPtr->eventNumber: %d\n", fRawEventPtr->eventNumber); 
-    int evNum = fRawEventPtr ? fRawEventPtr->eventNumber : fCalEventPtr->eventNumber ;
-    Int_t headEntry=fHeadIndex->GetEntryNumberWithIndex(evNum,0);
+    Int_t headEntry=fHeadIndex->GetEntryNumberWithIndex(eventNumber,0);
     //    std::cout << headEntry << "\t" << fEventEntry << "\n";
     fHeadTree->GetEntry(headEntry);
 
-    if(evNum!=fHeadPtr->eventNumber) {      
-      std::cout << "Mismatched Event: " << evNum << "\t" << fHeadPtr->eventNumber << "\n";
+    if(eventNumber!=fHeadPtr->eventNumber) {
+      std::cout << "Mismatched Event: " << eventNumber << "\t" << fHeadPtr->eventNumber << "\n";
     }
   }
-   else {
-      std::cout << "No more entries in header tree" << endl;
-      return -1;
-   }
-//   std::cout << fEventEntry << "\t" << fWhichEventFileKind << "\n";
-   //Now need to make a UsefulAnitaEvent
-   switch(fWhichEventFileKind) {
-   case MagicDisplayFileType::kCalEvent:
-      {
-	 if(fUsefulEventPtr)
-	    delete fUsefulEventPtr;
-	 if(fCalType==WaveCalType::kDefault)
-	    fUsefulEventPtr = new UsefulAnitaEvent(fCalEventPtr);
-	 else
-	    fUsefulEventPtr = new UsefulAnitaEvent(fCalEventPtr,fCalType);
-      }
+  else {
+    std::cout << "No more entries in header tree" << endl;
+    return -1;
+  }
+  // std::cout << fEventEntry << "\t" << fWhichEventFileKind << "\n";
+  //Now need to make a UsefulAnitaEvent
+  switch(fWhichEventFileKind) {
+  case MagicDisplayFileType::kCalEvent:
+    {
+      if(fUsefulEventPtr)
+	delete fUsefulEventPtr;
+      if(fCalType==WaveCalType::kDefault)
+	fUsefulEventPtr = new UsefulAnitaEvent(fCalEventPtr);
+      else
+	fUsefulEventPtr = new UsefulAnitaEvent(fCalEventPtr,fCalType);
+    }
+    break;
+  case MagicDisplayFileType::kRawEvent:
+    {
+
+      if(fUsefulEventPtr)
+	delete fUsefulEventPtr;
+      fUsefulEventPtr = new UsefulAnitaEvent(fRawEventPtr,fCalType,fHeadPtr);
       break;
-   case MagicDisplayFileType::kRawEvent:
-      {
-	 
-	 if(fUsefulEventPtr)
-	    delete fUsefulEventPtr;
-	 fUsefulEventPtr = new UsefulAnitaEvent(fRawEventPtr,fCalType,fHeadPtr);  
-	 break;
-      }
-   case MagicDisplayFileType::kMcEvent:
-      //No need to do anything as we've already filled fUsefulEventPtr
-      break;
-   default:
-      std::cerr << "No File Type... something broke\n";
-      break;
-   }
+    }
+  case MagicDisplayFileType::kMcEvent:
+    //No need to do anything as we've already filled fUsefulEventPtr
+    break;
+  default:
+    std::cerr << "No File Type... something broke\n";
+    break;
+  }
+
   //Need to make configurable at some point
   //This will also need to be modifed to make realEvent accessible outside here
    return 0;
@@ -349,7 +365,7 @@ int MagicDisplay::getEventEntry()
 
 void MagicDisplay::closeCurrentRun()
 {
-  
+
   if(fHeadFile)
     fHeadFile->Close();
   if(fEventFile)
@@ -380,18 +396,18 @@ void MagicDisplay::closeCurrentRun()
 
 
 int MagicDisplay::loadEventTree()
-{     
+{
    Int_t fGotCalEventFile=0;
    char eventName[FILENAME_MAX];
-   char headerName[FILENAME_MAX];  
-   char telemHeaderName[FILENAME_MAX];  
-   char simHeaderName[FILENAME_MAX];  
+   char headerName[FILENAME_MAX];
+   char telemHeaderName[FILENAME_MAX];
+   char simHeaderName[FILENAME_MAX];
    sprintf(headerName,"%s/run%d/headFile%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);
    sprintf(telemHeaderName,"%s/run%d/eventHeadFile%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);
    sprintf(simHeaderName,"%s/run%d/SimulatedAnitaHeadFile%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);
 
    //Step one try calEventFile
-   //Will try and use calibrated event files  
+   //Will try and use calibrated event files
    sprintf(eventName,"%s/run%d/calEventFile%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);
    fEventFile = TFile::Open(eventName);
    if(fEventFile) {
@@ -401,8 +417,8 @@ int MagicDisplay::loadEventTree()
      fEventTree->SetBranchAddress("event",&fCalEventPtr);
    }
    else {
-     fGotCalEventFile=0;     
-     sprintf(eventName,"%s/run%d/eventFile%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);    
+     fGotCalEventFile=0;
+     sprintf(eventName,"%s/run%d/eventFile%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);
      fEventFile = TFile::Open(eventName);
      if(fEventFile) {
        fEventTree = (TTree*) fEventFile->Get("eventTree");
@@ -411,20 +427,20 @@ int MagicDisplay::loadEventTree()
        fEventTree->SetBranchAddress("event",&fRawEventPtr);
      }
      else {
-       ///Now check mcTree  
-       sprintf(eventName,"%s/run%d/SimulatedAnitaEventFile%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);    
+       ///Now check mcTree
+       sprintf(eventName,"%s/run%d/SimulatedAnitaEventFile%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);
        fEventFile = TFile::Open(eventName);
        if(fEventFile==NULL) {
 	 cout << "Couldn't find calEventFile, eventFile or SimulatedEventFile!" << endl;
 	 return -1;
        }
-       fEventTree = (TTree*) fEventFile->Get("eventTree");   
+       fEventTree = (TTree*) fEventFile->Get("eventTree");
        fWhichEventFileKind=MagicDisplayFileType::kMcEvent;
        fEventTree->SetBranchAddress("event",&fUsefulEventPtr);
      }
    }
-   
-   
+
+
    if(fEventTree->GetEntries()<1) {
      cout << "Couldn't open: " << eventName << "\n";
      return -1;
@@ -474,21 +490,21 @@ void MagicDisplay::refreshEventDisplay()
       fMagicEventInfoPad= new TPad("canMagicEventInfo","canMagicEventInfo",0.2,0.91,0.8,0.99);
       fMagicEventInfoPad->Draw();
       fMagicCanvas->Update();
-   }  
+   }
    //   fMagicMainPad->Clear();
 
-           
+
   //This will need to change
-  
+
    fEventCanMaker->setWaveformFormat(fWaveformFormat);
    fEventCanMaker->setCanvasLayout(fCanvasLayout);
    fEventCanMaker->setInterferometryTypeFlags(fInterferometryMapMode, fInterferometryZoomMode);
-   
+
 
    fEventCanMaker->getEventViewerCanvas(fUsefulEventPtr,fHeadPtr,fMagicMainPad);
    fEventCanMaker->getEventInfoCanvas(fUsefulEventPtr,fHeadPtr,fMagicEventInfoPad);
-   
-   
+
+
 
   fMagicCanvas->Update();
 }
@@ -497,7 +513,7 @@ void MagicDisplay::applyCut(const char *cutString)
 {
   if(cutString==0)
     fApplyEventCut=0;
-  
+
   if(!fEventTree) {
     if(loadEventTree()<0) {
       std::cout << "Couldn't open event file\n";
@@ -511,7 +527,7 @@ void MagicDisplay::applyCut(const char *cutString)
   fCutEventList = (TEventList*)gDirectory->Get("elist1");
   fApplyEventCut=1;
   fCutEventList->Print();
- 
+
 
 }
 
@@ -522,28 +538,28 @@ int MagicDisplay::displayNextEvent()
   if(fApplyEventCut==1) {
     fEventCutListEntry++;
     if(fEventCutListEntry<fCutEventList->GetN()) {
-      fEventEntry=fCutEventList->GetEntry(fEventCutListEntry);  
+      fEventEntry=fCutEventList->GetEntry(fEventCutListEntry);
       int retVal=getEventEntry();
       fEventCanMaker->fNewEvent=1;
       if(retVal==0) {
-	refreshEventDisplay(); 
+	refreshEventDisplay();
       }
       return retVal;
     }
     else {
       fEventCutListEntry=fCutEventList->GetN()-1;
       return -1;
-    }      
+    }
   }
   else if(fOrderByEventNumber==0) {
-    fEventEntry++;    
+    fEventEntry++;
     int retVal=getEventEntry();
     fEventCanMaker->fNewEvent=1;
     if(retVal==0) {
-      refreshEventDisplay(); 
+      refreshEventDisplay();
     }
     else fEventEntry--;
-    return retVal;  
+    return retVal;
   }
   else {
     Long64_t *indVals=fHeadIndex->GetIndex();
@@ -562,12 +578,12 @@ int MagicDisplay::displayNextEvent()
       int retVal=getEventEntry();
       fEventCanMaker->fNewEvent=1;
       if(retVal==0) {
-	refreshEventDisplay(); 
+	refreshEventDisplay();
       }
       else {
 	fEventTreeIndexEntry--;
       }
-      return retVal;  
+      return retVal;
     }
     else  {
       fEventTreeIndexEntry--;
@@ -580,31 +596,31 @@ int MagicDisplay::displayNextEvent()
 int MagicDisplay::displayFirstEvent()
 {
 
-  if(fApplyEventCut==1) {    
+  if(fApplyEventCut==1) {
     fEventCutListEntry=0;
     if(fEventCutListEntry<fCutEventList->GetN()) {
-      fEventEntry=fCutEventList->GetEntry(fEventCutListEntry);  
+      fEventEntry=fCutEventList->GetEntry(fEventCutListEntry);
       int retVal=getEventEntry();
       fEventCanMaker->fNewEvent=1;
       if(retVal==0) {
-	refreshEventDisplay(); 
+	refreshEventDisplay();
       }
       return retVal;
     }
     else {
       fEventCutListEntry=0;
       return -1;
-    }      
+    }
   }
-  else if(fOrderByEventNumber==0) {    
+  else if(fOrderByEventNumber==0) {
     fEventEntry=0;
     int retVal=getEventEntry();
     fEventCanMaker->fNewEvent=1;
     if(retVal==0) {
-      refreshEventDisplay(); 
+      refreshEventDisplay();
     }
     else fEventEntry--;
-    return retVal;  
+    return retVal;
   }
   else if(fOrderByEventNumber==1) {
     Long64_t *indVals=fHeadIndex->GetIndex();
@@ -614,12 +630,12 @@ int MagicDisplay::displayFirstEvent()
       int retVal=getEventEntry();
       fEventCanMaker->fNewEvent=1;
       if(retVal==0) {
-	refreshEventDisplay(); 
+	refreshEventDisplay();
       }
       else {
 	//Nothing
       }
-      return retVal;  
+      return retVal;
     }
     else  {
       //Nothing
@@ -634,37 +650,37 @@ int MagicDisplay::displayLastEvent()
 {
   //  fEventTree->Refresh();
   //  fHeadTree->Refresh();
-  
+
   Long64_t headEnts=fHeadTree->GetEntries();
   Long64_t eventEnts=fEventTree->GetEntries();
 
-  if(fApplyEventCut==1) {    
+  if(fApplyEventCut==1) {
     fEventCutListEntry=fCutEventList->GetN()-1;
     if(fEventCutListEntry<fCutEventList->GetN() && fEventCutListEntry>=0) {
-      fEventEntry=fCutEventList->GetEntry(fEventCutListEntry);  
+      fEventEntry=fCutEventList->GetEntry(fEventCutListEntry);
       int retVal=getEventEntry();
       fEventCanMaker->fNewEvent=1;
       if(retVal==0) {
-	refreshEventDisplay(); 
+	refreshEventDisplay();
       }
       return retVal;
     }
     else {
       fEventCutListEntry=0;
       return -1;
-    }      
+    }
   }
-  else if(fOrderByEventNumber==0) {    
+  else if(fOrderByEventNumber==0) {
     fEventEntry=headEnts-1;
     if(eventEnts<headEnts)
       fEventEntry=eventEnts-1;
     int retVal=getEventEntry();
     fEventCanMaker->fNewEvent=1;
     if(retVal==0) {
-      refreshEventDisplay(); 
+      refreshEventDisplay();
     }
     else fEventEntry--;
-    return retVal;  
+    return retVal;
   }
   else if(fOrderByEventNumber==1) {
     Long64_t *indVals=fHeadIndex->GetIndex();
@@ -674,13 +690,13 @@ int MagicDisplay::displayLastEvent()
       int retVal=getEventEntry();
       fEventCanMaker->fNewEvent=1;
       if(retVal==0) {
-	refreshEventDisplay(); 
+	refreshEventDisplay();
       }
       else {
 	//Nothing
 	fEventTreeIndexEntry=0;
       }
-      return retVal;  
+      return retVal;
     }
     else  {
       //Nothing
@@ -701,11 +717,11 @@ int MagicDisplay::displayPreviousEvent()
     //    std::cout << fApplyEventCut << "\t" << fEventCutListEntry << "\t" << fCutEventList->GetN() << "\n";
     fEventCutListEntry--;
     if(fEventCutListEntry>=0 && fEventCutListEntry<fCutEventList->GetN()) {
-      fEventEntry=fCutEventList->GetEntry(fEventCutListEntry);  
+      fEventEntry=fCutEventList->GetEntry(fEventCutListEntry);
       int retVal=getEventEntry();
       fEventCanMaker->fNewEvent=1;
       if(retVal==0) {
-	refreshEventDisplay(); 
+	refreshEventDisplay();
       }
       else {
 	fEventCutListEntry++;
@@ -715,19 +731,19 @@ int MagicDisplay::displayPreviousEvent()
     else {
       fEventCutListEntry++;
       return -1;
-    }      
+    }
   }
   else if(fOrderByEventNumber==0) {
     if(fEventEntry>0)
       fEventEntry--;
-    else 
+    else
       return -1;
    int retVal=getEventEntry();
    fEventCanMaker->fNewEvent=1;
    if(retVal==0) {
-     refreshEventDisplay(); 
-   }  
-   return retVal;  
+     refreshEventDisplay();
+   }
+   return retVal;
   }
   else {
     Long64_t *indVals=fHeadIndex->GetIndex();
@@ -746,12 +762,12 @@ int MagicDisplay::displayPreviousEvent()
       int retVal=getEventEntry();
       fEventCanMaker->fNewEvent=1;
       if(retVal==0) {
-	refreshEventDisplay(); 
-      } 
+	refreshEventDisplay();
+      }
       else {
 	fEventTreeIndexEntry++;
       }
-      return retVal;  
+      return retVal;
     }
     else  {
       fEventTreeIndexEntry++;
@@ -763,8 +779,8 @@ int MagicDisplay::displayPreviousEvent()
 
 int MagicDisplay::displayThisEvent(UInt_t eventNumber, UInt_t runNumber)
 {
-  cout << "displayThisEvent: " << eventNumber << "\t" << runNumber <<endl;  
-  
+  cout << "displayThisEvent: " << eventNumber << "\t" << runNumber <<endl;
+
   if(fCurrentRun != runNumber) {
     cout << "\t" << fCurrentRun << "\t" << runNumber << endl;
     closeCurrentRun();
@@ -772,24 +788,24 @@ int MagicDisplay::displayThisEvent(UInt_t eventNumber, UInt_t runNumber)
   }
 
   if(!fEventCanMaker) startEventDisplay();
-  
+
 
   if(eventNumber==0) {
     fEventEntry=0;
   }
   else {
     fEventEntry=fHeadTree->GetEntryNumberWithIndex(eventNumber);
-    if(fEventEntry<0) 
-      return -1;      
+    if(fEventEntry<0)
+      return -1;
   }
-  cout << "fEventEntry: " << fEventEntry << endl;
+  std::cout << "fEventEntry: " << fEventEntry << std::endl;
   int retVal=getEventEntry();
-  if(retVal==0) 
-    refreshEventDisplay(); 
+  if(retVal==0)
+    refreshEventDisplay();
   else {
     cout << "retVal: " << retVal << endl;
   }
-  return retVal;  
+  return retVal;
 }
 
 void MagicDisplay::drawEventButtons() {
@@ -809,7 +825,7 @@ void MagicDisplay::drawEventButtons() {
    butLast->SetTextSize(0.5);
    butLast->SetFillColor(kViolet-10);
    butLast->Draw();
-   
+
 
    TButton *butPlay = new TButton("Play","MagicDisplay::Instance()->startEventPlaying();",0.9,0.97,0.95,1);
    butPlay->SetTextSize(0.5);
@@ -854,7 +870,7 @@ void MagicDisplay::drawEventButtons() {
    fSurfButton->SetFillColor(kGray);
    fSurfButton->Draw();
    // fPayloadButton = new TButton("Payload","MagicDisplay::Instance()->setCanvasLayout(MagicDisplayCanvasLayoutOption::kPayloadView); MagicDisplay::Instance()->refreshEventDisplay();",0.05,0.933,0.1,0.966);
-   fPayloadButton = new TButton("Payload","std::cout << \"Sorry. Payload view currently disabled for ANITA-3.\" << std::endl;",0.05,0.933,0.1,0.966);   
+   fPayloadButton = new TButton("Payload","std::cout << \"Sorry. Payload view currently disabled for ANITA-3.\" << std::endl;",0.05,0.933,0.1,0.966);
    fPayloadButton->SetTextSize(0.5);
    fPayloadButton->SetFillColor(kGray);
    fPayloadButton->Draw();
@@ -864,7 +880,7 @@ void MagicDisplay::drawEventButtons() {
    fInterferometryButton->SetFillColor(kGray);
    fInterferometryButton->Draw();
 
-   ///yeah just cover up the payload button 
+   ///yeah just cover up the payload button
    fUCorrelatorButton = new TButton("UCorrelator","MagicDisplay::Instance()->setCanvasLayout(MagicDisplayCanvasLayoutOption::kUCorrelator); MagicDisplay::Instance()->refreshEventDisplay();",0.05,0.933,0.1,0.966);
    fUCorrelatorButton->SetTextSize(0.33);
    fUCorrelatorButton->SetFillColor(kGray);
@@ -890,7 +906,7 @@ void MagicDisplay::drawEventButtons() {
    fAverageFFTButton->SetFillColor(kGray);
    fAverageFFTButton->Draw();
 
-   
+
 }
 
 
@@ -938,12 +954,12 @@ void MagicDisplay::setInterferometryTypeFlags(CrossCorrelator::mapMode_t mapMode
   }
 
   // std::cout << fInterferometryMapMode << "\t" << fInterferometryZoomMode << std::endl;
-  
+
 }
 
 
-FilterStrategy * MagicDisplay::getNoFilterStrategy() { return &no_filter_strategy; } 
-FilterStrategy * MagicDisplay::getDefaultFilterStrategy() { return &default_strategy; } 
+FilterStrategy * MagicDisplay::getNoFilterStrategy() { return &no_filter_strategy; }
+FilterStrategy * MagicDisplay::getDefaultFilterStrategy() { return &default_strategy; }
 
 
 void MagicDisplay::swapWaveformButtonFunctionsAndTitles(MagicDisplayCanvasLayoutOption::MagicDisplayCanvasLayoutOption_t option){
@@ -960,7 +976,7 @@ void MagicDisplay::swapWaveformButtonFunctionsAndTitles(MagicDisplayCanvasLayout
     fHilbertButton->SetTitle("Zoom");
     fHilbertButton->SetMethod("MagicDisplay::Instance()->setInterferometryTypeFlags(CrossCorrelator::kTriggered, CrossCorrelator::kZoomedIn); MagicDisplay::Instance()->refreshEventDisplay();");
     fHilbertButton->SetTextSize(0.4);
-  
+
     fAverageFFTButton->SetTitle("");
     fAverageFFTButton->SetMethod("");
     fAverageFFTButton->SetTextSize(0.4);
@@ -979,12 +995,12 @@ void MagicDisplay::swapWaveformButtonFunctionsAndTitles(MagicDisplayCanvasLayout
     fHilbertButton->SetTitle("");
     fHilbertButton->SetMethod("");
     fHilbertButton->SetTextSize(0.4);
-  
+
     fAverageFFTButton->SetTitle("");
     fAverageFFTButton->SetMethod("");
     fAverageFFTButton->SetTextSize(0.4);
-  
-    drawUCorrelatorFilterButtons(); 
+
+    drawUCorrelatorFilterButtons();
 
   }
   else{
@@ -999,7 +1015,7 @@ void MagicDisplay::swapWaveformButtonFunctionsAndTitles(MagicDisplayCanvasLayout
     fHilbertButton->SetTitle("Hilbert");
     fHilbertButton->SetMethod("MagicDisplay::Instance()->setWaveformFormat(MagicDisplayFormatOption::kHilbertEnvelope); MagicDisplay::Instance()->refreshEventDisplay();");
     fHilbertButton->SetTextSize(0.4);
-  
+
     fAverageFFTButton->SetTitle("Average FFT");
     fAverageFFTButton->SetMethod("MagicDisplay::Instance()->setWaveformFormat(MagicDisplayFormatOption::kAveragedFFT); MagicDisplay::Instance()->refreshEventDisplay();");
     fAverageFFTButton->SetTextSize(0.4);
@@ -1008,14 +1024,14 @@ void MagicDisplay::swapWaveformButtonFunctionsAndTitles(MagicDisplayCanvasLayout
   fPowerButton->Modified();
   fHilbertButton->Modified();
   fAverageFFTButton->Modified();
-  
+
 }
 
 void MagicDisplay::setCanvasLayout(MagicDisplayCanvasLayoutOption::MagicDisplayCanvasLayoutOption_t option)
 {
    fCanvasLayout=option;
    swapWaveformButtonFunctionsAndTitles(fCanvasLayout);
-   
+
    switch(option) {
    case MagicDisplayCanvasLayoutOption::kSurfOnly:
      fVertButton->SetFillColor(kGray);
@@ -1080,14 +1096,14 @@ void MagicDisplay::setCanvasLayout(MagicDisplayCanvasLayoutOption::MagicDisplayC
      fInterferometryButton->SetFillColor(kGray);
      fUCorrelatorButton->SetFillColor(kGray+3);
      break;
- 
+
    default:
      break;
    }
    fVertButton->Modified();
-   fHorizButton->Modified();  
-   fBothButton->Modified(); 
-   fSurfButton->Modified(); 
+   fHorizButton->Modified();
+   fBothButton->Modified();
+   fSurfButton->Modified();
    fPayloadButton->Modified();
    fInterferometryButton->Modified();
    fUCorrelatorButton->Modified();
@@ -1107,13 +1123,13 @@ void MagicDisplay::toggleTimeEventOrdering()
     fTimeEntryButton->Modified();
   }
 }
-    
+
 
 void MagicDisplay::setWaveformFormat(MagicDisplayFormatOption::MagicDisplayFormatOption_t waveformOption)
 {
   fWaveformFormat=waveformOption;
   if(waveformOption==MagicDisplayFormatOption::kWaveform) {
-      //Turn on fft view off     
+      //Turn on fft view off
       fWaveformButton->SetFillColor(kGray+3);
       fPowerButton->SetFillColor(kGray);
       fHilbertButton->SetFillColor(kGray);
@@ -1156,10 +1172,10 @@ void MagicDisplay::setWaveformFormat(MagicDisplayFormatOption::MagicDisplayForma
       fHilbertButton->Modified();
       fAverageFFTButton->Modified();
    }
-      
+
 }
 
-int MagicDisplay::loadTurfTree() 
+int MagicDisplay::loadTurfTree()
 {
   char turfName[FILENAME_MAX];
   sprintf(turfName,"%s/run%d/turfRateFile%d.root",fCurrentBaseDir,
@@ -1185,7 +1201,7 @@ int MagicDisplay::loadTurfTree()
     fTurfRateTree=0;
   }
   return 0;
-} 
+}
 
 
 void MagicDisplay::startTurfDisplay()
@@ -1193,13 +1209,13 @@ void MagicDisplay::startTurfDisplay()
   fRFCanMaker=AnitaRFCanvasMaker::Instance();
   int retVal=this->getTurfEntry();
   if(retVal==0)
-    this->refreshTurfDisplay();   
+    this->refreshTurfDisplay();
 }
 
-int MagicDisplay::getTurfEntry() 
+int MagicDisplay::getTurfEntry()
 {
   if(!fTurfRateTree) {
-    if(loadTurfTree()<0) 
+    if(loadTurfTree()<0)
       return -1;
   }
   if(!fTurfRateTree) {
@@ -1212,7 +1228,7 @@ int MagicDisplay::getTurfEntry()
     std::cout << "No more entries in turf rate tree" << endl;
       return -1;
    }
-   //   std::cout << fTurfRateEntry << "\t" << fTurfPtr->realTime 
+   //   std::cout << fTurfRateEntry << "\t" << fTurfPtr->realTime
    //	     << "\t" << fTurfPtr->ppsNum << std::endl;
 
    return 0;
@@ -1222,10 +1238,10 @@ int MagicDisplay::displayNextTurf()
 {
    fTurfRateEntry++;
    int retVal=getTurfEntry();
-   if(retVal==0) 
-      refreshTurfDisplay();  
+   if(retVal==0)
+      refreshTurfDisplay();
    else fTurfRateEntry--;
-   return retVal;  
+   return retVal;
 }
 
 
@@ -1233,12 +1249,12 @@ int MagicDisplay::displayPreviousTurf()
 {
    if(fTurfRateEntry>0)
       fTurfRateEntry--;
-   else 
+   else
       return -1;
    int retVal=getTurfEntry();
-   if(retVal==0) 
-      refreshTurfDisplay();   
-   return retVal;     
+   if(retVal==0)
+      refreshTurfDisplay();
+   return retVal;
 }
 
 void MagicDisplay::refreshTurfDisplay()
@@ -1259,7 +1275,7 @@ void MagicDisplay::refreshTurfDisplay()
       fTurfInfoPad= new TPad("canMagicTurfInfo","canMagicTurfInfo",0.2,0.91,0.8,0.99);
       fTurfInfoPad->Draw();
       fTurfCanvas->Update();
-   }  
+   }
   //This will need to change
    fRFCanMaker->getTurfInfoCanvas(fTurfPtr,fTurfInfoPad);
    fRFCanMaker->getTurfRateCanvas(fTurfPtr,fTurfMainPad);
@@ -1276,7 +1292,7 @@ void MagicDisplay::drawTurfButtons()
    butPrev->SetTextSize(0.5);
    butPrev->SetFillColor(kBlue-10);
    butPrev->Draw();
-   
+
    fTurfYScaleButton = new TButton("Fix Scale","MagicDisplay::Instance()->toggleTurfYScale(); MagicDisplay::Instance()->refreshTurfDisplay();",0,0.96,0.1,1);
    fTurfYScaleButton->SetTextSize(0.4);
    fTurfYScaleButton->SetFillColor(kGray);
@@ -1297,7 +1313,7 @@ void MagicDisplay::toggleTurfYScale()
       fTurfYScaleButton->SetFillColor(kGray);
       fTurfYScaleButton->Modified();
    }
-      
+
 }
 
 int MagicDisplay::loadSurfTree()
@@ -1322,19 +1338,19 @@ int MagicDisplay::loadSurfTree()
 
 void MagicDisplay::startSurfDisplay()
 {
-  
+
    if(!fRFCanMaker)
-      fRFCanMaker=AnitaRFCanvasMaker::Instance();   
+      fRFCanMaker=AnitaRFCanvasMaker::Instance();
    int retVal=getSurfEntry();
    fRFCanMaker->setSurfHkDisplay(MagicDisplaySurfHkDisplay::kSurfView);
    std::cout << "RetVal: " << retVal << "\n";
    if(retVal==0) {
      refreshSurfDisplay();
    }
-   
+
 }
 
-int MagicDisplay::getSurfEntry() 
+int MagicDisplay::getSurfEntry()
 {
   if(!fSurfHkTree) {
     if(loadSurfTree()<0) {
@@ -1342,14 +1358,14 @@ int MagicDisplay::getSurfEntry()
       return -1;
     }
   }
-   //   std::cerr << 
+   //   std::cerr <<
   if(fSurfHkEntry<fSurfHkTree->GetEntries())
     fSurfHkTree->GetEntry(fSurfHkEntry);
   else {
     std::cout << "No more entries in surfHkTree" << endl;
     return -1;
   }
-  //   std::cout << fSurfHkEntry << "\t" << fSurfPtr->realTime 
+  //   std::cout << fSurfHkEntry << "\t" << fSurfPtr->realTime
    //	     << "\t" << fSurfPtr->ppsNum << std::endl;
 
    return 0;
@@ -1359,10 +1375,10 @@ int MagicDisplay::displayNextSurf()
 {
    fSurfHkEntry++;
    int retVal=getSurfEntry();
-   if(retVal==0) 
-      refreshSurfDisplay();  
+   if(retVal==0)
+      refreshSurfDisplay();
    else fSurfHkEntry--;
-   return retVal;  
+   return retVal;
 }
 
 
@@ -1370,12 +1386,12 @@ int MagicDisplay::displayPreviousSurf()
 {
    if(fSurfHkEntry>0)
       fSurfHkEntry--;
-   else 
+   else
       return -1;
    int retVal=getSurfEntry();
-   if(retVal==0) 
-      refreshSurfDisplay();   
-   return retVal;     
+   if(retVal==0)
+      refreshSurfDisplay();
+   return retVal;
 }
 
 void MagicDisplay::refreshSurfDisplay()
@@ -1396,7 +1412,7 @@ void MagicDisplay::refreshSurfDisplay()
       fSurfInfoPad= new TPad("canMagicSurfInfo","canMagicSurfInfo",0.2,0.91,0.8,0.99);
       fSurfInfoPad->Draw();
       fSurfCanvas->Update();
-   }  
+   }
   //This will need to change
    fRFCanMaker->getSurfInfoCanvas(fSurfPtr,fSurfInfoPad);
    fRFCanMaker->getSurfHkCanvas(fSurfPtr,fSurfMainPad);
@@ -1456,7 +1472,7 @@ void MagicDisplay::drawSurfButtons()
    //fSurfMeasuredKelvinViewButton->SetTextSize(0.4);
    //fSurfMeasuredKelvinViewButton->SetFillColor(kGray);
    //fSurfMeasuredKelvinViewButton->Draw();
-   
+
    fSurfLogButton  = new TButton("Log Scale","MagicDisplay::Instance()->toggleSurfLogView(); MagicDisplay::Instance()->refreshSurfDisplay();",0.1,0.97,0.2,1);
    fSurfLogButton->SetTextSize(0.4);
    fSurfLogButton->SetFillColor(kGray);
@@ -1519,15 +1535,15 @@ void MagicDisplay::setSurfHkDisplay(MagicDisplaySurfHkDisplay::MagicDisplaySurfH
       fSurfPhiViewButton->Modified();
       fSurfTimeViewButton->Modified();
    }
- 
+
 }
 
 
 void MagicDisplay::toggleSurfRfPowerView(Int_t kelvinView)
 {
-   
+
    if(kelvinView) {
-      //Turn on 
+      //Turn on
      fRFCanMaker->fSurfKelvinView=kelvinView;
      if(kelvinView==1) {
        fSurfKelvinViewButton->SetFillColor(kGray+3);
@@ -1552,7 +1568,7 @@ void MagicDisplay::toggleSurfRfPowerView(Int_t kelvinView)
       fSurfAdcViewButton->Modified();
       //fSurfMeasuredKelvinViewButton->Modified();
    }
-      
+
 }
 
 
@@ -1580,15 +1596,15 @@ int MagicDisplay::loadAvgSurfTree()
 
 void MagicDisplay::startAvgSurfDisplay()
 {
-  
+
    if(!fRFCanMaker)
       fRFCanMaker=AnitaRFCanvasMaker::Instance();
    int retVal=getAvgSurfEntry();
    if(retVal==0)
-      refreshAvgSurfDisplay();   
+      refreshAvgSurfDisplay();
 }
 
-int MagicDisplay::getAvgSurfEntry() 
+int MagicDisplay::getAvgSurfEntry()
 {
   if(!fAvgSurfHkTree) {
     int retVal=loadAvgSurfTree();
@@ -1597,14 +1613,14 @@ int MagicDisplay::getAvgSurfEntry()
       return retVal;
     }
   }
-  //   std::cerr << 
+  //   std::cerr <<
   if(fAvgSurfHkEntry<fAvgSurfHkTree->GetEntries())
     fAvgSurfHkTree->GetEntry(fAvgSurfHkEntry);
   else {
       std::cout << "No more entries in avgSurfHkTree" << endl;
       return -1;
    }
-   //   std::cout << fAvgSurfHkEntry << "\t" << fAvgSurfPtr->realTime 
+   //   std::cout << fAvgSurfHkEntry << "\t" << fAvgSurfPtr->realTime
    //	     << "\t" << fAvgSurfPtr->ppsNum << std::endl;
 
    return 0;
@@ -1614,10 +1630,10 @@ int MagicDisplay::displayNextAvgSurf()
 {
    fAvgSurfHkEntry++;
    int retVal=getAvgSurfEntry();
-   if(retVal==0) 
-      refreshAvgSurfDisplay();  
+   if(retVal==0)
+      refreshAvgSurfDisplay();
    else fAvgSurfHkEntry--;
-   return retVal;  
+   return retVal;
 }
 
 
@@ -1625,12 +1641,12 @@ int MagicDisplay::displayPreviousAvgSurf()
 {
    if(fAvgSurfHkEntry>0)
       fAvgSurfHkEntry--;
-   else 
+   else
       return -1;
    int retVal=getAvgSurfEntry();
-   if(retVal==0) 
-      refreshAvgSurfDisplay();   
-   return retVal;     
+   if(retVal==0)
+      refreshAvgSurfDisplay();
+   return retVal;
 }
 
 void MagicDisplay::refreshAvgSurfDisplay()
@@ -1651,7 +1667,7 @@ void MagicDisplay::refreshAvgSurfDisplay()
       fAvgSurfInfoPad= new TPad("canMagicAvgSurfInfo","canMagicAvgSurfInfo",0.2,0.91,0.8,0.99);
       fAvgSurfInfoPad->Draw();
       fAvgSurfCanvas->Update();
-   }  
+   }
   //This will need to change
    fRFCanMaker->getAvgSurfInfoCanvas(fAvgSurfPtr,fAvgSurfInfoPad);
    fRFCanMaker->getAvgSurfHkCanvas(fAvgSurfPtr,fAvgSurfMainPad);
@@ -1677,7 +1693,7 @@ void MagicDisplay::drawAvgSurfButtons()
    butStop->SetFillColor(kRed-10);
    butStop->Draw();
 
-  
+
 
    fAvgSurfAdcViewButton  = new TButton("ADC","MagicDisplay::Instance()->toggleAvgSurfRfPowerView(0); MagicDisplay::Instance()->refreshAvgSurfDisplay();",0.1,0.91,0.2,0.94);
    fAvgSurfAdcViewButton->SetTextSize(0.4);
@@ -1694,7 +1710,7 @@ void MagicDisplay::drawAvgSurfButtons()
    fAvgSurfMeasuredKelvinViewButton->SetTextSize(0.4);
    fAvgSurfMeasuredKelvinViewButton->SetFillColor(kGray);
    fAvgSurfMeasuredKelvinViewButton->Draw();
-   
+
    fAvgSurfLogButton  = new TButton("Log Scale","MagicDisplay::Instance()->toggleAvgSurfLogView(); MagicDisplay::Instance()->refreshAvgSurfDisplay();",0.1,0.97,0.2,1);
    fAvgSurfLogButton->SetTextSize(0.4);
    fAvgSurfLogButton->SetFillColor(kGray);
@@ -1741,9 +1757,9 @@ void MagicDisplay::toggleAvgSurfLogView()
 
 void MagicDisplay::setAvgSurfHkDisplay(MagicDisplaySurfHkDisplay::MagicDisplaySurfHkDisplay_t surfDisplay)
 {
-  
+
   fRFCanMaker->setAvgSurfHkDisplay(surfDisplay);
- 
+
   if(surfDisplay==MagicDisplaySurfHkDisplay::kSurfView) {
       //Turn on phi view off
       fAvgSurfSurfViewButton->SetFillColor(kGray+3);
@@ -1758,15 +1774,15 @@ void MagicDisplay::setAvgSurfHkDisplay(MagicDisplaySurfHkDisplay::MagicDisplaySu
       fAvgSurfSurfViewButton->Modified();
       fAvgSurfPhiViewButton->Modified();
    }
-      
+
 }
 
 
 void MagicDisplay::toggleAvgSurfRfPowerView(Int_t kelvinView)
 {
-   
+
    if(kelvinView) {
-      //Turn on 
+      //Turn on
      //     std::cout << "setting fAvgSurfKelvinView " << 1 << "\n";
       fRFCanMaker->fAvgSurfKelvinView=kelvinView;
       if(kelvinView==2) {
@@ -1777,7 +1793,7 @@ void MagicDisplay::toggleAvgSurfRfPowerView(Int_t kelvinView)
 	fAvgSurfMeasuredKelvinViewButton->SetFillColor(kGray);
 	fAvgSurfKelvinViewButton->SetFillColor(kGray+3);
       }
-	
+
       fAvgSurfAdcViewButton->SetFillColor(kGray);
       fAvgSurfKelvinViewButton->Modified();
       fAvgSurfAdcViewButton->Modified();
@@ -1793,7 +1809,7 @@ void MagicDisplay::toggleAvgSurfRfPowerView(Int_t kelvinView)
       fAvgSurfAdcViewButton->Modified();
       fAvgSurfMeasuredKelvinViewButton->Modified();
    }
-      
+
 }
 
 
@@ -1821,16 +1837,16 @@ int MagicDisplay::loadSumTurfTree()
 
 void MagicDisplay::startSumTurfDisplay()
 {
- 
-   
+
+
 
    fRFCanMaker=AnitaRFCanvasMaker::Instance();
    int retVal=getSumTurfEntry();
    if(retVal==0)
-      refreshSumTurfDisplay();   
+      refreshSumTurfDisplay();
 }
 
-int MagicDisplay::getSumTurfEntry() 
+int MagicDisplay::getSumTurfEntry()
 {
   if(!fSumTurfRateTree) {
     if(loadSumTurfTree()<0)
@@ -1842,7 +1858,7 @@ int MagicDisplay::getSumTurfEntry()
       std::cout << "No more entries in sumTurf rate tree" << endl;
       return -1;
    }
-   //   std::cout << fSumTurfRateEntry << "\t" << fSumTurfPtr->realTime 
+   //   std::cout << fSumTurfRateEntry << "\t" << fSumTurfPtr->realTime
    //	     << "\t" << fSumTurfPtr->ppsNum << std::endl;
 
    return 0;
@@ -1852,10 +1868,10 @@ int MagicDisplay::displayNextSumTurf()
 {
    fSumTurfRateEntry++;
    int retVal=getSumTurfEntry();
-   if(retVal==0) 
-      refreshSumTurfDisplay();  
+   if(retVal==0)
+      refreshSumTurfDisplay();
    else fSumTurfRateEntry--;
-   return retVal;  
+   return retVal;
 }
 
 
@@ -1863,12 +1879,12 @@ int MagicDisplay::displayPreviousSumTurf()
 {
    if(fSumTurfRateEntry>0)
       fSumTurfRateEntry--;
-   else 
+   else
       return -1;
    int retVal=getSumTurfEntry();
-   if(retVal==0) 
-      refreshSumTurfDisplay();   
-   return retVal;     
+   if(retVal==0)
+      refreshSumTurfDisplay();
+   return retVal;
 }
 
 void MagicDisplay::refreshSumTurfDisplay()
@@ -1889,7 +1905,7 @@ void MagicDisplay::refreshSumTurfDisplay()
       fSumTurfInfoPad= new TPad("canMagicSumTurfInfo","canMagicSumTurfInfo",0.2,0.91,0.8,0.99);
       fSumTurfInfoPad->Draw();
       fSumTurfCanvas->Update();
-   }  
+   }
   //This will need to change
    fRFCanMaker->getSumTurfInfoCanvas(fSumTurfPtr,fSumTurfInfoPad);
    fRFCanMaker->getSumTurfRateCanvas(fSumTurfPtr,fSumTurfMainPad);
@@ -1906,7 +1922,7 @@ void MagicDisplay::drawSumTurfButtons()
    butPrev->SetTextSize(0.5);
    butPrev->SetFillColor(kBlue-10);
    butPrev->Draw();
-   
+
    fSumTurfYScaleButton = new TButton("Fix Scale","MagicDisplay::Instance()->toggleSumTurfYScale(); MagicDisplay::Instance()->refreshSumTurfDisplay();",0,0.96,0.1,1);
    fSumTurfYScaleButton->SetTextSize(0.4);
    fSumTurfYScaleButton->SetFillColor(kGray);
@@ -1927,12 +1943,12 @@ void MagicDisplay::toggleSumTurfYScale()
       fSumTurfYScaleButton->SetFillColor(kGray);
       fSumTurfYScaleButton->Modified();
    }
-      
+
 }
 
 UInt_t MagicDisplay::getCurrentEvent()
 {
-  if(fHeadPtr) return fHeadPtr->eventNumber; 
+  if(fHeadPtr) return fHeadPtr->eventNumber;
   return 0;
 }
 
@@ -1945,7 +1961,7 @@ void MagicDisplay::startSurfHkPlaying()
     if(fEventPlaySleepMs>0)
       gSystem->Sleep(fEventPlaySleepMs);
   }
-  while(this->displayNextSurf()==0);  
+  while(this->displayNextSurf()==0);
 }
 
 void MagicDisplay::stopSurfHkPlaying()
@@ -1963,7 +1979,7 @@ void MagicDisplay::startAvgSurfHkPlaying()
     if(fEventPlaySleepMs>0)
       gSystem->Sleep(fEventPlaySleepMs);
   }
-  while(this->displayNextAvgSurf()==0);  
+  while(this->displayNextAvgSurf()==0);
 }
 
 void MagicDisplay::stopAvgSurfHkPlaying()
@@ -1991,7 +2007,7 @@ void MagicDisplay::startEventPlaying()
       std::cout << headEntries << "\t" << fHeadTree->GetEntries() << "\n";
       startEventPlaying();
     }
-  }    
+  }
 }
 
 
@@ -2008,7 +2024,7 @@ void MagicDisplay::startEventPlayingReverse()
   while(this->displayPreviousEvent()==0);
 }
 
-void MagicDisplay::stopEventPlaying() 
+void MagicDisplay::stopEventPlaying()
 {
   fInEventPlayMode=0;
 }
@@ -2213,7 +2229,7 @@ void MagicDisplay::refreshGpsDisplay()
       fGpsInfoPad= new TPad("canMagicGpsInfo","canMagicGpsInfo",0.2,0.91,0.8,0.99);
       fGpsInfoPad->Draw();
       fGpsCanvas->Update();
-   }  
+   }
   //This will need to change
    fGpsCanMaker->getGpsInfoCanvas(fAdu5ASatPtr,fAdu5BSatPtr,fG12SatPtr,
 				  fAdu5APatPtr,fAdu5BPatPtr,fG12PosPtr,
@@ -2235,7 +2251,7 @@ int MagicDisplay::getGpsEntry()
       return -1;
     }
   }
-  
+
   //Now have to decide which tree to move on in
   Int_t newData=0;
   if(fG12PosTree) {
@@ -2278,7 +2294,7 @@ int MagicDisplay::getGpsEntry()
       std::cout << "Now more entries in adu5bSatTree\n";
     }
   }
-  
+
   if(fAdu5aPatTree) {
     //    cout << "Got adu5PatTree\n";
     if(fAdu5aPatEntry<fAdu5aPatTree->GetEntries()) {
@@ -2380,12 +2396,12 @@ void MagicDisplay::drawGpsButtons()
 
 void MagicDisplay::setAnalysisConfig(const UCorrelator::AnalysisConfig * config)
 {
-  delete fUCorr; 
-  fUCorr = new UCorrelator::Analyzer(config, true); 
+  delete fUCorr;
+  fUCorr = new UCorrelator::Analyzer(config, true);
 
-  if (fCanvasLayout == MagicDisplayCanvasLayoutOption::kUCorrelator) 
+  if (fCanvasLayout == MagicDisplayCanvasLayoutOption::kUCorrelator)
   {
-      this->refreshEventDisplay();   
+      this->refreshEventDisplay();
   }
 
 }
@@ -2399,8 +2415,8 @@ void MagicDisplay::startGpsPlaying()
   }
   while(this->displayNextGps()==0);
 
-} 
- 
+}
+
 void MagicDisplay::stopGpsPlaying()
  {
    fInGpsPlayMode=0;
