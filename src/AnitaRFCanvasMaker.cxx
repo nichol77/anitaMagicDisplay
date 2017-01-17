@@ -593,15 +593,22 @@ void AnitaRFCanvasMaker::getSurfHkPhiCanvas(SurfHk *surfPtr,TPad *plotPad) {
     for(int ring=0;ring<3;ring++) {
       //First step is the scalers and thresholds
 
+      //kludge until anita_3and4 is merged into eventReaderRoot main 
+#ifndef MULTIVERSION_ANITA_ENABLED
+       histSurfHkPhi[1][phi]->Fill(ring+3*phi,surfPtr->getL1Scaler(phi,(AnitaRing::AnitaRing_t)ring)); 
+#endif
       
       for(int pol=0;pol<2;pol++) {
 	int binIndex=pol+ring*2+phi*8;
+
+#ifdef MULTIVERSION_ANITA_ENABLED
         int v = AnitaVersion::get(); 
 
         if (v == 3 && ring == 0 || v ==4 && pol == 0) //avoid counting too many times 
         {
           histSurfHkPhi[1][phi]->Fill(ring+3*phi,surfPtr->getL1Scaler(phi,AnitaPol::AnitaPol_t(pol), (AnitaRing::AnitaRing_t)ring));           
         }
+#endif
 
 	maskedBands[binIndex]=surfPtr->isMasked(phi,(AnitaRing::AnitaRing_t)ring,
 						(AnitaTrigPol::AnitaTrigPol_t)pol);
