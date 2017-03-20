@@ -6,7 +6,7 @@
 /////     (Magic Display) is a simple event display for ANITA. It's not  /////
 /////     nearly as all singing and dancing as Ped's display, but it     /////
 /////     does provide a convenient interface to the data and it has     /////
-/////     some FFT etc. capabilities.                                    ///// 
+/////     some FFT etc. capabilities.                                    /////
 /////  Author: Ryan Nichol (rjn@hep.ucl.ac.uk)                           /////
 //////////////////////////////////////////////////////////////////////////////
 
@@ -19,9 +19,10 @@
 #include "AnitaConventions.h"
 #include "CalibratedAnitaEvent.h"
 #include "CrossCorrelator.h"
-#include "Analyzer.h" 
+#include "Analyzer.h"
 #include "FilterStrategy.h"
 
+#include "AnitaDataset.h"
 
 class TCanvas;
 class TPad;
@@ -56,10 +57,10 @@ Typically one starts MagicDisplay by giving the constructor the base directory t
 
 Most of the functions are called by pressig one of the buttons on the display. They can, of course, be called directly through MagicDisplay::Instance()->functionName().
 */
-class MagicDisplay 
+class MagicDisplay
 {
  public:
-  
+
  //! The assignment constructor. Most MagicDisplay sessions start with a call to this.
   /*!
     \param baseDir The directory that contains the runXXXX directories (that contain the ROOT files
@@ -73,7 +74,7 @@ class MagicDisplay
   //Control Panel Functions
   void startControlPanel(); ///<Starts the (currently highly buggy) control panel
 
-  Int_t getCurrentRun() 
+  Int_t getCurrentRun()
   {return fCurrentRun;} ///< Returns the current run number
   UInt_t getCurrentEvent(); ///< Returns the current event number
 
@@ -83,7 +84,8 @@ class MagicDisplay
 
   void closeCurrentRun(); ///< Closes all currently opened run TFiles, in preparation for changing to a new run.
 
-  int loadEventTree(); ///< Loads the event tree corresponding to the current run number <i>fCurrentRun</i>
+  // int loadEventTree(); ///< Loads the event tree corresponding to the current run number <i>fCurrentRun</i>
+  int loadDataset(); ///< Loads the event tree corresponding to the current run number <i>fCurrentRun</i>
   void startEventDisplay(); ///< Starts the main event display. This is typically the first thing that gets done after creating a MagicDisplay object in the runMagicDisplay macro.
   //! Displays a specified event number (from the specified run number). This is an increddibly useful and well hidden function. From the ROOT prompt you can call this by MagicDisplay::Instance()->displayThisEvent(10001,3000);
   /*!
@@ -91,7 +93,7 @@ class MagicDisplay
     \param runNumber The run which contains the desired event
     \return Zero on success
   */
-  int displayThisEvent(UInt_t eventNumber, UInt_t runNumber); 
+  int displayThisEvent(UInt_t eventNumber, UInt_t runNumber);
   int displayNextEvent(); ///< Displays the next event in the file, normally called by pressing the "Next" button.
   int displayFirstEvent(); ///< Displays the first event in the file, normally called by pressing the "First" button.
   int displayLastEvent(); ///< Displays the last event in the file, normally called by pressing the "Last" button.
@@ -104,17 +106,17 @@ class MagicDisplay
     \param option See MagicDisplayCanvasLayoutOption for options.
   */
   void setCanvasLayout(MagicDisplayCanvasLayoutOption::MagicDisplayCanvasLayoutOption_t option); ///< Sets the drawing option for the event display see MagicDisplayCanvasLayoutOption for available options.
-  void swapWaveformButtonFunctionsAndTitles(MagicDisplayCanvasLayoutOption::MagicDisplayCanvasLayoutOption_t option);  
+  void swapWaveformButtonFunctionsAndTitles(MagicDisplayCanvasLayoutOption::MagicDisplayCanvasLayoutOption_t option);
   //! Toggles between waveform and FFT view modes
   /*!
     \param waveformView See MagicDisplayFormatOption for options.
   */
   void setWaveformFormat(MagicDisplayFormatOption::MagicDisplayFormatOption_t waveformView);
   void setInterferometryTypeFlags(CrossCorrelator::mapMode_t mapMode, CrossCorrelator::zoomMode_t zoomMode);
-  
-  // For UCorrelator integration 
-  void setFilterStrategy(FilterStrategy * filter_strategy); 
-  void setAnalysisConfig(const UCorrelator::AnalysisConfig * config); 
+
+  // For UCorrelator integration
+  void setFilterStrategy(FilterStrategy * filter_strategy);
+  void setAnalysisConfig(const UCorrelator::AnalysisConfig * config);
 
 
   void toggleTimeEventOrdering(); ///< Toggles between time and event ordering
@@ -124,11 +126,11 @@ class MagicDisplay
   void startTurfDisplay(); ///< Starts the TURF Rate display window.
   int displayNextTurf(); ///< Displays the next event in the TURF tree.
   int displayPreviousTurf(); ///< Displays the previous event in the TURF tree.
-  void refreshTurfDisplay(); ///< Refreshs the TURF rate display. 
+  void refreshTurfDisplay(); ///< Refreshs the TURF rate display.
   int getTurfEntry(); ///< Attempts to load the entry corresponding to <i>fTurfRateEntry</i>.
   void drawTurfButtons(); ///< Draws the buttons on the TURF rate display
   void toggleTurfYScale(); ///< Toggles betweeen fixed and auto-scaling y-axis pn the TURF rate display.
- 
+
   int loadSurfTree(); ///< Opens the SURF hk file for the current run.
   void startSurfDisplay(); ///< Starts the SURF Hk display window.
   int displayNextSurf(); ///< Displays the next SURF hk entry.
@@ -169,7 +171,7 @@ class MagicDisplay
   void startGpsDisplay(); ///< Starts the GPS display window.
   int displayNextGps(); ///< Displays the next event in the GPS tree.
   int displayPreviousGps(); ///< Displays the previous event in the GPS tree.
-  void refreshGpsDisplay(); ///< Refreshs the GPS display. 
+  void refreshGpsDisplay(); ///< Refreshs the GPS display.
   int getGpsEntry(); ///< Attempts to load the entries.
   void drawGpsButtons(); ///< Draws the buttons on the GPS rate display
   void startGpsPlaying(); ///< Starts GPS Play mode
@@ -183,32 +185,32 @@ class MagicDisplay
 
   */
   static MagicDisplay*  Instance();
-  
 
-  TFile *fHeadFile; ///< A pointer to the current header file.
-  TFile *fEventFile; ///< A pointer to the current event file.
-  TFile *fTurfRateFile; ///< A pointer to the current TURF rate file.
-  TFile *fSumTurfRateFile; ///< A pointer to the current summed TURF rate file.
-  TFile *fSurfHkFile; ///< A pointer to the current SURF hk file.
-  TFile *fAvgSurfHkFile; ///< A pointer to the current averaged SURF hk file.
-  TFile *fGpsFile; ///<A pointer to the current GPS file.
+  AnitaDataset* fDataset; ///!< Replaces the need for MagicDisplay to track dataset itself
+  // TFile *fHeadFile; ///< A pointer to the current header file.
+  // TFile *fEventFile; ///< A pointer to the current event file.
+  // TFile *fTurfRateFile; ///< A pointer to the current TURF rate file.
+  // TFile *fSumTurfRateFile; ///< A pointer to the current summed TURF rate file.
+  // TFile *fSurfHkFile; ///< A pointer to the current SURF hk file.
+  // TFile *fAvgSurfHkFile; ///< A pointer to the current averaged SURF hk file.
+  // TFile *fGpsFile; ///<A pointer to the current GPS file.
 
-  //Here are the data managers
-  TTree *fHeadTree; ///< A pointer to the current header tree.
-  TTree *fEventTree; ///< A pointer to the current event tree.
-  TTree *fPrettyHkTree; ///< A pointer to the current pretty hk tree.
-  TTree *fTurfRateTree; ///< A pointer to the current TURF rate tree.
-  TTree *fSurfHkTree; ///< A pointer to the current SURF hk tree.
-  TTree *fSumTurfRateTree; ///< A pointer to the current summed TURF rate tree.
-  TTree *fAvgSurfHkTree;///< A pointer to the current averaged SURF hk tree.
-  TTree *fG12PosTree;///< A pointer to the current G12 position tree.
-  TTree *fG12SatTree;///< A pointer to the current G12 satellite tree.
-  TTree *fAdu5aPatTree; ///< A pointer to the current ADU5 A position tree.
-  TTree *fAdu5aSatTree; ///< A pointer to the current ADU5 A satellite tree.
-  TTree *fAdu5aVtgTree; ///< A pointer to the current ADU5 A velocity tree.
-  TTree *fAdu5bPatTree; ///< A pointer to the current ADU5 B position tree.
-  TTree *fAdu5bSatTree; ///< A pointer to the current ADU5 B satellite tree.
-  TTree *fAdu5bVtgTree; ///< A pointer to the current ADU5 B velocity tree.
+  // //Here are the data managers
+  // TTree *fHeadTree; ///< A pointer to the current header tree.
+  // TTree *fEventTree; ///< A pointer to the current event tree.
+  // TTree *fPrettyHkTree; ///< A pointer to the current pretty hk tree.
+  // TTree *fTurfRateTree; ///< A pointer to the current TURF rate tree.
+  // TTree *fSurfHkTree; ///< A pointer to the current SURF hk tree.
+  // TTree *fSumTurfRateTree; ///< A pointer to the current summed TURF rate tree.
+  // TTree *fAvgSurfHkTree;///< A pointer to the current averaged SURF hk tree.
+  // TTree *fG12PosTree;///< A pointer to the current G12 position tree.
+  // TTree *fG12SatTree;///< A pointer to the current G12 satellite tree.
+  // TTree *fAdu5aPatTree; ///< A pointer to the current ADU5 A position tree.
+  // TTree *fAdu5aSatTree; ///< A pointer to the current ADU5 A satellite tree.
+  // TTree *fAdu5aVtgTree; ///< A pointer to the current ADU5 A velocity tree.
+  // TTree *fAdu5bPatTree; ///< A pointer to the current ADU5 B position tree.
+  // TTree *fAdu5bSatTree; ///< A pointer to the current ADU5 B satellite tree.
+  // TTree *fAdu5bVtgTree; ///< A pointer to the current ADU5 B velocity tree.
 
   //And some useful info to keep track of what is where
   Long64_t fEventCutListEntry; ///< The current cut index
@@ -241,11 +243,11 @@ class MagicDisplay
 
   CrossCorrelator& getCrossCorrelator(); /// < for command line interface
 
- 
-  UCorrelator::Analyzer * getUCorr() { return fUCorr; } 
-  FilterStrategy * getStrategy() { return fStrategy; } 
-  FilterStrategy * getNoFilterStrategy(); 
-  FilterStrategy * getDefaultFilterStrategy(); 
+
+  UCorrelator::Analyzer * getUCorr() { return fUCorr; }
+  FilterStrategy * getStrategy() { return fStrategy; }
+  FilterStrategy * getNoFilterStrategy();
+  FilterStrategy * getDefaultFilterStrategy();
 
 
  protected:
@@ -256,7 +258,7 @@ class MagicDisplay
   void zeroPointers();
   MagicDisplayFormatOption::MagicDisplayFormatOption_t fWaveformFormat; ///< The format for displaying waveforms.
   MagicDisplayCanvasLayoutOption::MagicDisplayCanvasLayoutOption_t fCanvasLayout; ///< The format for the canvas layout
-  
+
    TCanvas *fMagicCanvas; ///< The main event display canvas.
    TPad *fMagicMainPad; ///< The main event display pad.
    TPad *fMagicEventInfoPad; ///< The event display info pad.
@@ -304,7 +306,7 @@ class MagicDisplay
    TButton *fBothButton; ///< The both polarisations button.
    TButton *fSurfButton; ///< The SURF view button.
    TButton *fPayloadButton; ///< The payload view button.
-   TButton *fInterferometryButton; ///< The Interferometry view button.  
+   TButton *fInterferometryButton; ///< The Interferometry view button.
    TButton *fUCorrelatorButton; ///< The UCorrelator view button
 
    TButton *fWaveformButton; ///< The waveform view button.
@@ -340,7 +342,7 @@ class MagicDisplay
    Int_t fOrderByEventNumber; ///< Order by event number
    Int_t fApplyEventCut; ///< Apply an event cut
    TEventList *fCutEventList; ///<The cut eventlist
-   
+
 
    Int_t fInSurfPlayMode; ///< Flag that indicates surfhk play mode
    Int_t fInAvgSurfPlayMode; ///< Flag that indicates surfhk play mode
@@ -349,12 +351,12 @@ class MagicDisplay
    WaveCalType::WaveCalType_t fCalType; ///< The waveform calibration type.
 
   CrossCorrelator::mapMode_t fInterferometryMapMode;
-  CrossCorrelator::zoomMode_t fInterferometryZoomMode;  
+  CrossCorrelator::zoomMode_t fInterferometryZoomMode;
 
 
-  void drawUCorrelatorFilterButtons(); 
-  UCorrelator::Analyzer * fUCorr; 
-  FilterStrategy * fStrategy; 
+  void drawUCorrelatorFilterButtons();
+  UCorrelator::Analyzer * fUCorr;
+  FilterStrategy * fStrategy;
 };
 
 

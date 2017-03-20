@@ -93,112 +93,115 @@ static int no_filter_strategy_init = 0;
 
 void MagicDisplay::zeroPointers()
 {
+
+  fDataset = NULL;
+
   fApplyEventCut=0;
   fOrderByEventNumber=1;
   fEventCutListEntry=-1;
   fEventTreeIndexEntry=-1;
-   fHeadFile=0;
-   fEventEntry=0;
-   fEventFile=0;
-   fTurfRateFile=0;
-   fSumTurfRateFile=0;
-   fSurfHkFile=0;
-   fAvgSurfHkFile=0;
-   fRawEventPtr=0;
-   fCalEventPtr=0;
-   fWhichEventFileKind=MagicDisplayFileType::kCalEvent;
-   fHeadPtr=0;
-   fHkPtr=0;
-   fAvgSurfPtr=0;
-   fSumTurfPtr=0;
-   fUsefulEventPtr=0;
-   fTurfRateTree=0;
-   fTurfPtr=0;
-   fSurfPtr=0;
-   fSurfHkEntry=0;
-   fSurfHkTree=0;
+  //  fHeadFile=0;
+  fEventEntry=0;
+  //  fEventFile=0;
+  //  fTurfRateFile=0;
+  //  fSumTurfRateFile=0;
+  //  fSurfHkFile=0;
+  //  fAvgSurfHkFile=0;
+  fRawEventPtr=0;
+  fCalEventPtr=0;
+  fWhichEventFileKind=MagicDisplayFileType::kCalEvent;
+  fHeadPtr=0;
+  fHkPtr=0;
+  fAvgSurfPtr=0;
+  fSumTurfPtr=0;
+  fUsefulEventPtr=0;
+  // fTurfRateTree=0;
+  fTurfPtr=0;
+  fSurfPtr=0;
+  fSurfHkEntry=0;
+  // fSurfHkTree=0;
 
-   //GPS stuff
-   fGpsFile=0;
-   fG12PosTree=0;
-   fG12SatTree=0;
-   fAdu5aPatTree=0;
-   fAdu5aSatTree=0;
-   fAdu5aVtgTree=0;
-   fAdu5bPatTree=0;
-   fAdu5bSatTree=0;
-   fAdu5bVtgTree=0;
-   fG12PosEntry=0;
-   fG12SatEntry=0;
-   fAdu5aPatEntry=0;
-   fAdu5aSatEntry=0;
-   fAdu5aVtgEntry=0;
-   fAdu5bPatEntry=0;
-   fAdu5bSatEntry=0;
-   fAdu5bVtgEntry=0;
-   fG12PosPtr=0;
-   fG12SatPtr=0;
-   fAdu5APatPtr=0;
-   fAdu5ASatPtr=0;
-   fAdu5AVtgPtr=0;
-   fAdu5BPatPtr=0;
-   fAdu5BSatPtr=0;
-   fAdu5BVtgPtr=0;
-   fGpsCanvas=0;
-   fGpsMainPad=0;
-   fGpsInfoPad=0;
+  //GPS stuff
+  //  fGpsFile=0;
+  // fG12PosTree=0;
+  // fG12SatTree=0;
+  // fAdu5aPatTree=0;
+  // fAdu5aSatTree=0;
+  // fAdu5aVtgTree=0;
+  // fAdu5bPatTree=0;
+  // fAdu5bSatTree=0;
+  // fAdu5bVtgTree=0;
+  fG12PosEntry=0;
+  fG12SatEntry=0;
+  fAdu5aPatEntry=0;
+  fAdu5aSatEntry=0;
+  fAdu5aVtgEntry=0;
+  fAdu5bPatEntry=0;
+  fAdu5bSatEntry=0;
+  fAdu5bVtgEntry=0;
+  fG12PosPtr=0;
+  fG12SatPtr=0;
+  fAdu5APatPtr=0;
+  fAdu5ASatPtr=0;
+  fAdu5AVtgPtr=0;
+  fAdu5BPatPtr=0;
+  fAdu5BSatPtr=0;
+  fAdu5BVtgPtr=0;
+  fGpsCanvas=0;
+  fGpsMainPad=0;
+  fGpsInfoPad=0;
 
-   fMagicCanvas=0;
-   fMagicEventInfoPad=0;
-   fMagicMainPad=0;
+  fMagicCanvas=0;
+  fMagicEventInfoPad=0;
+  fMagicMainPad=0;
 
-   fTurfCanvas=0;
-   fTurfMainPad=0;
-   fTurfInfoPad=0;
+  fTurfCanvas=0;
+  fTurfMainPad=0;
+  fTurfInfoPad=0;
 
-   fSumTurfCanvas=0;
-   fSumTurfMainPad=0;
-   fSumTurfInfoPad=0;
+  fSumTurfCanvas=0;
+  fSumTurfMainPad=0;
+  fSumTurfInfoPad=0;
 
-   fSurfCanvas=0;
-   fSurfMainPad=0;
-   fSurfInfoPad=0;
+  fSurfCanvas=0;
+  fSurfMainPad=0;
+  fSurfInfoPad=0;
 
-   fAvgSurfCanvas=0;
-   fAvgSurfMainPad=0;
-   fAvgSurfInfoPad=0;
+  fAvgSurfCanvas=0;
+  fAvgSurfMainPad=0;
+  fAvgSurfInfoPad=0;
 
-   fgInstance=this;
-   fEventTree=0;
-   fSurfHkTree=0;
-   fTurfRateTree=0;
-   fAvgSurfHkTree=0;
-   fSumTurfRateTree=0;
-   fEventPlaySleepMs=0;
+  fgInstance=this;
+  // fEventTree=0;
+  // fSurfHkTree=0;
+  // fTurfRateTree=0;
+  // fAvgSurfHkTree=0;
+  // fSumTurfRateTree=0;
+  fEventPlaySleepMs=0;
 
-   fWaveformFormat=MagicDisplayFormatOption::kWaveform;
-   fCanvasLayout=MagicDisplayCanvasLayoutOption::kPhiVerticalOnly;
-   fInterferometryMapMode=CrossCorrelator::kGlobal;
-   fInterferometryZoomMode=CrossCorrelator::kZoomedOut;
-
-
-   if (!default_strategy_init)
-   {
-     default_strategy_init = 1;
-     default_strategy.addOperation(new UCorrelator::SineSubtractFilter);
-     default_strategy.addOperation(new ALFAFilter);
-   }
-
-   if (!no_filter_strategy_init)
-   {
-     no_filter_strategy_init = 1;
-     no_filter_strategy.addOperation(new ALFAFilter);
-   }
+  fWaveformFormat=MagicDisplayFormatOption::kWaveform;
+  fCanvasLayout=MagicDisplayCanvasLayoutOption::kPhiVerticalOnly;
+  fInterferometryMapMode=CrossCorrelator::kGlobal;
+  fInterferometryZoomMode=CrossCorrelator::kZoomedOut;
 
 
-   setFilterStrategy(&default_strategy);
+  if (!default_strategy_init)
+    {
+      default_strategy_init = 1;
+      default_strategy.addOperation(new UCorrelator::SineSubtractFilter);
+      default_strategy.addOperation(new ALFAFilter);
+    }
 
-   fUCorr = new UCorrelator::Analyzer(0,true);
+  if (!no_filter_strategy_init)
+    {
+      no_filter_strategy_init = 1;
+      no_filter_strategy.addOperation(new ALFAFilter);
+    }
+
+
+  setFilterStrategy(&default_strategy);
+
+  fUCorr = new UCorrelator::Analyzer(0,true);
 }
 
 
@@ -285,77 +288,97 @@ void MagicDisplay::startEventDisplay()
 
 int MagicDisplay::getEventEntry()
 {
-  if(!fEventTree) {
-    if(loadEventTree()<0) {
-      std::cout << "Couldn't open event file\n";
+  if(!fDataset) {
+    if(loadDataset()<0) {
+      std::cout << "Couldn't load data set file\n";
       return -1;
     }
   }
+  // if(!fEventTree) {
+  //   if(loadEventTree()<0) {
+  //     std::cout << "Couldn't open event file\n";
+  //     return -1;
+  //   }
+  // }
 
-  if(fEventEntry<fEventTree->GetEntries())
-    fEventTree->GetEntry(fEventEntry);
+  if(fEventEntry<fDataset->N())
+    fDataset->getEntry(fEventEntry);
   else {
-    std::cout << "No more entries in event tree " << fEventEntry << "\t" << fEventTree->GetEntries() << endl;
+    std::cout << "No more entries in event tree " << fEventEntry << "\t" << fDataset->N() << endl;
     return -1;
   }
+
+  // if(fEventEntry<fEventTree->GetEntries())
+  //   fEventTree->GetEntry(fEventEntry);
+  // else {
+  //   std::cout << "No more entries in event tree " << fEventEntry << "\t" << fEventTree->GetEntries() << endl;
+  //   return -1;
+  // }
 
   // This is where we're crashing.
   // In the MC case, we don't have a fRawEventPtr.
   // Let's get the eventNumber more carefully.
-  UInt_t eventNumber = 0;
-  if(fRawEventPtr){
-    eventNumber = fRawEventPtr->eventNumber;
-  }
-  else if(fCalEventPtr){
-    eventNumber = fCalEventPtr->eventNumber;
-  }
-  else{
-    eventNumber = fUsefulEventPtr->eventNumber;
-  }
+
+  // UInt_t eventNumber = 0;
+  // if(fRawEventPtr){
+  //   eventNumber = fRawEventPtr->eventNumber;
+  // }
+  // else if(fCalEventPtr){
+  //   eventNumber = fCalEventPtr->eventNumber;
+  // }
+  // else{
+  //   eventNumber = fUsefulEventPtr->eventNumber;
+  // }
 
   //  std::cout << fEventEntry << "\t" << fHeadTree << "\t" << fHeadTree->GetEntries() << "\t" << fRawEventPtr << "\t" << fUsefulEventPtr << "\t" << eventNumber << std::endl;
 
-  if(fEventEntry<fHeadTree->GetEntries())  {
-    Int_t headEntry=fHeadIndex->GetEntryNumberWithIndex(eventNumber,0);
-    //    std::cout << headEntry << "\t" << fEventEntry << "\n";
-    fHeadTree->GetEntry(headEntry);
+  fHeadPtr = fDataset->header();
 
-    if(eventNumber!=fHeadPtr->eventNumber) {
-      std::cout << "Mismatched Event: " << eventNumber << "\t" << fHeadPtr->eventNumber << "\n";
-    }
-  }
-  else {
-    std::cout << "No more entries in header tree" << endl;
-    return -1;
-  }
+  // // if(fEventEntry<fHeadTree->GetEntries())  {
+  // if(fEventEntry<fDataset->N())  {
+  //   Int_t headEntry=fHeadIndex->GetEntryNumberWithIndex(eventNumber,0);
+  //   //    std::cout << headEntry << "\t" << fEventEntry << "\n";
+  //   fHeadTree->GetEntry(headEntry);
+
+  //   if(eventNumber!=fHeadPtr->eventNumber) {
+  //     std::cout << "Mismatched Event: " << eventNumber << "\t" << fHeadPtr->eventNumber << "\n";
+  //   }
+  // }
+  // else {
+  //   std::cout << "No more entries in header tree" << endl;
+  //   return -1;
+  // }
   // std::cout << fEventEntry << "\t" << fWhichEventFileKind << "\n";
-  //Now need to make a UsefulAnitaEvent
-  switch(fWhichEventFileKind) {
-  case MagicDisplayFileType::kCalEvent:
-    {
-      if(fUsefulEventPtr)
-	delete fUsefulEventPtr;
-      if(fCalType==WaveCalType::kDefault)
-	fUsefulEventPtr = new UsefulAnitaEvent(fCalEventPtr);
-      else
-	fUsefulEventPtr = new UsefulAnitaEvent(fCalEventPtr,fCalType);
-    }
-    break;
-  case MagicDisplayFileType::kRawEvent:
-    {
 
-      if(fUsefulEventPtr)
-	delete fUsefulEventPtr;
-      fUsefulEventPtr = new UsefulAnitaEvent(fRawEventPtr,fCalType,fHeadPtr);
-      break;
-    }
-  case MagicDisplayFileType::kMcEvent:
-    //No need to do anything as we've already filled fUsefulEventPtr
-    break;
-  default:
-    std::cerr << "No File Type... something broke\n";
-    break;
-  }
+
+  //Now need to make a UsefulAnitaEvent
+  // switch(fWhichEventFileKind) {
+  // case MagicDisplayFileType::kCalEvent:
+  //   {
+  //     if(fUsefulEventPtr)
+  // 	delete fUsefulEventPtr;
+  //     if(fCalType==WaveCalType::kDefault)
+  // 	fUsefulEventPtr = new UsefulAnitaEvent(fCalEventPtr);
+  //     else
+  // 	fUsefulEventPtr = new UsefulAnitaEvent(fCalEventPtr,fCalType);
+  //   }
+  //   break;
+  // case MagicDisplayFileType::kRawEvent:
+  //   {
+
+  //     if(fUsefulEventPtr)
+  // 	delete fUsefulEventPtr;
+  //     fUsefulEventPtr = new UsefulAnitaEvent(fRawEventPtr,fCalType,fHeadPtr);
+  //     break;
+  //   }
+  // case MagicDisplayFileType::kMcEvent:
+  //   //No need to do anything as we've already filled fUsefulEventPtr
+  //   break;
+  // default:
+  //   std::cerr << "No File Type... something broke\n";
+  //   break;
+  // }
+  fUsefulEventPtr = fDataset->useful();
 
   //Need to make configurable at some point
   //This will also need to be modifed to make realEvent accessible outside here
@@ -366,109 +389,122 @@ int MagicDisplay::getEventEntry()
 void MagicDisplay::closeCurrentRun()
 {
 
-  if(fHeadFile)
-    fHeadFile->Close();
-  if(fEventFile)
-    fEventFile->Close();
-  if(fTurfRateFile)
-    fTurfRateFile->Close();
-  if(fSumTurfRateFile)
-    fSumTurfRateFile->Close();
-  if(fSurfHkFile)
-    fSurfHkFile->Close();
-  if(fAvgSurfHkFile)
-    fAvgSurfHkFile->Close();
+  if(fDataset){
+    delete fDataset;
+    fDataset = NULL;
+  }
 
-  fHeadFile=0;
-  fEventFile=0;
-  fTurfRateFile=0;
-  fSumTurfRateFile=0;
-  fSurfHkFile=0;
-  fAvgSurfHkFile=0;
+  // if(fHeadFile)
+  //   fHeadFile->Close();
+  // if(fEventFile)
+  //   fEventFile->Close();
+  // if(fTurfRateFile)
+  //   fTurfRateFile->Close();
+  // if(fSumTurfRateFile)
+  //   fSumTurfRateFile->Close();
+  // if(fSurfHkFile)
+  //   fSurfHkFile->Close();
+  // if(fAvgSurfHkFile)
+  //   fAvgSurfHkFile->Close();
 
-  fHeadTree=0;
-  fEventTree=0;
-  fTurfRateTree=0;
-  fSumTurfRateTree=0;
-  fSurfHkTree=0;
-  fAvgSurfHkTree=0;
+  // fHeadFile=0;
+  // fEventFile=0;
+  // fTurfRateFile=0;
+  // fSumTurfRateFile=0;
+  // fSurfHkFile=0;
+  // fAvgSurfHkFile=0;
+
+  // fHeadTree=0;
+  // fEventTree=0;
+  // fTurfRateTree=0;
+  // fSumTurfRateTree=0;
+  // fSurfHkTree=0;
+  // fAvgSurfHkTree=0;
 }
 
 
-int MagicDisplay::loadEventTree()
+// int MagicDisplay::loadEventTree()
+int MagicDisplay::loadDataset()
 {
-   Int_t fGotCalEventFile=0;
-   char eventName[FILENAME_MAX];
-   char headerName[FILENAME_MAX];
-   char telemHeaderName[FILENAME_MAX];
-   char simHeaderName[FILENAME_MAX];
-   sprintf(headerName,"%s/run%d/headFile%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);
-   sprintf(telemHeaderName,"%s/run%d/eventHeadFile%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);
-   sprintf(simHeaderName,"%s/run%d/SimulatedAnitaHeadFile%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);
 
-   //Step one try calEventFile
-   //Will try and use calibrated event files
-   sprintf(eventName,"%s/run%d/calEventFile%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);
-   fEventFile = TFile::Open(eventName);
-   if(fEventFile) {
-     fEventTree = (TTree*) fEventFile->Get("eventTree");
-     fGotCalEventFile=1;
-     fWhichEventFileKind=MagicDisplayFileType::kCalEvent;
-     fEventTree->SetBranchAddress("event",&fCalEventPtr);
-   }
-   else {
-     fGotCalEventFile=0;
-     sprintf(eventName,"%s/run%d/eventFile%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);
-     fEventFile = TFile::Open(eventName);
-     if(fEventFile) {
-       fEventTree = (TTree*) fEventFile->Get("eventTree");
-       fGotCalEventFile=0;
-       fWhichEventFileKind=MagicDisplayFileType::kRawEvent;
-       fEventTree->SetBranchAddress("event",&fRawEventPtr);
-     }
-     else {
-       ///Now check mcTree
-       sprintf(eventName,"%s/run%d/SimulatedAnitaEventFile%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);
-       fEventFile = TFile::Open(eventName);
-       if(fEventFile==NULL) {
-	 cout << "Couldn't find calEventFile, eventFile or SimulatedEventFile!" << endl;
-	 return -1;
-       }
-       fEventTree = (TTree*) fEventFile->Get("eventTree");
-       fWhichEventFileKind=MagicDisplayFileType::kMcEvent;
-       fEventTree->SetBranchAddress("event",&fUsefulEventPtr);
-     }
-   }
+  fDataset = new AnitaDataset(fCurrentRun);
+
+  // Int_t fGotCalEventFile=0;
+  //  char eventName[FILENAME_MAX];
+  //  char headerName[FILENAME_MAX];
+  //  char telemHeaderName[FILENAME_MAX];
+  //  char simHeaderName[FILENAME_MAX];
+  //  sprintf(headerName,"%s/run%d/headFile%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);
+  //  sprintf(telemHeaderName,"%s/run%d/eventHeadFile%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);
+  //  sprintf(simHeaderName,"%s/run%d/SimulatedAnitaHeadFile%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);
+
+  //  //Step one try calEventFile
+  //  //Will try and use calibrated event files
+  //  sprintf(eventName,"%s/run%d/calEventFile%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);
+  //  fEventFile = TFile::Open(eventName);
+  //  if(fEventFile) {
+  //    fEventTree = (TTree*) fEventFile->Get("eventTree");
+  //    fGotCalEventFile=1;
+  //    fWhichEventFileKind=MagicDisplayFileType::kCalEvent;
+  //    fEventTree->SetBranchAddress("event",&fCalEventPtr);
+  //  }
+  //  else {
+  //    fGotCalEventFile=0;
+  //    sprintf(eventName,"%s/run%d/eventFile%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);
+  //    fEventFile = TFile::Open(eventName);
+  //    if(fEventFile) {
+  //      fEventTree = (TTree*) fEventFile->Get("eventTree");
+  //      fGotCalEventFile=0;
+  //      fWhichEventFileKind=MagicDisplayFileType::kRawEvent;
+  //      fEventTree->SetBranchAddress("event",&fRawEventPtr);
+  //    }
+  //    else {
+  //      ///Now check mcTree
+  //      sprintf(eventName,"%s/run%d/SimulatedAnitaEventFile%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);
+  //      fEventFile = TFile::Open(eventName);
+  //      if(fEventFile==NULL) {
+  // 	 cout << "Couldn't find calEventFile, eventFile or SimulatedEventFile!" << endl;
+  // 	 return -1;
+  //      }
+  //      fEventTree = (TTree*) fEventFile->Get("eventTree");
+  //      fWhichEventFileKind=MagicDisplayFileType::kMcEvent;
+  //      fEventTree->SetBranchAddress("event",&fUsefulEventPtr);
+  //    }
+  //  }
 
 
-   if(fEventTree->GetEntries()<1) {
-     cout << "Couldn't open: " << eventName << "\n";
+   // if(fEventTree->GetEntries()<1) {
+   //   cout << "Couldn't open: " << eventName << "\n";
+   //   return -1;
+   // }
+  if(fDataset->N() < 1){
+     cout << "Couldn't find data! << \n";
      return -1;
-   }
+  }
 
-
-   std::cout << telemHeaderName << "\n";
-   fHeadFile = TFile::Open(telemHeaderName);
-   if(!fHeadFile) {
-     fHeadFile = TFile::Open(headerName);
-     if(!fHeadFile) fHeadFile = TFile::Open(simHeaderName);
-       if(!fHeadFile) {
-	 cout << "Couldn't open: " << headerName << "\n";
-	 return -1;
-       }
-   }
-   fHeadTree = (TTree*) fHeadFile->Get("headTree");
-   if(!fHeadTree) {
-     cout << "Couldn't get headTree from " << headerName << endl;
-     return -1;
-   }
-  fHeadTree->SetBranchAddress("header",&fHeadPtr);
-  fEventEntry=0;
-  fHeadTree->BuildIndex("eventNumber");
-  fHeadIndex = (TTreeIndex*) fHeadTree->GetTreeIndex();
-  //  std::cerr << fEventTree << "\t" << fHeadTree << "\n";
-  std::cerr << fHeadTree->GetEntries() << "\t"
-	    << fEventTree->GetEntries() << "\n";
+  //  std::cout << telemHeaderName << "\n";
+  //  fHeadFile = TFile::Open(telemHeaderName);
+  //  if(!fHeadFile) {
+  //    fHeadFile = TFile::Open(headerName);
+  //    if(!fHeadFile) fHeadFile = TFile::Open(simHeaderName);
+  //      if(!fHeadFile) {
+  // 	 cout << "Couldn't open: " << headerName << "\n";
+  // 	 return -1;
+  //      }
+  //  }
+  //  fHeadTree = (TTree*) fHeadFile->Get("headTree");
+  //  if(!fHeadTree) {
+  //    cout << "Couldn't get headTree from " << headerName << endl;
+  //    return -1;
+  //  }
+  // fHeadTree->SetBranchAddress("header",&fHeadPtr);
+  // fEventEntry=0;
+  // fHeadTree->BuildIndex("eventNumber");
+  // fHeadIndex = (TTreeIndex*) fHeadTree->GetTreeIndex();
+  // //  std::cerr << fEventTree << "\t" << fHeadTree << "\n";
+  // std::cerr << fHeadTree->GetEntries() << "\t"
+  // 	    << fEventTree->GetEntries() << "\n";
+  std::cerr << fDataset->N() << std::endl;
   return 0;
 }
 
@@ -514,134 +550,151 @@ void MagicDisplay::applyCut(const char *cutString)
   if(cutString==0)
     fApplyEventCut=0;
 
-  if(!fEventTree) {
-    if(loadEventTree()<0) {
-      std::cout << "Couldn't open event file\n";
+  if(!fDataset) {
+    if(loadDataset()<0) {
+      std::cout << "Couldn't load dataset\n";
       return;
     }
   }
+  // if(!fEventTree) {
+  //   if(loadEventTree()<0) {
+  //     std::cout << "Couldn't open event file\n";
+  //     return;
+  //   }
+  // }
 
-  TCanvas tempCan;
-  tempCan.cd();
-  fHeadTree->Draw(">>elist1",cutString);
-  fCutEventList = (TEventList*)gDirectory->Get("elist1");
-  fApplyEventCut=1;
-  fCutEventList->Print();
 
+  // fHeadTree->Draw(">>elist1",cutString, "goff");
+  // fDataset->setCut(">>elist1",cutString, "goff");
+  // fCutEventList = (TEventList*)gDirectory->Get("elist1");
+  // fApplyEventCut=1;
+  // fCutEventList->Print();
+  // TCanvas tempCan;
+  // tempCan.cd();
+  // fHeadTree->Draw(">>elist1",cutString);
+  // fCutEventList = (TEventList*)gDirectory->Get("elist1");
+  // fApplyEventCut=1;
+  // fCutEventList->Print();
+
+  std::cerr << "Temporarily deleted body of " << __PRETTY_FUNCTION__ << " during code refactoring" << std::endl;
 
 }
 
 int MagicDisplay::displayNextEvent()
 {
-  //  static Int_t fEventTreeIndexEntry=-1;
-  //  static Int_t listNumber=-1;
-  if(fApplyEventCut==1) {
-    fEventCutListEntry++;
-    if(fEventCutListEntry<fCutEventList->GetN()) {
-      fEventEntry=fCutEventList->GetEntry(fEventCutListEntry);
-      int retVal=getEventEntry();
-      fEventCanMaker->fNewEvent=1;
-      if(retVal==0) {
-	refreshEventDisplay();
-      }
-      return retVal;
-    }
-    else {
-      fEventCutListEntry=fCutEventList->GetN()-1;
-      return -1;
-    }
-  }
-  else if(fOrderByEventNumber==0) {
-    fEventEntry++;
-    int retVal=getEventEntry();
-    fEventCanMaker->fNewEvent=1;
-    if(retVal==0) {
-      refreshEventDisplay();
-    }
-    else fEventEntry--;
-    return retVal;
-  }
-  else {
-    Long64_t *indVals=fHeadIndex->GetIndex();
-    if(fEventTreeIndexEntry==-1) {
-      //Need to find which entry we are at
-      for(int i=0;i<fHeadIndex->GetN();i++) {
-	if(indVals[i]==fEventEntry) {
-	  fEventTreeIndexEntry=i;
-	  break;
-	}
-      }
-    }
-    fEventTreeIndexEntry++;
-    if(fEventTreeIndexEntry<fHeadIndex->GetN()) {
-      fEventEntry=indVals[fEventTreeIndexEntry];
-      int retVal=getEventEntry();
-      fEventCanMaker->fNewEvent=1;
-      if(retVal==0) {
-	refreshEventDisplay();
-      }
-      else {
-	fEventTreeIndexEntry--;
-      }
-      return retVal;
-    }
-    else  {
-      fEventTreeIndexEntry--;
-      return -1;
-    }
-  }
+   // static Int_t fEventTreeIndexEntry=-1;
+   // static Int_t listNumber=-1;
+   // if(fApplyEventCut==1) {
+   //   fEventCutListEntry++;
+   //   if(fEventCutListEntry<fCutEventList->GetN()) {
+   //     fEventEntry=fCutEventList->GetEntry(fEventCutListEntry);
+   //     int retVal=getEventEntry();
+   //     fEventCanMaker->fNewEvent=1;
+   //     if(retVal==0) {
+   // 	 refreshEventDisplay();
+   //     }
+   //     return retVal;
+   //   }
+   //   else {
+   //     fEventCutListEntry=fCutEventList->GetN()-1;
+   //     return -1;
+   //   }
+   // }
+   // else if(fOrderByEventNumber==0) {
+   //   fEventEntry++;
+   //   int retVal=getEventEntry();
+   //   fEventCanMaker->fNewEvent=1;
+   //   if(retVal==0) {
+   //     refreshEventDisplay();
+   //   }
+   //   else fEventEntry--;
+   //   return retVal;
+   // }
+   // else {
+   //   Long64_t *indVals=fHeadIndex->GetIndex();
+   //   if(fEventTreeIndexEntry==-1) {
+   //     //Need to find which entry we are at
+   //     for(int i=0;i<fHeadIndex->GetN();i++) {
+   // 	 if(indVals[i]==fEventEntry) {
+   // 	   fEventTreeIndexEntry=i;
+   // 	   break;
+   // 	 }
+   //     }
+   //   }
+   //   fEventTreeIndexEntry++;
+   //   if(fEventTreeIndexEntry<fHeadIndex->GetN()) {
+   //     fEventEntry=indVals[fEventTreeIndexEntry];
+   //     int retVal=getEventEntry();
+   //     fEventCanMaker->fNewEvent=1;
+   //     if(retVal==0) {
+   // 	 refreshEventDisplay();
+   //     }
+   //     else {
+   // 	 fEventTreeIndexEntry--;
+   //     }
+   //     return retVal;
+   //   }
+   //   else  {
+   //     fEventTreeIndexEntry--;
+   //     return -1;
+   //   }
+   // }
+  std::cerr << "Temporarily deleted body of " << __PRETTY_FUNCTION__ << " during code refactoring" << std::endl;
+
 }
 
 
 int MagicDisplay::displayFirstEvent()
 {
 
-  if(fApplyEventCut==1) {
-    fEventCutListEntry=0;
-    if(fEventCutListEntry<fCutEventList->GetN()) {
-      fEventEntry=fCutEventList->GetEntry(fEventCutListEntry);
-      int retVal=getEventEntry();
-      fEventCanMaker->fNewEvent=1;
-      if(retVal==0) {
-	refreshEventDisplay();
-      }
-      return retVal;
-    }
-    else {
-      fEventCutListEntry=0;
-      return -1;
-    }
-  }
-  else if(fOrderByEventNumber==0) {
-    fEventEntry=0;
-    int retVal=getEventEntry();
-    fEventCanMaker->fNewEvent=1;
-    if(retVal==0) {
-      refreshEventDisplay();
-    }
-    else fEventEntry--;
-    return retVal;
-  }
-  else if(fOrderByEventNumber==1) {
-    Long64_t *indVals=fHeadIndex->GetIndex();
-    fEventTreeIndexEntry=0;
-    if(fEventTreeIndexEntry<fHeadIndex->GetN()) {
-      fEventEntry=indVals[fEventTreeIndexEntry];
-      int retVal=getEventEntry();
-      fEventCanMaker->fNewEvent=1;
-      if(retVal==0) {
-	refreshEventDisplay();
-      }
-      else {
-	//Nothing
-      }
-      return retVal;
-    }
-    else  {
-      //Nothing
-      return -1;
-    }
-  }
+  // if(fApplyEventCut==1) {
+  //   fEventCutListEntry=0;
+  //   if(fEventCutListEntry<fCutEventList->GetN()) {
+  //     fEventEntry=fCutEventList->GetEntry(fEventCutListEntry);
+  //     int retVal=getEventEntry();
+  //     fEventCanMaker->fNewEvent=1;
+  //     if(retVal==0) {
+  // 	refreshEventDisplay();
+  //     }
+  //     return retVal;
+  //   }
+  //   else {
+  //     fEventCutListEntry=0;
+  //     return -1;
+  //   }
+  // }
+  // else if(fOrderByEventNumber==0) {
+  //   fEventEntry=0;
+  //   int retVal=getEventEntry();
+  //   fEventCanMaker->fNewEvent=1;
+  //   if(retVal==0) {
+  //     refreshEventDisplay();
+  //   }
+  //   else fEventEntry--;
+  //   return retVal;
+  // }
+  // else if(fOrderByEventNumber==1) {
+  //   Long64_t *indVals=fHeadIndex->GetIndex();
+  //   fEventTreeIndexEntry=0;
+  //   if(fEventTreeIndexEntry<fHeadIndex->GetN()) {
+  //     fEventEntry=indVals[fEventTreeIndexEntry];
+  //     int retVal=getEventEntry();
+  //     fEventCanMaker->fNewEvent=1;
+  //     if(retVal==0) {
+  // 	refreshEventDisplay();
+  //     }
+  //     else {
+  // 	//Nothing
+  //     }
+  //     return retVal;
+  //   }
+  //   else  {
+  //     //Nothing
+  //     return -1;
+  //   }
+  // }
+  std::cerr << "Temporarily deleted body of " << __PRETTY_FUNCTION__ << " during code refactoring" << std::endl;
+
   return -1;
 }
 
@@ -651,59 +704,62 @@ int MagicDisplay::displayLastEvent()
   //  fEventTree->Refresh();
   //  fHeadTree->Refresh();
 
-  Long64_t headEnts=fHeadTree->GetEntries();
-  Long64_t eventEnts=fEventTree->GetEntries();
+  Long64_t headEnts=fDataset->N();
+  // Long64_t headEnts=fHeadTree->GetEntries();
+  // Long64_t eventEnts=fEventTree->GetEntries();
 
-  if(fApplyEventCut==1) {
-    fEventCutListEntry=fCutEventList->GetN()-1;
-    if(fEventCutListEntry<fCutEventList->GetN() && fEventCutListEntry>=0) {
-      fEventEntry=fCutEventList->GetEntry(fEventCutListEntry);
-      int retVal=getEventEntry();
-      fEventCanMaker->fNewEvent=1;
-      if(retVal==0) {
-	refreshEventDisplay();
-      }
-      return retVal;
-    }
-    else {
-      fEventCutListEntry=0;
-      return -1;
-    }
-  }
-  else if(fOrderByEventNumber==0) {
-    fEventEntry=headEnts-1;
-    if(eventEnts<headEnts)
-      fEventEntry=eventEnts-1;
-    int retVal=getEventEntry();
-    fEventCanMaker->fNewEvent=1;
-    if(retVal==0) {
-      refreshEventDisplay();
-    }
-    else fEventEntry--;
-    return retVal;
-  }
-  else if(fOrderByEventNumber==1) {
-    Long64_t *indVals=fHeadIndex->GetIndex();
-    fEventTreeIndexEntry=fHeadIndex->GetN()-1;
-    if(fEventTreeIndexEntry>=0) {
-      fEventEntry=indVals[fEventTreeIndexEntry];
-      int retVal=getEventEntry();
-      fEventCanMaker->fNewEvent=1;
-      if(retVal==0) {
-	refreshEventDisplay();
-      }
-      else {
-	//Nothing
-	fEventTreeIndexEntry=0;
-      }
-      return retVal;
-    }
-    else  {
-      //Nothing
-      fEventTreeIndexEntry=0;
-      return -1;
-    }
-  }
+  // if(fApplyEventCut==1) {
+  //   fEventCutListEntry=fCutEventList->GetN()-1;
+  //   if(fEventCutListEntry<fCutEventList->GetN() && fEventCutListEntry>=0) {
+  //     fEventEntry=fCutEventList->GetEntry(fEventCutListEntry);
+  //     int retVal=getEventEntry();
+  //     fEventCanMaker->fNewEvent=1;
+  //     if(retVal==0) {
+  // 	refreshEventDisplay();
+  //     }
+  //     return retVal;
+  //   }
+  //   else {
+  //     fEventCutListEntry=0;
+  //     return -1;
+  //   }
+  // }
+  // else if(fOrderByEventNumber==0) {
+  //   fEventEntry=headEnts-1;
+  //   if(eventEnts<headEnts)
+  //     fEventEntry=eventEnts-1;
+  //   int retVal=getEventEntry();
+  //   fEventCanMaker->fNewEvent=1;
+  //   if(retVal==0) {
+  //     refreshEventDisplay();
+  //   }
+  //   else fEventEntry--;
+  //   return retVal;
+  // }
+  // else if(fOrderByEventNumber==1) {
+  //   Long64_t *indVals=fHeadIndex->GetIndex();
+  //   fEventTreeIndexEntry=fHeadIndex->GetN()-1;
+  //   if(fEventTreeIndexEntry>=0) {
+  //     fEventEntry=indVals[fEventTreeIndexEntry];
+  //     int retVal=getEventEntry();
+  //     fEventCanMaker->fNewEvent=1;
+  //     if(retVal==0) {
+  // 	refreshEventDisplay();
+  //     }
+  //     else {
+  // 	//Nothing
+  // 	fEventTreeIndexEntry=0;
+  //     }
+  //     return retVal;
+  //   }
+  //   else  {
+  //     //Nothing
+  //     fEventTreeIndexEntry=0;
+  //     return -1;
+  //   }
+  // }
+  std::cerr << "Temporarily deleted body of " << __PRETTY_FUNCTION__ << " during code refactoring" << std::endl;
+
   return -1;
 }
 
@@ -713,67 +769,69 @@ int MagicDisplay::displayPreviousEvent()
   //  static Int_t fEventTreeIndexEntry=-1;
   //  static Int_t fEventCutListEntry=-1;
 
-  if(fApplyEventCut==1) {
-    //    std::cout << fApplyEventCut << "\t" << fEventCutListEntry << "\t" << fCutEventList->GetN() << "\n";
-    fEventCutListEntry--;
-    if(fEventCutListEntry>=0 && fEventCutListEntry<fCutEventList->GetN()) {
-      fEventEntry=fCutEventList->GetEntry(fEventCutListEntry);
-      int retVal=getEventEntry();
-      fEventCanMaker->fNewEvent=1;
-      if(retVal==0) {
-	refreshEventDisplay();
-      }
-      else {
-	fEventCutListEntry++;
-      }
-      return retVal;
-    }
-    else {
-      fEventCutListEntry++;
-      return -1;
-    }
-  }
-  else if(fOrderByEventNumber==0) {
-    if(fEventEntry>0)
-      fEventEntry--;
-    else
-      return -1;
-   int retVal=getEventEntry();
-   fEventCanMaker->fNewEvent=1;
-   if(retVal==0) {
-     refreshEventDisplay();
-   }
-   return retVal;
-  }
-  else {
-    Long64_t *indVals=fHeadIndex->GetIndex();
-    if(fEventTreeIndexEntry==-1) {
-      //Need to find which entry we are at
-      for(int i=0;i<fHeadIndex->GetN();i++) {
-	if(indVals[i]==fEventEntry) {
-	  fEventTreeIndexEntry=i;
-	  break;
-	}
-      }
-    }
-    fEventTreeIndexEntry--;
-    if(fEventTreeIndexEntry>=0 && fEventTreeIndexEntry<fHeadIndex->GetN()) {
-      fEventEntry=indVals[fEventTreeIndexEntry];
-      int retVal=getEventEntry();
-      fEventCanMaker->fNewEvent=1;
-      if(retVal==0) {
-	refreshEventDisplay();
-      }
-      else {
-	fEventTreeIndexEntry++;
-      }
-      return retVal;
-    }
-    else  {
-      fEventTreeIndexEntry++;
-      return -1;
-    }
-  }
+  // if(fApplyEventCut==1) {
+  //   //    std::cout << fApplyEventCut << "\t" << fEventCutListEntry << "\t" << fCutEventList->GetN() << "\n";
+  //   fEventCutListEntry--;
+  //   if(fEventCutListEntry>=0 && fEventCutListEntry<fCutEventList->GetN()) {
+  //     fEventEntry=fCutEventList->GetEntry(fEventCutListEntry);
+  //     int retVal=getEventEntry();
+  //     fEventCanMaker->fNewEvent=1;
+  //     if(retVal==0) {
+  // 	refreshEventDisplay();
+  //     }
+  //     else {
+  // 	fEventCutListEntry++;
+  //     }
+  //     return retVal;
+  //   }
+  //   else {
+  //     fEventCutListEntry++;
+  //     return -1;
+  //   }
+  // }
+  // else if(fOrderByEventNumber==0) {
+  //   if(fEventEntry>0)
+  //     fEventEntry--;
+  //   else
+  //     return -1;
+  //  int retVal=getEventEntry();
+  //  fEventCanMaker->fNewEvent=1;
+  //  if(retVal==0) {
+  //    refreshEventDisplay();
+  //  }
+  //  return retVal;
+  // }
+  // else {
+  //   Long64_t *indVals=fHeadIndex->GetIndex();
+  //   if(fEventTreeIndexEntry==-1) {
+  //     //Need to find which entry we are at
+  //     for(int i=0;i<fHeadIndex->GetN();i++) {
+  // 	if(indVals[i]==fEventEntry) {
+  // 	  fEventTreeIndexEntry=i;
+  // 	  break;
+  // 	}
+  //     }
+  //   }
+  //   fEventTreeIndexEntry--;
+  //   if(fEventTreeIndexEntry>=0 && fEventTreeIndexEntry<fHeadIndex->GetN()) {
+  //     fEventEntry=indVals[fEventTreeIndexEntry];
+  //     int retVal=getEventEntry();
+  //     fEventCanMaker->fNewEvent=1;
+  //     if(retVal==0) {
+  // 	refreshEventDisplay();
+  //     }
+  //     else {
+  // 	fEventTreeIndexEntry++;
+  //     }
+  //     return retVal;
+  //   }
+  //   else  {
+  //     fEventTreeIndexEntry++;
+  //     return -1;
+  //   }
+  // }
+  std::cerr << "Temporarily deleted body of " << __PRETTY_FUNCTION__ << " during code refactoring" << std::endl;
+
 }
 
 
@@ -782,29 +840,36 @@ int MagicDisplay::displayThisEvent(UInt_t eventNumber, UInt_t runNumber)
   cout << "displayThisEvent: " << eventNumber << "\t" << runNumber <<endl;
 
   if(fCurrentRun != runNumber) {
-    cout << "\t" << fCurrentRun << "\t" << runNumber << endl;
+    std::cout << "\t" << fCurrentRun << "\t" << runNumber << std::endl;
     closeCurrentRun();
     fCurrentRun=runNumber;
+    // loadEventTree();
+    loadDataset();
   }
 
-  if(!fEventCanMaker) startEventDisplay();
+  if(!fEventCanMaker){
+    startEventDisplay();
+  }
 
 
-  if(eventNumber==0) {
-    fEventEntry=0;
-  }
-  else {
-    fEventEntry=fHeadTree->GetEntryNumberWithIndex(eventNumber);
-    if(fEventEntry<0)
-      return -1;
-  }
-  std::cout << "fEventEntry: " << fEventEntry << std::endl;
+  // if(eventNumber==0) {
+  //   fEventEntry=0;
+  // }
+  // else {
+  //   fEventEntry=fHeadTree->GetEntryNumberWithIndex(eventNumber);
+  //   if(fEventEntry<0)
+  //     return -1;
+  // }
+  // std::cout << "fEventEntry: " << fEventEntry << std::endl;
   int retVal=getEventEntry();
-  if(retVal==0)
-    refreshEventDisplay();
-  else {
-    cout << "retVal: " << retVal << endl;
-  }
+  // if(retVal==0)
+  //   refreshEventDisplay();
+  // else {
+  //   cout << "retVal: " << retVal << endl;
+  // }
+  fEventEntry = 0;
+  std::cerr << "Temporarily deleted body of " << __PRETTY_FUNCTION__ << " during code refactoring" << std::endl;
+
   return retVal;
 }
 
@@ -1177,29 +1242,30 @@ void MagicDisplay::setWaveformFormat(MagicDisplayFormatOption::MagicDisplayForma
 
 int MagicDisplay::loadTurfTree()
 {
-  char turfName[FILENAME_MAX];
-  sprintf(turfName,"%s/run%d/turfRateFile%d.root",fCurrentBaseDir,
-	  fCurrentRun,fCurrentRun);
-  fTurfRateFile = TFile::Open(turfName);
-  if(!fTurfRateFile) {
-    cout << "Couldn't open: " << turfName << "\n";
-    return -1;
-  }
-  fTurfRateTree = (TTree*) fTurfRateFile->Get("turfRateTree");
-  if(!fTurfRateTree) {
-    cout << "Couldn't get turfRateTree from " << turfName << endl;
-    return -1;
-  }
-  if(fTurfRateTree->GetEntries()>0) {
-    fTurfRateTree->SetBranchAddress("turf",&fTurfPtr);
-    fTurfRateEntry=0;
-  }
-  else {
-    delete fTurfRateTree;
-    fTurfRateFile->Close();
-    fTurfRateFile=0;
-    fTurfRateTree=0;
-  }
+  // char turfName[FILENAME_MAX];
+  // sprintf(turfName,"%s/run%d/turfRateFile%d.root",fCurrentBaseDir,
+  // 	  fCurrentRun,fCurrentRun);
+  // fTurfRateFile = TFile::Open(turfName);
+  // if(!fTurfRateFile) {
+  //   cout << "Couldn't open: " << turfName << "\n";
+  //   return -1;
+  // }
+  // fTurfRateTree = (TTree*) fTurfRateFile->Get("turfRateTree");
+  // if(!fTurfRateTree) {
+  //   cout << "Couldn't get turfRateTree from " << turfName << endl;
+  //   return -1;
+  // }
+  // if(fTurfRateTree->GetEntries()>0) {
+  //   fTurfRateTree->SetBranchAddress("turf",&fTurfPtr);
+  //   fTurfRateEntry=0;
+  // }
+  // else {
+  //   delete fTurfRateTree;
+  //   fTurfRateFile->Close();
+  //   fTurfRateFile=0;
+  //   fTurfRateTree=0;
+  // }
+  std::cerr << "Temporarily deleted body of " << __PRETTY_FUNCTION__ << " during code refactoring" << std::endl;
   return 0;
 }
 
@@ -1214,23 +1280,23 @@ void MagicDisplay::startTurfDisplay()
 
 int MagicDisplay::getTurfEntry()
 {
-  if(!fTurfRateTree) {
-    if(loadTurfTree()<0)
-      return -1;
-  }
-  if(!fTurfRateTree) {
-    std::cout << "No Turf Rates to play with\n";
-    return -1;
-  }
-  if(fTurfRateEntry<fTurfRateTree->GetEntries())
-    fTurfRateTree->GetEntry(fTurfRateEntry);
-  else {
-    std::cout << "No more entries in turf rate tree" << endl;
-      return -1;
-   }
+  // if(!fTurfRateTree) {
+  //   if(loadTurfTree()<0)
+  //     return -1;
+  // }
+  // if(!fTurfRateTree) {
+  //   std::cout << "No Turf Rates to play with\n";
+  //   return -1;
+  // }
+  // if(fTurfRateEntry<fTurfRateTree->GetEntries())
+  //   fTurfRateTree->GetEntry(fTurfRateEntry);
+  // else {
+  //   std::cout << "No more entries in turf rate tree" << endl;
+  //     return -1;
+  //  }
    //   std::cout << fTurfRateEntry << "\t" << fTurfPtr->realTime
    //	     << "\t" << fTurfPtr->ppsNum << std::endl;
-
+  std::cerr << "Temporarily deleted body of " << __PRETTY_FUNCTION__ << " during code refactoring" << std::endl;
    return 0;
 }
 
@@ -1318,21 +1384,23 @@ void MagicDisplay::toggleTurfYScale()
 
 int MagicDisplay::loadSurfTree()
 {
- char surfName[FILENAME_MAX];
- sprintf(surfName,"%s/run%d/surfHkFile%d.root",fCurrentBaseDir,
-	 fCurrentRun,fCurrentRun);
- fSurfHkFile = TFile::Open(surfName);
- if(!fSurfHkFile) {
-   cout << "Couldn't open: " << surfName << "\n";
-   return -1;
- }
- fSurfHkTree = (TTree*) fSurfHkFile->Get("surfHkTree");
- if(!fSurfHkTree) {
-   cout << "Couldn't get surfHkTree from " << surfName << endl;
-   return -1;
- }
- fSurfHkTree->SetBranchAddress("surf",&fSurfPtr);
- fSurfHkEntry=0;
+ // char surfName[FILENAME_MAX];
+ // sprintf(surfName,"%s/run%d/surfHkFile%d.root",fCurrentBaseDir,
+ // 	 fCurrentRun,fCurrentRun);
+ // fSurfHkFile = TFile::Open(surfName);
+ // if(!fSurfHkFile) {
+ //   cout << "Couldn't open: " << surfName << "\n";
+ //   return -1;
+ // }
+ // fSurfHkTree = (TTree*) fSurfHkFile->Get("surfHkTree");
+ // if(!fSurfHkTree) {
+ //   cout << "Couldn't get surfHkTree from " << surfName << endl;
+ //   return -1;
+ // }
+ // fSurfHkTree->SetBranchAddress("surf",&fSurfPtr);
+ // fSurfHkEntry=0;
+  std::cerr << "Temporarily deleted body of " << __PRETTY_FUNCTION__ << " during code refactoring" << std::endl;
+
  return 0;
 }
 
@@ -1352,21 +1420,22 @@ void MagicDisplay::startSurfDisplay()
 
 int MagicDisplay::getSurfEntry()
 {
-  if(!fSurfHkTree) {
-    if(loadSurfTree()<0) {
-      cout << "Couldn't open SURF hk tree\n";
-      return -1;
-    }
-  }
-   //   std::cerr <<
-  if(fSurfHkEntry<fSurfHkTree->GetEntries())
-    fSurfHkTree->GetEntry(fSurfHkEntry);
-  else {
-    std::cout << "No more entries in surfHkTree" << endl;
-    return -1;
-  }
+  // if(!fSurfHkTree) {
+  //   if(loadSurfTree()<0) {
+  //     cout << "Couldn't open SURF hk tree\n";
+  //     return -1;
+  //   }
+  // }
+  //  //   std::cerr <<
+  // if(fSurfHkEntry<fSurfHkTree->GetEntries())
+  //   fSurfHkTree->GetEntry(fSurfHkEntry);
+  // else {
+  //   std::cout << "No more entries in surfHkTree" << endl;
+  //   return -1;
+  // }
   //   std::cout << fSurfHkEntry << "\t" << fSurfPtr->realTime
    //	     << "\t" << fSurfPtr->ppsNum << std::endl;
+  std::cerr << "Temporarily deleted body of " << __PRETTY_FUNCTION__ << " during code refactoring" << std::endl;
 
    return 0;
 }
@@ -1576,21 +1645,23 @@ void MagicDisplay::toggleSurfRfPowerView(Int_t kelvinView)
 
 int MagicDisplay::loadAvgSurfTree()
 {
-  char surfName[FILENAME_MAX];
-  sprintf(surfName,"%s/run%d/avgSurfHkFile%d.root",fCurrentBaseDir,
-	  fCurrentRun,fCurrentRun);
-  fSurfHkFile = TFile::Open(surfName);
-  if(!fSurfHkFile) {
-    cout << "Couldn't open: " << surfName << "\n";
-    return -1;
-  }
-  fAvgSurfHkTree = (TTree*) fSurfHkFile->Get("avgSurfHkTree");
-  if(!fAvgSurfHkTree) {
-    cout << "Couldn't get avgSurfHkTree from " << surfName << endl;
-    return -1;
-  }
-  fAvgSurfHkTree->SetBranchAddress("avgsurf",&fAvgSurfPtr);
-  fAvgSurfHkEntry=0;
+  // char surfName[FILENAME_MAX];
+  // sprintf(surfName,"%s/run%d/avgSurfHkFile%d.root",fCurrentBaseDir,
+  // 	  fCurrentRun,fCurrentRun);
+  // fSurfHkFile = TFile::Open(surfName);
+  // if(!fSurfHkFile) {
+  //   cout << "Couldn't open: " << surfName << "\n";
+  //   return -1;
+  // }
+  // fAvgSurfHkTree = (TTree*) fSurfHkFile->Get("avgSurfHkTree");
+  // if(!fAvgSurfHkTree) {
+  //   cout << "Couldn't get avgSurfHkTree from " << surfName << endl;
+  //   return -1;
+  // }
+  // fAvgSurfHkTree->SetBranchAddress("avgsurf",&fAvgSurfPtr);
+  // fAvgSurfHkEntry=0;
+  std::cerr << "Temporarily deleted body of " << __PRETTY_FUNCTION__ << " during code refactoring" << std::endl;
+
   return 0;
 }
 
@@ -1606,22 +1677,24 @@ void MagicDisplay::startAvgSurfDisplay()
 
 int MagicDisplay::getAvgSurfEntry()
 {
-  if(!fAvgSurfHkTree) {
-    int retVal=loadAvgSurfTree();
-    if(retVal<0) {
-      std::cout << "Couldn't load average surf tree\n";
-      return retVal;
-    }
-  }
-  //   std::cerr <<
-  if(fAvgSurfHkEntry<fAvgSurfHkTree->GetEntries())
-    fAvgSurfHkTree->GetEntry(fAvgSurfHkEntry);
-  else {
-      std::cout << "No more entries in avgSurfHkTree" << endl;
-      return -1;
-   }
-   //   std::cout << fAvgSurfHkEntry << "\t" << fAvgSurfPtr->realTime
-   //	     << "\t" << fAvgSurfPtr->ppsNum << std::endl;
+  // if(!fAvgSurfHkTree) {
+  //   int retVal=loadAvgSurfTree();
+  //   if(retVal<0) {
+  //     std::cout << "Couldn't load average surf tree\n";
+  //     return retVal;
+  //   }
+  // }
+  // //   std::cerr <<
+  // if(fAvgSurfHkEntry<fAvgSurfHkTree->GetEntries())
+  //   fAvgSurfHkTree->GetEntry(fAvgSurfHkEntry);
+  // else {
+  //     std::cout << "No more entries in avgSurfHkTree" << endl;
+  //     return -1;
+  //  }
+  //  //   std::cout << fAvgSurfHkEntry << "\t" << fAvgSurfPtr->realTime
+  //  //	     << "\t" << fAvgSurfPtr->ppsNum << std::endl;
+
+  std::cerr << "Temporarily deleted body of " << __PRETTY_FUNCTION__ << " during code refactoring" << std::endl;
 
    return 0;
 }
@@ -1816,21 +1889,24 @@ void MagicDisplay::toggleAvgSurfRfPowerView(Int_t kelvinView)
 int MagicDisplay::loadSumTurfTree()
 {
 
-  char sumTurfName[FILENAME_MAX];
-  sprintf(sumTurfName,"%s/run%d/sumTurfRateFile%d.root",fCurrentBaseDir,
-	  fCurrentRun,fCurrentRun);
-  fSumTurfRateFile = TFile::Open(sumTurfName);
-  if(!fSumTurfRateFile) {
-    cout << "Couldn't open: " << sumTurfName << "\n";
-    return -1;
-  }
-  fSumTurfRateTree = (TTree*) fSumTurfRateFile->Get("sumTurfRateTree");
-  if(!fSumTurfRateTree) {
-    cout << "Couldn't get sumTurfRateTree from " << sumTurfName << endl;
-    return -1;
-  }
-  fSumTurfRateTree->SetBranchAddress("sumturf",&fSumTurfPtr);
-  fSumTurfRateEntry=0;
+  // char sumTurfName[FILENAME_MAX];
+  // sprintf(sumTurfName,"%s/run%d/sumTurfRateFile%d.root",fCurrentBaseDir,
+  // 	  fCurrentRun,fCurrentRun);
+  // fSumTurfRateFile = TFile::Open(sumTurfName);
+  // if(!fSumTurfRateFile) {
+  //   cout << "Couldn't open: " << sumTurfName << "\n";
+  //   return -1;
+  // }
+  // fSumTurfRateTree = (TTree*) fSumTurfRateFile->Get("sumTurfRateTree");
+  // if(!fSumTurfRateTree) {
+  //   cout << "Couldn't get sumTurfRateTree from " << sumTurfName << endl;
+  //   return -1;
+  // }
+  // fSumTurfRateTree->SetBranchAddress("sumturf",&fSumTurfPtr);
+  // fSumTurfRateEntry=0;
+
+  std::cerr << "Temporarily deleted body of " << __PRETTY_FUNCTION__ << " during code refactoring" << std::endl;
+
   return 0;
 }
 
@@ -1848,18 +1924,19 @@ void MagicDisplay::startSumTurfDisplay()
 
 int MagicDisplay::getSumTurfEntry()
 {
-  if(!fSumTurfRateTree) {
-    if(loadSumTurfTree()<0)
-      return -1;
-  }
-   if(fSumTurfRateEntry<fSumTurfRateTree->GetEntries())
-      fSumTurfRateTree->GetEntry(fSumTurfRateEntry);
-   else {
-      std::cout << "No more entries in sumTurf rate tree" << endl;
-      return -1;
-   }
-   //   std::cout << fSumTurfRateEntry << "\t" << fSumTurfPtr->realTime
-   //	     << "\t" << fSumTurfPtr->ppsNum << std::endl;
+  // if(!fSumTurfRateTree) {
+  //   if(loadSumTurfTree()<0)
+  //     return -1;
+  // }
+  //  if(fSumTurfRateEntry<fSumTurfRateTree->GetEntries())
+  //     fSumTurfRateTree->GetEntry(fSumTurfRateEntry);
+  //  else {
+  //     std::cout << "No more entries in sumTurf rate tree" << endl;
+  //     return -1;
+  //  }
+  //  //   std::cout << fSumTurfRateEntry << "\t" << fSumTurfPtr->realTime
+  //  //	     << "\t" << fSumTurfPtr->ppsNum << std::endl;
+  std::cerr << "Temporarily deleted body of " << __PRETTY_FUNCTION__ << " during code refactoring" << std::endl;
 
    return 0;
 }
@@ -2000,11 +2077,14 @@ void MagicDisplay::startEventPlaying()
   }
   while(this->displayNextEvent()==0);
   if(fInEventPlayMode) {
-    Long64_t headEntries=fHeadTree->GetEntries();
+    // Long64_t headEntries=fHeadTree->GetEntries();
+    Long64_t headEntries=fDataset->N();
     //    fHeadTree->Refresh();
     //fEventTree->Refresh();
-    if(fHeadTree->GetEntries()!=headEntries) {
-      std::cout << headEntries << "\t" << fHeadTree->GetEntries() << "\n";
+    if(fDataset->N()!=headEntries) {
+      std::cout << headEntries << "\t" << fDataset->N() << "\n";
+    // if(fHeadTree->GetEntries()!=headEntries) {
+    //   std::cout << headEntries << "\t" << fHeadTree->GetEntries() << "\n";
       startEventPlaying();
     }
   }
@@ -2062,82 +2142,85 @@ void MagicDisplay::startSummaryDisplay()
 
 int MagicDisplay::loadGpsTrees()
 {
-  char gpsName[FILENAME_MAX];
-  sprintf(gpsName,"%s/run%d/gpsFile%d.root",fCurrentBaseDir,
-	  fCurrentRun,fCurrentRun);
-  fGpsFile = TFile::Open(gpsName);
-  if(!fGpsFile) {
-    cout << "Couldn't open: " << gpsName << "\n";
-    return -1;
-  }
-  fG12PosTree = (TTree*) fGpsFile->Get("g12PosTree");
-  if(!fG12PosTree) {
-    cout << "Couldn't get g12PosTree\n";
-  }
-  else {
-    fG12PosTree->SetBranchAddress("pos",&fG12PosPtr);
-  }
-  fG12SatTree = (TTree*) fGpsFile->Get("g12SatTree");
-  if(!fG12SatTree) {
-    cout << "Couldn't get g12SatTree\n";
-  }
-  else {
-    fG12SatTree->SetBranchAddress("sat",&fG12SatPtr);
-  }
-  fAdu5aPatTree = (TTree*) fGpsFile->Get("adu5PatTree");
-  if(!fAdu5aPatTree) {
-    cout << "Couldn't get adu5aPatTree\n";
-  }
-  else {
-    fAdu5aPatTree->SetBranchAddress("pat",&fAdu5APatPtr);
-  }
-  fAdu5aSatTree = (TTree*) fGpsFile->Get("adu5SatTree");
-  if(!fAdu5aSatTree) {
-    cout << "Couldn't get adu5aSatTree\n";
-  }
-  else {
-    fAdu5aSatTree->SetBranchAddress("sat",&fAdu5ASatPtr);
-    fAdu5aSatTree->BuildIndex("realTime");
-    fAdu5aSatIndex=(TTreeIndex*)fAdu5aSatTree->GetTreeIndex();
-  }
-  fAdu5aVtgTree = (TTree*) fGpsFile->Get("adu5VtgTree");
-  if(!fAdu5aVtgTree) {
-    cout << "Couldn't get adu5aVtgTree\n";
-  }
-  else {
-    fAdu5aVtgTree->SetBranchAddress("vtg",&fAdu5AVtgPtr);
-  }
-  fAdu5bPatTree = (TTree*) fGpsFile->Get("adu5bPatTree");
-  if(!fAdu5bPatTree) {
-    cout << "Couldn't get adu5bPatTree\n";
-  }
-  else {
-    fAdu5bPatTree->SetBranchAddress("pat",&fAdu5BPatPtr);
-  }
-  fAdu5bSatTree = (TTree*) fGpsFile->Get("adu5bSatTree");
-  if(!fAdu5bSatTree) {
-    cout << "Couldn't get adu5bSatTree\n";
-  }
-  else {
-    fAdu5bSatTree->SetBranchAddress("sat",&fAdu5BSatPtr);
-    fAdu5bSatTree->BuildIndex("realTime");
-    fAdu5bSatIndex=(TTreeIndex*)fAdu5bSatTree->GetTreeIndex();
-  }
-  fAdu5bVtgTree = (TTree*) fGpsFile->Get("adu5bVtgTree");
-  if(!fAdu5bVtgTree) {
-    cout << "Couldn't get adu5bVtgTree\n";
-  }
-  else {
-    fAdu5bVtgTree->SetBranchAddress("vtg",&fAdu5BVtgPtr);
-  }
-  fG12PosEntry=0;
-  fG12SatEntry=0;
-  fAdu5aPatEntry=0;
-  fAdu5aSatEntry=0;
-  fAdu5aVtgEntry=0;
-  fAdu5bPatEntry=0;
-  fAdu5bSatEntry=0;
-  fAdu5bVtgEntry=0;
+
+  std::cerr << "Temporarily deleted body of " << __PRETTY_FUNCTION__ << " during code refactoring" << std::endl;
+
+  // char gpsName[FILENAME_MAX];
+  // sprintf(gpsName,"%s/run%d/gpsFile%d.root",fCurrentBaseDir,
+  // 	  fCurrentRun,fCurrentRun);
+  // fGpsFile = TFile::Open(gpsName);
+  // if(!fGpsFile) {
+  //   cout << "Couldn't open: " << gpsName << "\n";
+  //   return -1;
+  // }
+  // fG12PosTree = (TTree*) fGpsFile->Get("g12PosTree");
+  // if(!fG12PosTree) {
+  //   cout << "Couldn't get g12PosTree\n";
+  // }
+  // else {
+  //   fG12PosTree->SetBranchAddress("pos",&fG12PosPtr);
+  // }
+  // fG12SatTree = (TTree*) fGpsFile->Get("g12SatTree");
+  // if(!fG12SatTree) {
+  //   cout << "Couldn't get g12SatTree\n";
+  // }
+  // else {
+  //   fG12SatTree->SetBranchAddress("sat",&fG12SatPtr);
+  // }
+  // fAdu5aPatTree = (TTree*) fGpsFile->Get("adu5PatTree");
+  // if(!fAdu5aPatTree) {
+  //   cout << "Couldn't get adu5aPatTree\n";
+  // }
+  // else {
+  //   fAdu5aPatTree->SetBranchAddress("pat",&fAdu5APatPtr);
+  // }
+  // fAdu5aSatTree = (TTree*) fGpsFile->Get("adu5SatTree");
+  // if(!fAdu5aSatTree) {
+  //   cout << "Couldn't get adu5aSatTree\n";
+  // }
+  // else {
+  //   fAdu5aSatTree->SetBranchAddress("sat",&fAdu5ASatPtr);
+  //   fAdu5aSatTree->BuildIndex("realTime");
+  //   fAdu5aSatIndex=(TTreeIndex*)fAdu5aSatTree->GetTreeIndex();
+  // }
+  // fAdu5aVtgTree = (TTree*) fGpsFile->Get("adu5VtgTree");
+  // if(!fAdu5aVtgTree) {
+  //   cout << "Couldn't get adu5aVtgTree\n";
+  // }
+  // else {
+  //   fAdu5aVtgTree->SetBranchAddress("vtg",&fAdu5AVtgPtr);
+  // }
+  // fAdu5bPatTree = (TTree*) fGpsFile->Get("adu5bPatTree");
+  // if(!fAdu5bPatTree) {
+  //   cout << "Couldn't get adu5bPatTree\n";
+  // }
+  // else {
+  //   fAdu5bPatTree->SetBranchAddress("pat",&fAdu5BPatPtr);
+  // }
+  // fAdu5bSatTree = (TTree*) fGpsFile->Get("adu5bSatTree");
+  // if(!fAdu5bSatTree) {
+  //   cout << "Couldn't get adu5bSatTree\n";
+  // }
+  // else {
+  //   fAdu5bSatTree->SetBranchAddress("sat",&fAdu5BSatPtr);
+  //   fAdu5bSatTree->BuildIndex("realTime");
+  //   fAdu5bSatIndex=(TTreeIndex*)fAdu5bSatTree->GetTreeIndex();
+  // }
+  // fAdu5bVtgTree = (TTree*) fGpsFile->Get("adu5bVtgTree");
+  // if(!fAdu5bVtgTree) {
+  //   cout << "Couldn't get adu5bVtgTree\n";
+  // }
+  // else {
+  //   fAdu5bVtgTree->SetBranchAddress("vtg",&fAdu5BVtgPtr);
+  // }
+  // fG12PosEntry=0;
+  // fG12SatEntry=0;
+  // fAdu5aPatEntry=0;
+  // fAdu5aSatEntry=0;
+  // fAdu5aVtgEntry=0;
+  // fAdu5bPatEntry=0;
+  // fAdu5bSatEntry=0;
+  // fAdu5bVtgEntry=0;
   return 0;
 }
 
@@ -2155,33 +2238,35 @@ void MagicDisplay::startGpsDisplay()
 int MagicDisplay::displayNextGps()
 {
   Int_t retVal=0;
-  switch(fGpsCanMaker->getGpsDisplayOpt()) {
-  case MagicDisplayGpsDisplay::kMapView:
-    break;
-  case MagicDisplayGpsDisplay::kSatView:
-    fG12SatEntry++;
-    if(fG12SatTree) {
-      if(fG12SatEntry>=fG12SatTree->GetEntries())
-	return -1;
-    }
-    getGpsEntry();
-    if(fAdu5aSatIndex) {
-      fAdu5aSatEntry=fAdu5aSatIndex->GetEntryNumberWithBestIndex(fG12SatPtr->realTime,0);
-      if(fAdu5aSatEntry<0) fAdu5aSatEntry=0;
-    }
-    if(fAdu5bSatIndex) {
-      fAdu5bSatEntry=fAdu5bSatIndex->GetEntryNumberWithBestIndex(fG12SatPtr->realTime,0);
-      if(fAdu5bSatEntry<0) fAdu5aSatEntry=0;
-    }
-    break;
-  case MagicDisplayGpsDisplay::kTimeView:
-    break;
-  default:
-    break;
-  }
-  retVal=getGpsEntry();
-  if(retVal==0)
-    refreshGpsDisplay();
+  // switch(fGpsCanMaker->getGpsDisplayOpt()) {
+  // case MagicDisplayGpsDisplay::kMapView:
+  //   break;
+  // case MagicDisplayGpsDisplay::kSatView:
+  //   fG12SatEntry++;
+  //   if(fG12SatTree) {
+  //     if(fG12SatEntry>=fG12SatTree->GetEntries())
+  // 	return -1;
+  //   }
+  //   getGpsEntry();
+  //   if(fAdu5aSatIndex) {
+  //     fAdu5aSatEntry=fAdu5aSatIndex->GetEntryNumberWithBestIndex(fG12SatPtr->realTime,0);
+  //     if(fAdu5aSatEntry<0) fAdu5aSatEntry=0;
+  //   }
+  //   if(fAdu5bSatIndex) {
+  //     fAdu5bSatEntry=fAdu5bSatIndex->GetEntryNumberWithBestIndex(fG12SatPtr->realTime,0);
+  //     if(fAdu5bSatEntry<0) fAdu5aSatEntry=0;
+  //   }
+  //   break;
+  // case MagicDisplayGpsDisplay::kTimeView:
+  //   break;
+  // default:
+  //   break;
+  // }
+  // retVal=getGpsEntry();
+  // if(retVal==0)
+  //   refreshGpsDisplay();
+  std::cerr << "Temporarily deleted body of " << __PRETTY_FUNCTION__ << " during code refactoring" << std::endl;
+
   return retVal;
 
 }
@@ -2189,25 +2274,27 @@ int MagicDisplay::displayNextGps()
 int MagicDisplay::displayPreviousGps()
 {
   Int_t retVal=0;
-  switch(fGpsCanMaker->getGpsDisplayOpt()) {
-  case MagicDisplayGpsDisplay::kMapView:
-    break;
-  case MagicDisplayGpsDisplay::kSatView:
-    if(fG12SatEntry>0)
-      fG12SatEntry--;
-    if(fAdu5aSatEntry>0)
-      fAdu5aSatEntry--;
-    if(fAdu5bSatEntry>0)
-      fAdu5bSatEntry--;
-    break;
-  case MagicDisplayGpsDisplay::kTimeView:
-    break;
-  default:
-    break;
-  }
-  retVal=getGpsEntry();
-  if(retVal==0)
-    refreshGpsDisplay();
+  // switch(fGpsCanMaker->getGpsDisplayOpt()) {
+  // case MagicDisplayGpsDisplay::kMapView:
+  //   break;
+  // case MagicDisplayGpsDisplay::kSatView:
+  //   if(fG12SatEntry>0)
+  //     fG12SatEntry--;
+  //   if(fAdu5aSatEntry>0)
+  //     fAdu5aSatEntry--;
+  //   if(fAdu5bSatEntry>0)
+  //     fAdu5bSatEntry--;
+  //   break;
+  // case MagicDisplayGpsDisplay::kTimeView:
+  //   break;
+  // default:
+  //   break;
+  // }
+  // retVal=getGpsEntry();
+  // if(retVal==0)
+  //   refreshGpsDisplay();
+  std::cerr << "Temporarily deleted body of " << __PRETTY_FUNCTION__ << " during code refactoring" << std::endl;
+
   return retVal;
 }
 
@@ -2245,101 +2332,104 @@ void MagicDisplay::refreshGpsDisplay()
 
 int MagicDisplay::getGpsEntry()
 {
-  if(!fGpsFile) {
-    if(loadGpsTrees()<0) {
-      cout << "Couldn't open GPS file\n";
-      return -1;
-    }
-  }
+  // if(!fGpsFile) {
+  //   if(loadGpsTrees()<0) {
+  //     cout << "Couldn't open GPS file\n";
+  //     return -1;
+  //   }
+  // }
 
-  //Now have to decide which tree to move on in
-  Int_t newData=0;
-  if(fG12PosTree) {
-    //    cout << "Got g12PosTree\n";
-    if(fG12PosEntry<fG12PosTree->GetEntries()) {
-      fG12PosTree->GetEntry(fG12PosEntry);
-      newData++;
-    }
-    else {
-      std::cout << "Now more entries in g12PosTree\n";
-    }
-  }
-  if(fG12SatTree) {
-    //    cout << "Got g12SatTree\n";
-    if(fG12SatEntry<fG12SatTree->GetEntries()) {
-      fG12SatTree->GetEntry(fG12SatEntry);
-      newData++;
-    }
-    else {
-      std::cout << "Now more entries in g12SatTree\n";
-    }
-  }
-  if(fAdu5aSatTree) {
-    //    cout << "Got adu5SatTree\n";
-    if(fAdu5aSatEntry<fAdu5aSatTree->GetEntries()) {
-      fAdu5aSatTree->GetEntry(fAdu5aSatEntry);
-      newData++;
-    }
-    else {
-      std::cout << "Now more entries in adu5aSatTree\n";
-    }
-  }
-  if(fAdu5bSatTree) {
-    //    cout << "Got adu5bSatTree\n";
-    if(fAdu5bSatEntry<fAdu5bSatTree->GetEntries()) {
-      fAdu5bSatTree->GetEntry(fAdu5bSatEntry);
-      newData++;
-    }
-    else {
-      std::cout << "Now more entries in adu5bSatTree\n";
-    }
-  }
+  // //Now have to decide which tree to move on in
+  // Int_t newData=0;
+  // if(fG12PosTree) {
+  //   //    cout << "Got g12PosTree\n";
+  //   if(fG12PosEntry<fG12PosTree->GetEntries()) {
+  //     fG12PosTree->GetEntry(fG12PosEntry);
+  //     newData++;
+  //   }
+  //   else {
+  //     std::cout << "Now more entries in g12PosTree\n";
+  //   }
+  // }
+  // if(fG12SatTree) {
+  //   //    cout << "Got g12SatTree\n";
+  //   if(fG12SatEntry<fG12SatTree->GetEntries()) {
+  //     fG12SatTree->GetEntry(fG12SatEntry);
+  //     newData++;
+  //   }
+  //   else {
+  //     std::cout << "Now more entries in g12SatTree\n";
+  //   }
+  // }
+  // if(fAdu5aSatTree) {
+  //   //    cout << "Got adu5SatTree\n";
+  //   if(fAdu5aSatEntry<fAdu5aSatTree->GetEntries()) {
+  //     fAdu5aSatTree->GetEntry(fAdu5aSatEntry);
+  //     newData++;
+  //   }
+  //   else {
+  //     std::cout << "Now more entries in adu5aSatTree\n";
+  //   }
+  // }
+  // if(fAdu5bSatTree) {
+  //   //    cout << "Got adu5bSatTree\n";
+  //   if(fAdu5bSatEntry<fAdu5bSatTree->GetEntries()) {
+  //     fAdu5bSatTree->GetEntry(fAdu5bSatEntry);
+  //     newData++;
+  //   }
+  //   else {
+  //     std::cout << "Now more entries in adu5bSatTree\n";
+  //   }
+  // }
 
-  if(fAdu5aPatTree) {
-    //    cout << "Got adu5PatTree\n";
-    if(fAdu5aPatEntry<fAdu5aPatTree->GetEntries()) {
-      fAdu5aPatTree->GetEntry(fAdu5aPatEntry);
-      newData++;
-    }
-    else {
-      std::cout << "Now more entries in adu5aPatTree\n";
-    }
-  }
+  // if(fAdu5aPatTree) {
+  //   //    cout << "Got adu5PatTree\n";
+  //   if(fAdu5aPatEntry<fAdu5aPatTree->GetEntries()) {
+  //     fAdu5aPatTree->GetEntry(fAdu5aPatEntry);
+  //     newData++;
+  //   }
+  //   else {
+  //     std::cout << "Now more entries in adu5aPatTree\n";
+  //   }
+  // }
 
-  if(fAdu5bPatTree) {
-    //    cout << "Got adu5bPatTree\n";
-    if(fAdu5bPatEntry<fAdu5bPatTree->GetEntries()) {
-      fAdu5bPatTree->GetEntry(fAdu5bPatEntry);
-      newData++;
-    }
-    else {
-      std::cout << "Now more entries in adu5bPatTree\n";
-    }
-  }
-  if(fAdu5aVtgTree) {
-    //    cout << "Got adu5VtgTree\n";
-    if(fAdu5aVtgEntry<fAdu5aVtgTree->GetEntries()) {
-      fAdu5aVtgTree->GetEntry(fAdu5aVtgEntry);
-      newData++;
-    }
-    else {
-    std::cout << "Now more entries in adu5aVtgTree\n";
-    }
-  }
-  if(fAdu5bVtgTree) {
-    //    cout << "Got adu5bVtgTree\n";
-    if(fAdu5bVtgEntry<fAdu5bVtgTree->GetEntries()) {
-      fAdu5bVtgTree->GetEntry(fAdu5bVtgEntry);
-      newData++;
-    }
-    else {
-      std::cout << "Now more entries in adu5bVtgTree\n";
-    }
-  }
+  // if(fAdu5bPatTree) {
+  //   //    cout << "Got adu5bPatTree\n";
+  //   if(fAdu5bPatEntry<fAdu5bPatTree->GetEntries()) {
+  //     fAdu5bPatTree->GetEntry(fAdu5bPatEntry);
+  //     newData++;
+  //   }
+  //   else {
+  //     std::cout << "Now more entries in adu5bPatTree\n";
+  //   }
+  // }
+  // if(fAdu5aVtgTree) {
+  //   //    cout << "Got adu5VtgTree\n";
+  //   if(fAdu5aVtgEntry<fAdu5aVtgTree->GetEntries()) {
+  //     fAdu5aVtgTree->GetEntry(fAdu5aVtgEntry);
+  //     newData++;
+  //   }
+  //   else {
+  //   std::cout << "Now more entries in adu5aVtgTree\n";
+  //   }
+  // }
+  // if(fAdu5bVtgTree) {
+  //   //    cout << "Got adu5bVtgTree\n";
+  //   if(fAdu5bVtgEntry<fAdu5bVtgTree->GetEntries()) {
+  //     fAdu5bVtgTree->GetEntry(fAdu5bVtgEntry);
+  //     newData++;
+  //   }
+  //   else {
+  //     std::cout << "Now more entries in adu5bVtgTree\n";
+  //   }
+  // }
 
 
-  if(newData==0)
-    return -1;
+  // if(newData==0)
+  //   return -1;
+
+  std::cerr << "Temporarily deleted body of " << __PRETTY_FUNCTION__ << " during code refactoring" << std::endl;
+
   return 0;
 }
 
