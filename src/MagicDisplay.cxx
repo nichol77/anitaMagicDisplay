@@ -70,7 +70,7 @@
 #include "TThread.h"
 #include "TEventList.h"
 #include <TGClient.h>
-
+#include "TCut.h"
 
 #include "UCFilters.h"
 #include "BasicFilters.h"
@@ -247,8 +247,7 @@ MagicDisplay::MagicDisplay(const char *baseDir, int run, WaveCalType::WaveCalTyp
 {
   //Offline constructor
   zeroPointers();
-  cout << "MagicDisplay::MagicDisplay(" << baseDir << " , " << run
-       << ")" << endl;
+  std::cout << "MagicDisplay::MagicDisplay(" << baseDir << " , " << run << ")" << std::endl;
   fCurrentRun=run;
   strncpy(fCurrentBaseDir,baseDir,179);
   fCalType=calType;
@@ -294,6 +293,8 @@ int MagicDisplay::getEventEntry()
       return -1;
     }
   }
+
+
   // if(!fEventTree) {
   //   if(loadEventTree()<0) {
   //     std::cout << "Couldn't open event file\n";
@@ -301,12 +302,12 @@ int MagicDisplay::getEventEntry()
   //   }
   // }
 
-  if(fEventEntry<fDataset->N())
-    fDataset->getEntry(fEventEntry);
-  else {
-    std::cout << "No more entries in event tree " << fEventEntry << "\t" << fDataset->N() << endl;
-    return -1;
-  }
+  // if(fEventEntry<fDataset->N())
+  //   fDataset->getEntry(fEventEntry);
+  // else {
+  //   std::cout << "No more entries in event tree " << fEventEntry << "\t" << fDataset->N() << endl;
+  //   return -1;
+  // }
 
   // if(fEventEntry<fEventTree->GetEntries())
   //   fEventTree->GetEntry(fEventEntry);
@@ -331,8 +332,6 @@ int MagicDisplay::getEventEntry()
   // }
 
   //  std::cout << fEventEntry << "\t" << fHeadTree << "\t" << fHeadTree->GetEntries() << "\t" << fRawEventPtr << "\t" << fUsefulEventPtr << "\t" << eventNumber << std::endl;
-
-  fHeadPtr = fDataset->header();
 
   // // if(fEventEntry<fHeadTree->GetEntries())  {
   // if(fEventEntry<fDataset->N())  {
@@ -378,11 +377,24 @@ int MagicDisplay::getEventEntry()
   //   std::cerr << "No File Type... something broke\n";
   //   break;
   // }
-  fUsefulEventPtr = fDataset->useful();
+
+  // need to get this to return -1 on some kind of error.
 
   //Need to make configurable at some point
   //This will also need to be modifed to make realEvent accessible outside here
-   return 0;
+
+  int retVal = 0;
+  fHeadPtr = fDataset->header(); // assign the header pointer in case we haven't already
+
+  if(fEventEntry >= 0){
+    fUsefulEventPtr = fDataset->useful();
+  }
+  else{
+    retVal = -1;
+  }
+  fUsefulEventPtr = fDataset->useful();
+
+  return retVal;
 }
 
 
@@ -427,7 +439,7 @@ void MagicDisplay::closeCurrentRun()
 int MagicDisplay::loadDataset()
 {
 
-  fDataset = new AnitaDataset(fCurrentRun);
+  fDataset = new AnitaDataset(fCurrentRun, false, fCalType);
 
   // Int_t fGotCalEventFile=0;
   //  char eventName[FILENAME_MAX];
@@ -547,15 +559,20 @@ void MagicDisplay::refreshEventDisplay()
 
 void MagicDisplay::applyCut(const char *cutString)
 {
-  if(cutString==0)
+  if(cutString==NULL){
     fApplyEventCut=0;
+  }
 
   if(!fDataset) {
     if(loadDataset()<0) {
       std::cout << "Couldn't load dataset\n";
-      return;
     }
   }
+  else{
+    fDataset->setCut(TCut(cutString));
+    fApplyEventCut = 1;
+  }
+
   // if(!fEventTree) {
   //   if(loadEventTree()<0) {
   //     std::cout << "Couldn't open event file\n";
@@ -582,6 +599,16 @@ void MagicDisplay::applyCut(const char *cutString)
 
 int MagicDisplay::displayNextEvent()
 {
+
+  if(fApplyEventCut==0){
+    fEventEntry = fDataset->next();
+  }
+  else{
+    fEventEntry = fDataset->nextInCut();
+  }
+  int retVal = getEventEntry();
+  refreshEventDisplay();
+
    // static Int_t fEventTreeIndexEntry=-1;
    // static Int_t listNumber=-1;
    // if(fApplyEventCut==1) {
@@ -640,12 +667,20 @@ int MagicDisplay::displayNextEvent()
    //   }
    // }
   std::cerr << "Temporarily deleted body of " << __PRETTY_FUNCTION__ << " during code refactoring" << std::endl;
-
+  return retVal;
 }
 
 
 int MagicDisplay::displayFirstEvent()
 {
+  if(fApplyEventCut==0){
+    fEventEntry = fDataset->first();
+  }
+  else{
+    fEventEntry = fDataset->firstInCut();
+  }
+  int retVal = getEventEntry();
+  refreshEventDisplay();
 
   // if(fApplyEventCut==1) {
   //   fEventCutListEntry=0;
@@ -695,7 +730,7 @@ int MagicDisplay::displayFirstEvent()
   // }
   std::cerr << "Temporarily deleted body of " << __PRETTY_FUNCTION__ << " during code refactoring" << std::endl;
 
-  return -1;
+  return retVal;
 }
 
 
@@ -704,7 +739,16 @@ int MagicDisplay::displayLastEvent()
   //  fEventTree->Refresh();
   //  fHeadTree->Refresh();
 
-  Long64_t headEnts=fDataset->N();
+  // Long64_t headEnts=fDataset->N();
+  if(fApplyEventCut==0){
+    fEventEntry = fDataset->last();
+  }
+  else{
+    fEventEntry = fDataset->lastInCut();
+  }
+  int retVal = getEventEntry();
+  refreshEventDisplay();
+
   // Long64_t headEnts=fHeadTree->GetEntries();
   // Long64_t eventEnts=fEventTree->GetEntries();
 
@@ -760,12 +804,21 @@ int MagicDisplay::displayLastEvent()
   // }
   std::cerr << "Temporarily deleted body of " << __PRETTY_FUNCTION__ << " during code refactoring" << std::endl;
 
-  return -1;
+  return retVal;
 }
 
 
 int MagicDisplay::displayPreviousEvent()
 {
+  if(fApplyEventCut==0){
+    fEventEntry = fDataset->previous();
+  }
+  else{
+    fEventEntry = fDataset->previousInCut();
+  }
+  int retVal = getEventEntry();
+  refreshEventDisplay();
+
   //  static Int_t fEventTreeIndexEntry=-1;
   //  static Int_t fEventCutListEntry=-1;
 
@@ -831,7 +884,7 @@ int MagicDisplay::displayPreviousEvent()
   //   }
   // }
   std::cerr << "Temporarily deleted body of " << __PRETTY_FUNCTION__ << " during code refactoring" << std::endl;
-
+  return retVal;
 }
 
 
@@ -2083,8 +2136,8 @@ void MagicDisplay::startEventPlaying()
     //fEventTree->Refresh();
     if(fDataset->N()!=headEntries) {
       std::cout << headEntries << "\t" << fDataset->N() << "\n";
-    // if(fHeadTree->GetEntries()!=headEntries) {
-    //   std::cout << headEntries << "\t" << fHeadTree->GetEntries() << "\n";
+      // if(fHeadTree->GetEntries()!=headEntries) {
+      //   std::cout << headEntries << "\t" << fHeadTree->GetEntries() << "\n";
       startEventPlaying();
     }
   }
