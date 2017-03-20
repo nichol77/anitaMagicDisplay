@@ -440,82 +440,10 @@ int MagicDisplay::loadDataset()
 {
 
   fDataset = new AnitaDataset(fCurrentRun, false, fCalType);
-
-  // Int_t fGotCalEventFile=0;
-  //  char eventName[FILENAME_MAX];
-  //  char headerName[FILENAME_MAX];
-  //  char telemHeaderName[FILENAME_MAX];
-  //  char simHeaderName[FILENAME_MAX];
-  //  sprintf(headerName,"%s/run%d/headFile%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);
-  //  sprintf(telemHeaderName,"%s/run%d/eventHeadFile%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);
-  //  sprintf(simHeaderName,"%s/run%d/SimulatedAnitaHeadFile%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);
-
-  //  //Step one try calEventFile
-  //  //Will try and use calibrated event files
-  //  sprintf(eventName,"%s/run%d/calEventFile%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);
-  //  fEventFile = TFile::Open(eventName);
-  //  if(fEventFile) {
-  //    fEventTree = (TTree*) fEventFile->Get("eventTree");
-  //    fGotCalEventFile=1;
-  //    fWhichEventFileKind=MagicDisplayFileType::kCalEvent;
-  //    fEventTree->SetBranchAddress("event",&fCalEventPtr);
-  //  }
-  //  else {
-  //    fGotCalEventFile=0;
-  //    sprintf(eventName,"%s/run%d/eventFile%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);
-  //    fEventFile = TFile::Open(eventName);
-  //    if(fEventFile) {
-  //      fEventTree = (TTree*) fEventFile->Get("eventTree");
-  //      fGotCalEventFile=0;
-  //      fWhichEventFileKind=MagicDisplayFileType::kRawEvent;
-  //      fEventTree->SetBranchAddress("event",&fRawEventPtr);
-  //    }
-  //    else {
-  //      ///Now check mcTree
-  //      sprintf(eventName,"%s/run%d/SimulatedAnitaEventFile%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);
-  //      fEventFile = TFile::Open(eventName);
-  //      if(fEventFile==NULL) {
-  // 	 cout << "Couldn't find calEventFile, eventFile or SimulatedEventFile!" << endl;
-  // 	 return -1;
-  //      }
-  //      fEventTree = (TTree*) fEventFile->Get("eventTree");
-  //      fWhichEventFileKind=MagicDisplayFileType::kMcEvent;
-  //      fEventTree->SetBranchAddress("event",&fUsefulEventPtr);
-  //    }
-  //  }
-
-
-   // if(fEventTree->GetEntries()<1) {
-   //   cout << "Couldn't open: " << eventName << "\n";
-   //   return -1;
-   // }
   if(fDataset->N() < 1){
-     cout << "Couldn't find data! << \n";
+     cout << "Couldn't find dataset! << \n";
      return -1;
   }
-
-  //  std::cout << telemHeaderName << "\n";
-  //  fHeadFile = TFile::Open(telemHeaderName);
-  //  if(!fHeadFile) {
-  //    fHeadFile = TFile::Open(headerName);
-  //    if(!fHeadFile) fHeadFile = TFile::Open(simHeaderName);
-  //      if(!fHeadFile) {
-  // 	 cout << "Couldn't open: " << headerName << "\n";
-  // 	 return -1;
-  //      }
-  //  }
-  //  fHeadTree = (TTree*) fHeadFile->Get("headTree");
-  //  if(!fHeadTree) {
-  //    cout << "Couldn't get headTree from " << headerName << endl;
-  //    return -1;
-  //  }
-  // fHeadTree->SetBranchAddress("header",&fHeadPtr);
-  // fEventEntry=0;
-  // fHeadTree->BuildIndex("eventNumber");
-  // fHeadIndex = (TTreeIndex*) fHeadTree->GetTreeIndex();
-  // //  std::cerr << fEventTree << "\t" << fHeadTree << "\n";
-  // std::cerr << fHeadTree->GetEntries() << "\t"
-  // 	    << fEventTree->GetEntries() << "\n";
   std::cerr << fDataset->N() << std::endl;
   return 0;
 }
@@ -557,6 +485,8 @@ void MagicDisplay::refreshEventDisplay()
   fMagicCanvas->Update();
 }
 
+
+
 void MagicDisplay::applyCut(const char *cutString)
 {
   if(cutString==NULL){
@@ -572,33 +502,9 @@ void MagicDisplay::applyCut(const char *cutString)
     fDataset->setCut(TCut(cutString));
     fApplyEventCut = 1;
   }
-
-  // if(!fEventTree) {
-  //   if(loadEventTree()<0) {
-  //     std::cout << "Couldn't open event file\n";
-  //     return;
-  //   }
-  // }
-
-
-  // fHeadTree->Draw(">>elist1",cutString, "goff");
-  // fDataset->setCut(">>elist1",cutString, "goff");
-  // fCutEventList = (TEventList*)gDirectory->Get("elist1");
-  // fApplyEventCut=1;
-  // fCutEventList->Print();
-  // TCanvas tempCan;
-  // tempCan.cd();
-  // fHeadTree->Draw(">>elist1",cutString);
-  // fCutEventList = (TEventList*)gDirectory->Get("elist1");
-  // fApplyEventCut=1;
-  // fCutEventList->Print();
-
-  std::cerr << "Temporarily deleted body of " << __PRETTY_FUNCTION__ << " during code refactoring" << std::endl;
-
 }
 
-int MagicDisplay::displayNextEvent()
-{
+int MagicDisplay::displayNextEvent(){
 
   if(fApplyEventCut==0){
     fEventEntry = fDataset->next();
@@ -607,72 +513,15 @@ int MagicDisplay::displayNextEvent()
     fEventEntry = fDataset->nextInCut();
   }
   int retVal = getEventEntry();
-  refreshEventDisplay();
-
-   // static Int_t fEventTreeIndexEntry=-1;
-   // static Int_t listNumber=-1;
-   // if(fApplyEventCut==1) {
-   //   fEventCutListEntry++;
-   //   if(fEventCutListEntry<fCutEventList->GetN()) {
-   //     fEventEntry=fCutEventList->GetEntry(fEventCutListEntry);
-   //     int retVal=getEventEntry();
-   //     fEventCanMaker->fNewEvent=1;
-   //     if(retVal==0) {
-   // 	 refreshEventDisplay();
-   //     }
-   //     return retVal;
-   //   }
-   //   else {
-   //     fEventCutListEntry=fCutEventList->GetN()-1;
-   //     return -1;
-   //   }
-   // }
-   // else if(fOrderByEventNumber==0) {
-   //   fEventEntry++;
-   //   int retVal=getEventEntry();
-   //   fEventCanMaker->fNewEvent=1;
-   //   if(retVal==0) {
-   //     refreshEventDisplay();
-   //   }
-   //   else fEventEntry--;
-   //   return retVal;
-   // }
-   // else {
-   //   Long64_t *indVals=fHeadIndex->GetIndex();
-   //   if(fEventTreeIndexEntry==-1) {
-   //     //Need to find which entry we are at
-   //     for(int i=0;i<fHeadIndex->GetN();i++) {
-   // 	 if(indVals[i]==fEventEntry) {
-   // 	   fEventTreeIndexEntry=i;
-   // 	   break;
-   // 	 }
-   //     }
-   //   }
-   //   fEventTreeIndexEntry++;
-   //   if(fEventTreeIndexEntry<fHeadIndex->GetN()) {
-   //     fEventEntry=indVals[fEventTreeIndexEntry];
-   //     int retVal=getEventEntry();
-   //     fEventCanMaker->fNewEvent=1;
-   //     if(retVal==0) {
-   // 	 refreshEventDisplay();
-   //     }
-   //     else {
-   // 	 fEventTreeIndexEntry--;
-   //     }
-   //     return retVal;
-   //   }
-   //   else  {
-   //     fEventTreeIndexEntry--;
-   //     return -1;
-   //   }
-   // }
-  std::cerr << "Temporarily deleted body of " << __PRETTY_FUNCTION__ << " during code refactoring" << std::endl;
+  if(retVal==0){
+    refreshEventDisplay();
+  }
   return retVal;
 }
 
 
-int MagicDisplay::displayFirstEvent()
-{
+int MagicDisplay::displayFirstEvent(){
+
   if(fApplyEventCut==0){
     fEventEntry = fDataset->first();
   }
@@ -680,66 +529,16 @@ int MagicDisplay::displayFirstEvent()
     fEventEntry = fDataset->firstInCut();
   }
   int retVal = getEventEntry();
-  refreshEventDisplay();
-
-  // if(fApplyEventCut==1) {
-  //   fEventCutListEntry=0;
-  //   if(fEventCutListEntry<fCutEventList->GetN()) {
-  //     fEventEntry=fCutEventList->GetEntry(fEventCutListEntry);
-  //     int retVal=getEventEntry();
-  //     fEventCanMaker->fNewEvent=1;
-  //     if(retVal==0) {
-  // 	refreshEventDisplay();
-  //     }
-  //     return retVal;
-  //   }
-  //   else {
-  //     fEventCutListEntry=0;
-  //     return -1;
-  //   }
-  // }
-  // else if(fOrderByEventNumber==0) {
-  //   fEventEntry=0;
-  //   int retVal=getEventEntry();
-  //   fEventCanMaker->fNewEvent=1;
-  //   if(retVal==0) {
-  //     refreshEventDisplay();
-  //   }
-  //   else fEventEntry--;
-  //   return retVal;
-  // }
-  // else if(fOrderByEventNumber==1) {
-  //   Long64_t *indVals=fHeadIndex->GetIndex();
-  //   fEventTreeIndexEntry=0;
-  //   if(fEventTreeIndexEntry<fHeadIndex->GetN()) {
-  //     fEventEntry=indVals[fEventTreeIndexEntry];
-  //     int retVal=getEventEntry();
-  //     fEventCanMaker->fNewEvent=1;
-  //     if(retVal==0) {
-  // 	refreshEventDisplay();
-  //     }
-  //     else {
-  // 	//Nothing
-  //     }
-  //     return retVal;
-  //   }
-  //   else  {
-  //     //Nothing
-  //     return -1;
-  //   }
-  // }
-  std::cerr << "Temporarily deleted body of " << __PRETTY_FUNCTION__ << " during code refactoring" << std::endl;
+  if(retVal==0){
+    refreshEventDisplay();
+  }
 
   return retVal;
 }
 
 
-int MagicDisplay::displayLastEvent()
-{
-  //  fEventTree->Refresh();
-  //  fHeadTree->Refresh();
+int MagicDisplay::displayLastEvent(){
 
-  // Long64_t headEnts=fDataset->N();
   if(fApplyEventCut==0){
     fEventEntry = fDataset->last();
   }
@@ -747,69 +546,16 @@ int MagicDisplay::displayLastEvent()
     fEventEntry = fDataset->lastInCut();
   }
   int retVal = getEventEntry();
-  refreshEventDisplay();
-
-  // Long64_t headEnts=fHeadTree->GetEntries();
-  // Long64_t eventEnts=fEventTree->GetEntries();
-
-  // if(fApplyEventCut==1) {
-  //   fEventCutListEntry=fCutEventList->GetN()-1;
-  //   if(fEventCutListEntry<fCutEventList->GetN() && fEventCutListEntry>=0) {
-  //     fEventEntry=fCutEventList->GetEntry(fEventCutListEntry);
-  //     int retVal=getEventEntry();
-  //     fEventCanMaker->fNewEvent=1;
-  //     if(retVal==0) {
-  // 	refreshEventDisplay();
-  //     }
-  //     return retVal;
-  //   }
-  //   else {
-  //     fEventCutListEntry=0;
-  //     return -1;
-  //   }
-  // }
-  // else if(fOrderByEventNumber==0) {
-  //   fEventEntry=headEnts-1;
-  //   if(eventEnts<headEnts)
-  //     fEventEntry=eventEnts-1;
-  //   int retVal=getEventEntry();
-  //   fEventCanMaker->fNewEvent=1;
-  //   if(retVal==0) {
-  //     refreshEventDisplay();
-  //   }
-  //   else fEventEntry--;
-  //   return retVal;
-  // }
-  // else if(fOrderByEventNumber==1) {
-  //   Long64_t *indVals=fHeadIndex->GetIndex();
-  //   fEventTreeIndexEntry=fHeadIndex->GetN()-1;
-  //   if(fEventTreeIndexEntry>=0) {
-  //     fEventEntry=indVals[fEventTreeIndexEntry];
-  //     int retVal=getEventEntry();
-  //     fEventCanMaker->fNewEvent=1;
-  //     if(retVal==0) {
-  // 	refreshEventDisplay();
-  //     }
-  //     else {
-  // 	//Nothing
-  // 	fEventTreeIndexEntry=0;
-  //     }
-  //     return retVal;
-  //   }
-  //   else  {
-  //     //Nothing
-  //     fEventTreeIndexEntry=0;
-  //     return -1;
-  //   }
-  // }
-  std::cerr << "Temporarily deleted body of " << __PRETTY_FUNCTION__ << " during code refactoring" << std::endl;
+  if(retVal==0){
+    refreshEventDisplay();
+  }
 
   return retVal;
 }
 
 
-int MagicDisplay::displayPreviousEvent()
-{
+int MagicDisplay::displayPreviousEvent(){
+
   if(fApplyEventCut==0){
     fEventEntry = fDataset->previous();
   }
@@ -817,80 +563,16 @@ int MagicDisplay::displayPreviousEvent()
     fEventEntry = fDataset->previousInCut();
   }
   int retVal = getEventEntry();
-  refreshEventDisplay();
-
-  //  static Int_t fEventTreeIndexEntry=-1;
-  //  static Int_t fEventCutListEntry=-1;
-
-  // if(fApplyEventCut==1) {
-  //   //    std::cout << fApplyEventCut << "\t" << fEventCutListEntry << "\t" << fCutEventList->GetN() << "\n";
-  //   fEventCutListEntry--;
-  //   if(fEventCutListEntry>=0 && fEventCutListEntry<fCutEventList->GetN()) {
-  //     fEventEntry=fCutEventList->GetEntry(fEventCutListEntry);
-  //     int retVal=getEventEntry();
-  //     fEventCanMaker->fNewEvent=1;
-  //     if(retVal==0) {
-  // 	refreshEventDisplay();
-  //     }
-  //     else {
-  // 	fEventCutListEntry++;
-  //     }
-  //     return retVal;
-  //   }
-  //   else {
-  //     fEventCutListEntry++;
-  //     return -1;
-  //   }
-  // }
-  // else if(fOrderByEventNumber==0) {
-  //   if(fEventEntry>0)
-  //     fEventEntry--;
-  //   else
-  //     return -1;
-  //  int retVal=getEventEntry();
-  //  fEventCanMaker->fNewEvent=1;
-  //  if(retVal==0) {
-  //    refreshEventDisplay();
-  //  }
-  //  return retVal;
-  // }
-  // else {
-  //   Long64_t *indVals=fHeadIndex->GetIndex();
-  //   if(fEventTreeIndexEntry==-1) {
-  //     //Need to find which entry we are at
-  //     for(int i=0;i<fHeadIndex->GetN();i++) {
-  // 	if(indVals[i]==fEventEntry) {
-  // 	  fEventTreeIndexEntry=i;
-  // 	  break;
-  // 	}
-  //     }
-  //   }
-  //   fEventTreeIndexEntry--;
-  //   if(fEventTreeIndexEntry>=0 && fEventTreeIndexEntry<fHeadIndex->GetN()) {
-  //     fEventEntry=indVals[fEventTreeIndexEntry];
-  //     int retVal=getEventEntry();
-  //     fEventCanMaker->fNewEvent=1;
-  //     if(retVal==0) {
-  // 	refreshEventDisplay();
-  //     }
-  //     else {
-  // 	fEventTreeIndexEntry++;
-  //     }
-  //     return retVal;
-  //   }
-  //   else  {
-  //     fEventTreeIndexEntry++;
-  //     return -1;
-  //   }
-  // }
-  std::cerr << "Temporarily deleted body of " << __PRETTY_FUNCTION__ << " during code refactoring" << std::endl;
+  if(retVal==0){
+    refreshEventDisplay();
+  }
   return retVal;
 }
 
 
-int MagicDisplay::displayThisEvent(UInt_t eventNumber, UInt_t runNumber)
-{
-  cout << "displayThisEvent: " << eventNumber << "\t" << runNumber <<endl;
+int MagicDisplay::displayThisEvent(UInt_t eventNumber, UInt_t runNumber){
+
+  std::cout << "displayThisEvent: " << eventNumber << "\t" << runNumber << std::endl;
 
   if(fCurrentRun != runNumber) {
     std::cout << "\t" << fCurrentRun << "\t" << runNumber << std::endl;
@@ -904,24 +586,16 @@ int MagicDisplay::displayThisEvent(UInt_t eventNumber, UInt_t runNumber)
     startEventDisplay();
   }
 
-
-  // if(eventNumber==0) {
-  //   fEventEntry=0;
-  // }
-  // else {
-  //   fEventEntry=fHeadTree->GetEntryNumberWithIndex(eventNumber);
-  //   if(fEventEntry<0)
-  //     return -1;
-  // }
-  // std::cout << "fEventEntry: " << fEventEntry << std::endl;
+  if(!fDataset){
+    std::cerr << "Error! Couldn't find dataset" << std::endl;
+  }
+  else{
+    fEventEntry = fDataset->getEvent(eventNumber);
+  }
   int retVal=getEventEntry();
-  // if(retVal==0)
-  //   refreshEventDisplay();
-  // else {
-  //   cout << "retVal: " << retVal << endl;
-  // }
-  fEventEntry = 0;
-  std::cerr << "Temporarily deleted body of " << __PRETTY_FUNCTION__ << " during code refactoring" << std::endl;
+  if(retVal==0){
+    refreshEventDisplay();
+  }
 
   return retVal;
 }
