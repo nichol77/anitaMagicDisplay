@@ -384,7 +384,9 @@ int MagicDisplay::getEventEntry()
   //This will also need to be modifed to make realEvent accessible outside here
 
   int retVal = 0;
-  fHeadPtr = fDataset->header(); // assign the header pointer in case we haven't already
+  if(!fHeadPtr){
+    fHeadPtr = fDataset->header(); // assign the header pointer in case we haven't already
+  }
 
   if(fEventEntry >= 0){
     fUsefulEventPtr = fDataset->useful();
@@ -392,7 +394,6 @@ int MagicDisplay::getEventEntry()
   else{
     retVal = -1;
   }
-  fUsefulEventPtr = fDataset->useful();
 
   return retVal;
 }
@@ -439,7 +440,8 @@ void MagicDisplay::closeCurrentRun()
 int MagicDisplay::loadDataset()
 {
 
-  fDataset = new AnitaDataset(fCurrentRun, false, fCalType);
+  // fDataset = new AnitaDataset(fCurrentRun, false, fCalType);
+  fDataset = new BlindDataset(fCurrentRun, false, fCalType);
   if(fDataset->N() < 1){
      cout << "Couldn't find dataset! << \n";
      return -1;

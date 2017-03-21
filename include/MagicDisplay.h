@@ -22,7 +22,8 @@
 #include "Analyzer.h"
 #include "FilterStrategy.h"
 
-#include "AnitaDataset.h"
+//#include "AnitaDataset.h"
+#include "BlindDataset.h"
 
 class TCanvas;
 class TPad;
@@ -186,7 +187,8 @@ class MagicDisplay
   */
   static MagicDisplay*  Instance();
 
-  AnitaDataset* fDataset; ///!< Replaces the need for MagicDisplay to track dataset itself
+  // AnitaDataset* fDataset; ///!< Replaces the need for MagicDisplay to track dataset itself
+  BlindDataset* fDataset; ///!< Replaces the need for MagicDisplay to track dataset itself
   // TFile *fHeadFile; ///< A pointer to the current header file.
   // TFile *fEventFile; ///< A pointer to the current event file.
   // TFile *fTurfRateFile; ///< A pointer to the current TURF rate file.
