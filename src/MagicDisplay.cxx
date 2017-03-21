@@ -294,95 +294,6 @@ int MagicDisplay::getEventEntry()
     }
   }
 
-
-  // if(!fEventTree) {
-  //   if(loadEventTree()<0) {
-  //     std::cout << "Couldn't open event file\n";
-  //     return -1;
-  //   }
-  // }
-
-  // if(fEventEntry<fDataset->N())
-  //   fDataset->getEntry(fEventEntry);
-  // else {
-  //   std::cout << "No more entries in event tree " << fEventEntry << "\t" << fDataset->N() << endl;
-  //   return -1;
-  // }
-
-  // if(fEventEntry<fEventTree->GetEntries())
-  //   fEventTree->GetEntry(fEventEntry);
-  // else {
-  //   std::cout << "No more entries in event tree " << fEventEntry << "\t" << fEventTree->GetEntries() << endl;
-  //   return -1;
-  // }
-
-  // This is where we're crashing.
-  // In the MC case, we don't have a fRawEventPtr.
-  // Let's get the eventNumber more carefully.
-
-  // UInt_t eventNumber = 0;
-  // if(fRawEventPtr){
-  //   eventNumber = fRawEventPtr->eventNumber;
-  // }
-  // else if(fCalEventPtr){
-  //   eventNumber = fCalEventPtr->eventNumber;
-  // }
-  // else{
-  //   eventNumber = fUsefulEventPtr->eventNumber;
-  // }
-
-  //  std::cout << fEventEntry << "\t" << fHeadTree << "\t" << fHeadTree->GetEntries() << "\t" << fRawEventPtr << "\t" << fUsefulEventPtr << "\t" << eventNumber << std::endl;
-
-  // // if(fEventEntry<fHeadTree->GetEntries())  {
-  // if(fEventEntry<fDataset->N())  {
-  //   Int_t headEntry=fHeadIndex->GetEntryNumberWithIndex(eventNumber,0);
-  //   //    std::cout << headEntry << "\t" << fEventEntry << "\n";
-  //   fHeadTree->GetEntry(headEntry);
-
-  //   if(eventNumber!=fHeadPtr->eventNumber) {
-  //     std::cout << "Mismatched Event: " << eventNumber << "\t" << fHeadPtr->eventNumber << "\n";
-  //   }
-  // }
-  // else {
-  //   std::cout << "No more entries in header tree" << endl;
-  //   return -1;
-  // }
-  // std::cout << fEventEntry << "\t" << fWhichEventFileKind << "\n";
-
-
-  //Now need to make a UsefulAnitaEvent
-  // switch(fWhichEventFileKind) {
-  // case MagicDisplayFileType::kCalEvent:
-  //   {
-  //     if(fUsefulEventPtr)
-  // 	delete fUsefulEventPtr;
-  //     if(fCalType==WaveCalType::kDefault)
-  // 	fUsefulEventPtr = new UsefulAnitaEvent(fCalEventPtr);
-  //     else
-  // 	fUsefulEventPtr = new UsefulAnitaEvent(fCalEventPtr,fCalType);
-  //   }
-  //   break;
-  // case MagicDisplayFileType::kRawEvent:
-  //   {
-
-  //     if(fUsefulEventPtr)
-  // 	delete fUsefulEventPtr;
-  //     fUsefulEventPtr = new UsefulAnitaEvent(fRawEventPtr,fCalType,fHeadPtr);
-  //     break;
-  //   }
-  // case MagicDisplayFileType::kMcEvent:
-  //   //No need to do anything as we've already filled fUsefulEventPtr
-  //   break;
-  // default:
-  //   std::cerr << "No File Type... something broke\n";
-  //   break;
-  // }
-
-  // need to get this to return -1 on some kind of error.
-
-  //Need to make configurable at some point
-  //This will also need to be modifed to make realEvent accessible outside here
-
   int retVal = 0;
   if(!fHeadPtr){
     fHeadPtr = fDataset->header(); // assign the header pointer in case we haven't already
@@ -407,32 +318,6 @@ void MagicDisplay::closeCurrentRun()
     fDataset = NULL;
   }
 
-  // if(fHeadFile)
-  //   fHeadFile->Close();
-  // if(fEventFile)
-  //   fEventFile->Close();
-  // if(fTurfRateFile)
-  //   fTurfRateFile->Close();
-  // if(fSumTurfRateFile)
-  //   fSumTurfRateFile->Close();
-  // if(fSurfHkFile)
-  //   fSurfHkFile->Close();
-  // if(fAvgSurfHkFile)
-  //   fAvgSurfHkFile->Close();
-
-  // fHeadFile=0;
-  // fEventFile=0;
-  // fTurfRateFile=0;
-  // fSumTurfRateFile=0;
-  // fSurfHkFile=0;
-  // fAvgSurfHkFile=0;
-
-  // fHeadTree=0;
-  // fEventTree=0;
-  // fTurfRateTree=0;
-  // fSumTurfRateTree=0;
-  // fSurfHkTree=0;
-  // fAvgSurfHkTree=0;
 }
 
 
