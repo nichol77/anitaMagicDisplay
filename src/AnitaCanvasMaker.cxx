@@ -445,6 +445,8 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr, RawAnitaHe
 	  hImage[polInd] = fCrossCorr->getZoomMap(pol);
 	}
 	hImage[polInd]->SetTitleSize(0.1);
+	hImage[polInd]->GetXaxis()->SetTitleSize(0.04);
+	hImage[polInd]->GetYaxis()->SetTitleSize(0.04);
       }
     }
   }

@@ -295,11 +295,8 @@ int MagicDisplay::getEventEntry()
   }
 
   int retVal = 0;
-  if(!fHeadPtr){
-    fHeadPtr = fDataset->header(); // assign the header pointer in case we haven't already
-  }
-
   if(fEventEntry >= 0){
+    fHeadPtr = fDataset->header();
     fUsefulEventPtr = fDataset->useful();
   }
   else{
