@@ -404,7 +404,8 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr, RawAnitaHe
   TPad *retCan=0;
   static UInt_t lastEventNumber=0;
 
-  FilteredAnitaEvent fEv(evPtr, MagicDisplay::Instance()->getStrategy(), pat, hdPtr);  
+  // FilteredAnitaEvent fEv(evPtr, MagicDisplay::Instance()->getStrategy(), pat, hdPtr);
+  FilteredAnitaEvent fEv(evPtr, MagicDisplay::Instance()->getNoFilterStrategy(), pat, hdPtr);    
 
 
   if(fCanvasView==MagicDisplayCanvasLayoutOption::kInterferometry){
@@ -491,48 +492,78 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr, RawAnitaHe
 	  grSurfFiltered[surf][chan]=0;
 	}
 
+	TGraph *grTemp = NULL;
+	int ant = -1;
+	AnitaPol::AnitaPol_t pol = AnitaPol::kNotAPol;	
+	
+	if(chan==CHANNELS_PER_SURF-1) // last channel is the clock
+	{
+	  grTemp = evPtr->getGraphFromSurfAndChan(surf,chan);
+	}
+	else{ // regular channel
+	  AnitaGeomTool::getAntPolFromSurfChan(surf,chan,ant,pol);
+	  const AnalysisWaveform* wf = fEv.getFilteredGraph(ant, pol);
+	  const TGraphAligned* gr = wf->even();
+	  grTemp = new TGraph(gr->GetN(), gr->GetX(), gr->GetY());
+	}
 
-	TGraph *grTemp = evPtr->getGraphFromSurfAndChan(surf,chan);
+	// std::cout << surf << "\t" << chan << "\t" << grTemp << "\t" << ant << "\t" << pol << "\t" << std::endl;
+	
 	if(grTemp==NULL || grTemp->GetN()==0){
-
 	  //std::cout << "Skipping this. If you're using MC you're fine. If you're not using data, there's something wrong." << std::endl;
 	  continue;
 	}
+
+
+	// This section just finds min/max voltages for setting the axes of the displayed graphs
 	if(fAutoScale || fCanvasView==MagicDisplayCanvasLayoutOption::kPayloadView) {
 	  Int_t numPoints=grTemp->GetN();
 	  Double_t *yVals=grTemp->GetY();
 
-	  if(chan<8) {
-	    int ant=0;
-	    AnitaPol::AnitaPol_t pol;
-	    AnitaGeomTool::getAntPolFromSurfChan(surf,chan,ant,pol);
+
+	  if(chan<CHANNELS_PER_SURF-1) // ignore clock
+	  {
 	    Int_t phi=AnitaGeomTool::getPhiFromAnt(ant);
 
 	    for(int i=0;i<numPoints;i++) {
 
-	      if(yVals[i]<fMinVoltLimit)
+	      // find the absolute max/min
+	      if(yVals[i]<fMinVoltLimit){
 		fMinVoltLimit=yVals[i];
-	      if(yVals[i]>fMaxVoltLimit)
+	      }
+	      if(yVals[i]>fMaxVoltLimit){		
 		fMaxVoltLimit=yVals[i];
+	      }
 
-	      if(pol==AnitaPol::kVertical) {
-		if(yVals[i]<fMinVertVoltLimit)
-		  fMinVertVoltLimit=yVals[i];
-		if(yVals[i]>fMaxVertVoltLimit)
-		  fMaxVertVoltLimit=yVals[i];
-		if(yVals[i]>maxVal) {
+	      // find the maximum/minimum for VPol only
+	      if(pol==AnitaPol::kVertical)
+	      {		
+		if(yVals[i] < fMinVertVoltLimit){
+		  fMinVertVoltLimit = yVals[i];
+		}
+
+		if(yVals[i] > fMaxVertVoltLimit){
+		  fMaxVertVoltLimit = yVals[i];
+		}
+
+		// find the maximum phi sector (VPol only)
+		if(yVals[i] > maxVal){
 		  maxVal=yVals[i];
 		  fPhiMax=phi;
 		}
 	      }
 	    }
 	  }
-	  else {
-	    for(int i=0;i<numPoints;i++) {
-	      if(yVals[i]<fMinClockVoltLimit)
-		fMinClockVoltLimit=yVals[i];
-	      if(yVals[i]>fMaxClockVoltLimit)
+	  else // now find the clock maxima/minima
+	  {
+
+	    for(int i=0;i<numPoints;i++){
+	      if(yVals[i]<fMinClockVoltLimit){
+		fMinClockVoltLimit=yVals[i];		
+	      }
+	      if(yVals[i]>fMaxClockVoltLimit){
 		fMaxClockVoltLimit=yVals[i];
+	      }
 	    }
 	  }
 	}
