@@ -32,6 +32,7 @@ class PrettyAnitaHk;
 class RawAnitaEvent;
 //class CalibratedAnitaEvent;
 class UsefulAnitaEvent;
+class Adu5Pat;
 
 class TurfRate;
 class SummedTurfRate;
@@ -294,14 +295,19 @@ class MagicDisplay
    SurfHk *fSurfPtr; ///< Pointer to the SURF hk.
    SummedTurfRate *fSumTurfPtr; ///< Pointer to the summed TURF rate.
    AveragedSurfHk *fAvgSurfPtr; ///< Pointer to the averaged SURF hk.
-   G12Pos *fG12PosPtr; ///< Pointer to the G12 position data.
-   G12Sat *fG12SatPtr; ///< Pointer to the G12 satellite data.
-   Adu5Pat *fAdu5APatPtr; ///< Pointer to the ADU5 position data.
-   Adu5Sat *fAdu5ASatPtr; ///< Pointer to the ADU5 satellite data.
-   Adu5Vtg *fAdu5AVtgPtr; ///< Pointer to the ADU5 velocity data.
-   Adu5Pat *fAdu5BPatPtr; ///< Pointer to the ADU5 position data.
-   Adu5Sat *fAdu5BSatPtr; ///< Pointer to the ADU5 satellite data.
-   Adu5Vtg *fAdu5BVtgPtr; ///< Pointer to the ADU5 velocity data.
+
+   Adu5Pat* fPatPtr; ///< Pointer to the Adu5Pat
+
+
+  
+  G12Pos *fG12PosPtr; ///< Pointer to the G12 position data.
+  G12Sat *fG12SatPtr; ///< Pointer to the G12 satellite data.
+  Adu5Pat *fAdu5APatPtr; ///< Pointer to the ADU5 position data.
+  Adu5Sat *fAdu5ASatPtr; ///< Pointer to the ADU5 satellite data.
+  Adu5Vtg *fAdu5AVtgPtr; ///< Pointer to the ADU5 velocity data.
+  Adu5Pat *fAdu5BPatPtr; ///< Pointer to the ADU5 position data.
+  Adu5Sat *fAdu5BSatPtr; ///< Pointer to the ADU5 satellite data.
+  Adu5Vtg *fAdu5BVtgPtr; ///< Pointer to the ADU5 velocity data.
 
    TButton *fVertButton; ///< The vertical polarisation button.
    TButton *fHorizButton; ///< The horizontal polarisation button.

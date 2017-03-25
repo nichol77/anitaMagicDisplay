@@ -405,11 +405,17 @@ TPad *AnitaCanvasMaker::quickGetEventViewerCanvasForWebPlottter(UsefulAnitaEvent
 }
 
 
-TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr, RawAnitaHeader *hdPtr, TPad *useCan){
+
+TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr, RawAnitaHeader *hdPtr, Adu5Pat* pat, TPad *useCan){
   // std::cerr << __PRETTY_FUNCTION__ << std::endl;
 
   TPad *retCan=0;
   static UInt_t lastEventNumber=0;
+
+
+  // FilteredAnitaEvent* fEv = new FilteredAnitaEvent(evPtr, MagicDisplay::Instance()->getStrategy(), pat, hdPtr);
+  FilteredAnitaEvent fEv(evPtr, MagicDisplay::Instance()->getStrategy(), pat, hdPtr);  
+
 
   if(fCanvasView==MagicDisplayCanvasLayoutOption::kInterferometry){
 
@@ -419,7 +425,8 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr, RawAnitaHe
 
     const int numPeaksCoarse = 1;
     const int numPeaksFine = 1;
-    fCrossCorr->reconstructEvent(evPtr, numPeaksCoarse, numPeaksFine);
+    // fCrossCorr->reconstructEvent(evPtr, numPeaksCoarse, numPeaksFine);
+    fCrossCorr->reconstructEvent(&fEv, numPeaksCoarse, numPeaksFine);    
 
     for(Int_t polInd=0; polInd<AnitaPol::kNotAPol; polInd++){
       if(hImage[polInd]!=NULL){
@@ -454,27 +461,28 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr, RawAnitaHe
   if (fCanvasView==MagicDisplayCanvasLayoutOption::kUCorrelator)
   {
 
-    //filthy filthy filthy
-    int run = hdPtr->run;
-    int ev = hdPtr->eventNumber;
-    if (run !=current_run || !dataset)
-    {
-      if (dataset)
-      {
-        dataset->loadRun(run);
-      }
-      else
-      {
-        dataset = new AnitaDataset(run);
-      }
-      current_run = run;
-    }
+    // //filthy filthy filthy
+    // int run = hdPtr->run;
+    // int ev = hdPtr->eventNumber;
+    // if (run !=current_run || !dataset)
+    // {
+    //   if (dataset)
+    //   {
+    //     dataset->loadRun(run);
+    //   }
+    //   else
+    //   {
+    //     dataset = new AnitaDataset(run);
+    //   }
+    //   current_run = run;
+    // }
 
-    dataset->getEvent(ev);
+    // dataset->getEvent(ev);
 
-    FilteredAnitaEvent fev( evPtr, MagicDisplay::Instance()->getStrategy(), dataset->gps(), dataset->header());
+    // FilteredAnitaEvent fev( evPtr, MagicDisplay::Instance()->getStrategy(), dataset->gps(), dataset->header());
     AnitaEventSummary sum;
-    MagicDisplay::Instance()->getUCorr()->analyze(&fev,&sum);
+    // MagicDisplay::Instance()->getUCorr()->analyze(&fev,&sum);
+    MagicDisplay::Instance()->getUCorr()->analyze(&fEv,&sum);    
   }
 
 

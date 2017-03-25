@@ -109,6 +109,7 @@ void MagicDisplay::zeroPointers()
   //  fAvgSurfHkFile=0;
   fRawEventPtr=0;
   fCalEventPtr=0;
+  fPatPtr=0;  
   fWhichEventFileKind=MagicDisplayFileType::kCalEvent;
   fHeadPtr=0;
   fHkPtr=0;
@@ -298,6 +299,7 @@ int MagicDisplay::getEventEntry()
   if(fEventEntry >= 0){
     fHeadPtr = fDataset->header();
     fUsefulEventPtr = fDataset->useful();
+    fPatPtr = fDataset->gps();    
   }
   else{
     retVal = -1;
@@ -361,7 +363,8 @@ void MagicDisplay::refreshEventDisplay()
    fEventCanMaker->setInterferometryTypeFlags(fInterferometryMapMode, fInterferometryZoomMode);
 
 
-   fEventCanMaker->getEventViewerCanvas(fUsefulEventPtr,fHeadPtr,fMagicMainPad);
+   // fEventCanMaker->getEventViewerCanvas(fUsefulEventPtr,fHeadPtr,fMagicMainPad);
+   fEventCanMaker->getEventViewerCanvas(fUsefulEventPtr,fHeadPtr,fPatPtr, fMagicMainPad);   
    fEventCanMaker->getEventInfoCanvas(fUsefulEventPtr,fHeadPtr,fMagicEventInfoPad);
 
 

@@ -75,10 +75,11 @@ class AnitaCanvasMaker
      Actually draws all the little squiggly lines.
      /param evPtr Pointer to the UsefulAnitaEvent we want to draw.
      /param hdPtr Pointer to the header of the event we want to draw
+     /param pat Pointer to the Adu5Pat matched most closely in time to the event we want to draw
      /param useCan Optional pointer to a canvas to draw the squiggly ines in (if zero a canvas will be created).
    */
-   TPad *getEventViewerCanvas(UsefulAnitaEvent *evPtr,RawAnitaHeader *hdPtr, TPad *useCan=0);
-
+   // TPad *getEventViewerCanvas(UsefulAnitaEvent *evPtr,RawAnitaHeader *hdPtr, TPad *useCan=0);
+  TPad *getEventViewerCanvas(UsefulAnitaEvent *evPtr, RawAnitaHeader *hdPtr, Adu5Pat* pat, TPad *useCan=0);
    //!  The interferometry canvas getter.
    /*!
      Puts histograms from the Cross Correlator onto the display
