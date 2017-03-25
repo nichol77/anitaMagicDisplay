@@ -42,6 +42,7 @@
 #include "AnitaRFCanvasMaker.h"
 #include "AnitaGpsCanvasMaker.h"
 #include "MagicControlPanel.h"
+#include "FilteringPanel.h"
 
 //Event Reader Includes
 #include "AnitaConventions.h"
@@ -82,6 +83,7 @@ AnitaCanvasMaker *fEventCanMaker=0;
 AnitaRFCanvasMaker *fRFCanMaker=0;
 AnitaGpsCanvasMaker *fGpsCanMaker=0;
 MagicControlPanel *fControlPanel=0;
+FilteringPanel *fFilteringPanel=0;
 //Leave these as global variables for now
 
 
@@ -274,6 +276,13 @@ void MagicDisplay::startControlPanel()
   //  fControlPanel=new MagicControlPanel(gClient->GetRoot(), 400, 200);
   //  fControlPanel->DrawControlPanel();
   //  fControlPanel->Draw();
+}
+
+
+
+void MagicDisplay::startFilteringPanel()
+{
+  fFilteringPanel = FilteringPanel::Instance();
 }
 
 
@@ -526,10 +535,19 @@ void MagicDisplay::drawEventButtons() {
    butGoto->SetTextSize(0.5);
    butGoto->SetFillColor(kOrange);
    butGoto->Draw();
+
    fTimeEntryButton= new TButton("Event#","MagicDisplay::Instance()->toggleTimeEventOrdering();",0.85,0.925,0.9,0.95);
    fTimeEntryButton->SetTextSize(0.5);
    fTimeEntryButton->SetFillColor(kGray);
    fTimeEntryButton->Draw();
+
+   TButton *butFiltering = new TButton("Filtering","MagicDisplay::Instance()->startFilteringPanel();",0.85,0.9,0.9,0.925);
+   // TButton *butFiltering = new TButton("Filtering","std::cout << \"some words\" << std::endl;",0.85,0.9,0.9,0.925);   
+   butFiltering->SetTextSize(0.5);
+   butFiltering->SetFillColor(kYellow);
+   butFiltering->Draw();
+   
+   
 
 
    fVertButton = new TButton("V","MagicDisplay::Instance()->setCanvasLayout(MagicDisplayCanvasLayoutOption::kPhiVerticalOnly); MagicDisplay::Instance()->refreshEventDisplay();",0,0.966,0.05,1);

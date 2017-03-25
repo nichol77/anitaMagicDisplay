@@ -25,6 +25,7 @@
 //#include "AnitaDataset.h"
 #include "BlindDataset.h"
 
+
 class TCanvas;
 class TPad;
 class RawAnitaHeader;
@@ -75,6 +76,7 @@ class MagicDisplay
 
   //Control Panel Functions
   void startControlPanel(); ///<Starts the (currently highly buggy) control panel
+  void startFilteringPanel(); ///<Starts the filtering control panel, to set filter strategies in the gui
 
   Int_t getCurrentRun()
   {return fCurrentRun;} ///< Returns the current run number

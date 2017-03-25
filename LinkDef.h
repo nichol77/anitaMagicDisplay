@@ -11,6 +11,7 @@
 #pragma link C++ class FFTGraph+;
 #pragma link C++ class MagicDisplay+;
 #pragma link C++ class MagicControlPanel+;
+#pragma link C++ class FilteringPanel+;
 #pragma link C++ class CorrelationFactory+;
 
 
