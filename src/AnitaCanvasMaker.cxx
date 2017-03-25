@@ -45,14 +45,6 @@
 
 #include "FilteredAnitaEvent.h"
 
-#include "AnitaDataset.h"
-
-//This is filthy, but I want to match the analysis exactly, so getting the header from
-//MagicDisplay won't do until it gets the timedHeader and gpsEvent, which should be done at some point, but
-//I'll figure it out later.
-static AnitaDataset * dataset = 0;
-static int current_run = 0;
-
 
 AnitaCanvasMaker*  AnitaCanvasMaker::fgInstance = 0;
 CrossCorrelator* AnitaCanvasMaker::fCrossCorr = 0;
@@ -412,8 +404,6 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr, RawAnitaHe
   TPad *retCan=0;
   static UInt_t lastEventNumber=0;
 
-
-  // FilteredAnitaEvent* fEv = new FilteredAnitaEvent(evPtr, MagicDisplay::Instance()->getStrategy(), pat, hdPtr);
   FilteredAnitaEvent fEv(evPtr, MagicDisplay::Instance()->getStrategy(), pat, hdPtr);  
 
 
@@ -460,28 +450,7 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr, RawAnitaHe
 
   if (fCanvasView==MagicDisplayCanvasLayoutOption::kUCorrelator)
   {
-
-    // //filthy filthy filthy
-    // int run = hdPtr->run;
-    // int ev = hdPtr->eventNumber;
-    // if (run !=current_run || !dataset)
-    // {
-    //   if (dataset)
-    //   {
-    //     dataset->loadRun(run);
-    //   }
-    //   else
-    //   {
-    //     dataset = new AnitaDataset(run);
-    //   }
-    //   current_run = run;
-    // }
-
-    // dataset->getEvent(ev);
-
-    // FilteredAnitaEvent fev( evPtr, MagicDisplay::Instance()->getStrategy(), dataset->gps(), dataset->header());
     AnitaEventSummary sum;
-    // MagicDisplay::Instance()->getUCorr()->analyze(&fev,&sum);
     MagicDisplay::Instance()->getUCorr()->analyze(&fEv,&sum);    
   }
 
