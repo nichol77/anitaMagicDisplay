@@ -74,8 +74,8 @@ FilteringPanel::FilteringPanel()
   fMainFrame->AddFrame(fSelectedFrame, new TGLayoutHints(kLHintsExpandX | kLHintsExpandY));
   
 
-  Pixel_t backpxl;
-  gClient->GetColorByName("#c0c0c0", backpxl);
+  // Pixel_t backpxl;
+  // gClient->GetColorByName("#c0c0c0", backpxl);
 
   // new TGTextView(this, 500, 94, fIDs.GetUnID(), kFixedWidth | kFixedHeight)
 
@@ -86,8 +86,9 @@ FilteringPanel::FilteringPanel()
   setText(fAppliedTextView, it);
   setText(fSelectedTextView, it);
 
-  fAppliedTextView->SetBackgroundColor(backpxl);
-  fSelectedTextView->SetBackgroundColor(backpxl);
+
+  TColor* yellow = gROOT->GetColor(kYellow - 9); // -9 tones down the yellow, which is a bit in-your-face otherwise
+  fAppliedTextView->SetBackgroundColor(yellow->GetPixel());  
   
   fAppliedFrame->AddFrame(fAppliedTextView, new TGLayoutHints(kLHintsExpandX | kLHintsExpandY));
 
