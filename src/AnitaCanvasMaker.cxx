@@ -49,6 +49,11 @@
 AnitaCanvasMaker*  AnitaCanvasMaker::fgInstance = 0;
 CrossCorrelator* AnitaCanvasMaker::fCrossCorr = 0;
 
+// These classes are such a mess anyway, I might as well leave these here...
+FilteredAnitaEvent* fEv = NULL;
+FilterStrategy* lastStrategy = NULL;
+
+
 int phiMap[6][8]={{0,2,4,6,8,10,12,14},
 		  {1,3,5,7,9,11,13,15},
 		  {0,2,4,6,8,10,12,14},
@@ -398,67 +403,24 @@ TPad *AnitaCanvasMaker::quickGetEventViewerCanvasForWebPlottter(UsefulAnitaEvent
 
 
 
+
 TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr, RawAnitaHeader *hdPtr, Adu5Pat* pat, TPad *useCan){
   // std::cerr << __PRETTY_FUNCTION__ << std::endl;
 
   TPad *retCan=0;
   static UInt_t lastEventNumber=0;
 
-  FilteredAnitaEvent fEv(evPtr, MagicDisplay::Instance()->getStrategy(), pat, hdPtr);
-  // FilteredAnitaEvent fEv(evPtr, MagicDisplay::Instance()->getNoFilterStrategy(), pat, hdPtr);    
+  if(evPtr->eventNumber!=lastEventNumber || fWaveformOption!=fLastWaveformFormat || MagicDisplay::Instance()->getStrategy() != lastStrategy) {
 
-
-  if(fCanvasView==MagicDisplayCanvasLayoutOption::kInterferometry){
-
-    if(!fCrossCorr){
-      fCrossCorr=new CrossCorrelator();
+    if(fEv){
+      delete fEv;
+      fEv = NULL;
     }
-
-    const int numPeaksCoarse = 1;
-    const int numPeaksFine = 1;
-    // fCrossCorr->reconstructEvent(evPtr, numPeaksCoarse, numPeaksFine);
-    fCrossCorr->reconstructEvent(&fEv, numPeaksCoarse, numPeaksFine);    
-
-    for(Int_t polInd=0; polInd<AnitaPol::kNotAPol; polInd++){
-      if(hImage[polInd]!=NULL){
-	delete hImage[polInd];
-	hImage[polInd] = NULL;
-      }
-      fMinInterfLimit = 1;
-      fMaxInterfLimit = -1;
-    }
-
-    for(Int_t polInd=0; polInd<AnitaPol::kNotAPol; polInd++){
-      AnitaPol::AnitaPol_t pol = AnitaPol::AnitaPol_t(polInd);
-      if(hImage[polInd]==NULL){
-	Double_t imagePeak, peakPhiDeg, peakThetaDeg;
-	// UShort_t l3TrigPattern = pol==AnitaPol::kHorizontal ? hdPtr->l3TrigPatternH : hdPtr->l3TrigPattern;
-
-	if(fInterferometryZoomMode!=CrossCorrelator::kZoomedIn){
-	  hImage[polInd] = fCrossCorr->getMap(pol, imagePeak,
-					      peakPhiDeg, peakThetaDeg);
-	}
-	else{
-	  // if(fInterferometryZoomMode==CrossCorrelator::kZoomedIn){
-	  hImage[polInd] = fCrossCorr->getZoomMap(pol);
-	}
-	hImage[polInd]->SetTitleSize(0.1);
-	hImage[polInd]->GetXaxis()->SetTitleSize(0.04);
-	hImage[polInd]->GetYaxis()->SetTitleSize(0.04);
-      }
-    }
-  }
-
-  if (fCanvasView==MagicDisplayCanvasLayoutOption::kUCorrelator)
-  {
-    AnitaEventSummary sum;
-    MagicDisplay::Instance()->getUCorr()->analyze(&fEv,&sum);    
-  }
-
-
-  if(evPtr->eventNumber!=lastEventNumber || fWaveformOption!=fLastWaveformFormat) {
+    fEv = new FilteredAnitaEvent(evPtr, MagicDisplay::Instance()->getStrategy(), pat, hdPtr);
+    
     lastEventNumber=evPtr->eventNumber;
-
+    lastStrategy = MagicDisplay::Instance()->getStrategy();
+    
     if(fAutoScale) {
       fMinVoltLimit=0;
       fMaxVoltLimit=0;
@@ -502,7 +464,7 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr, RawAnitaHe
 	}
 	else{ // regular channel
 	  AnitaGeomTool::getAntPolFromSurfChan(surf,chan,ant,pol);
-	  const AnalysisWaveform* wf = fEv.getFilteredGraph(ant, pol);
+	  const AnalysisWaveform* wf = fEv->getFilteredGraph(ant, pol);
 	  const TGraphAligned* gr = wf->even();
 	  grTemp = new TGraph(gr->GetN(), gr->GetX(), gr->GetY());
 	}
@@ -632,6 +594,54 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr, RawAnitaHe
 
   }
 
+  if(fCanvasView==MagicDisplayCanvasLayoutOption::kInterferometry){
+
+    if(!fCrossCorr){
+      fCrossCorr=new CrossCorrelator();
+    }
+
+    const int numPeaksCoarse = 1;
+    const int numPeaksFine = 1;
+    // fCrossCorr->reconstructEvent(evPtr, numPeaksCoarse, numPeaksFine);
+    fCrossCorr->reconstructEvent(fEv, numPeaksCoarse, numPeaksFine);
+
+    for(Int_t polInd=0; polInd<AnitaPol::kNotAPol; polInd++){
+      if(hImage[polInd]!=NULL){
+	delete hImage[polInd];
+	hImage[polInd] = NULL;
+      }
+      fMinInterfLimit = 1;
+      fMaxInterfLimit = -1;
+    }
+
+    for(Int_t polInd=0; polInd<AnitaPol::kNotAPol; polInd++){
+      AnitaPol::AnitaPol_t pol = AnitaPol::AnitaPol_t(polInd);
+      if(hImage[polInd]==NULL){
+	Double_t imagePeak, peakPhiDeg, peakThetaDeg;
+	// UShort_t l3TrigPattern = pol==AnitaPol::kHorizontal ? hdPtr->l3TrigPatternH : hdPtr->l3TrigPattern;
+
+	if(fInterferometryZoomMode!=CrossCorrelator::kZoomedIn){
+	  hImage[polInd] = fCrossCorr->getMap(pol, imagePeak,
+					      peakPhiDeg, peakThetaDeg);
+	}
+	else{
+	  // if(fInterferometryZoomMode==CrossCorrelator::kZoomedIn){
+	  hImage[polInd] = fCrossCorr->getZoomMap(pol);
+	}
+	hImage[polInd]->SetTitleSize(0.1);
+	hImage[polInd]->GetXaxis()->SetTitleSize(0.04);
+	hImage[polInd]->GetYaxis()->SetTitleSize(0.04);
+      }
+    }
+  }
+
+  if (fCanvasView==MagicDisplayCanvasLayoutOption::kUCorrelator)
+  {
+    AnitaEventSummary sum;
+    MagicDisplay::Instance()->getUCorr()->analyze(fEv,&sum);    
+  }
+
+  
   fNewEvent=0;
 
   fRedoEventCanvas=0;

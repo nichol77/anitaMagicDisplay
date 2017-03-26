@@ -242,7 +242,9 @@ void MagicDisplay::setFilterStrategy(FilterStrategy * s)
     }
     butFiltering->Modified(); // force update
     butFiltering->Update(); // force update
-    
+
+
+    this->refreshEventDisplay();
   }  
 
   //TODO: do a smarter job of this
@@ -395,7 +397,7 @@ void MagicDisplay::refreshEventDisplay()
 
 
    // fEventCanMaker->getEventViewerCanvas(fUsefulEventPtr,fHeadPtr,fMagicMainPad);
-   fEventCanMaker->getEventViewerCanvas(fUsefulEventPtr,fHeadPtr,fPatPtr, fMagicMainPad);   
+   fEventCanMaker->getEventViewerCanvas(fUsefulEventPtr,fHeadPtr,fPatPtr, fMagicMainPad);
    fEventCanMaker->getEventInfoCanvas(fUsefulEventPtr,fHeadPtr,fMagicEventInfoPad);
 
 
