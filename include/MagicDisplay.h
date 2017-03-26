@@ -24,9 +24,12 @@
 
 //#include "AnitaDataset.h"
 #include "BlindDataset.h"
+#include "TGFrame.h"
 
+// #include <RQ_OBJECT.h>
 
 class TCanvas;
+class TRootEmbeddedCanvas;
 class TPad;
 class RawAnitaHeader;
 class PrettyAnitaHk;
@@ -60,8 +63,9 @@ Typically one starts MagicDisplay by giving the constructor the base directory t
 
 Most of the functions are called by pressig one of the buttons on the display. They can, of course, be called directly through MagicDisplay::Instance()->functionName().
 */
-class MagicDisplay
+class MagicDisplay// : public TGMainFrame
 {
+  // RQ_OBJECT("MagicDisplay") // for the signals/slots fun times
  public:
 
  //! The assignment constructor. Most MagicDisplay sessions start with a call to this.
@@ -105,6 +109,8 @@ class MagicDisplay
   void refreshEventDisplay(); ///< Refresh the event display and redraw the graphs, this is called everytime a new event is displayed.
   int getEventEntry(); ///< Tries to retrieve the event corresponding to entry <i>fEventEntry</i> from the evnt file. Returns zero on success.
   void drawEventButtons(); ///< Worker function to draw the buttons on the main event display canvas.
+  int doKeyboardShortcut(); ///!< Execute intesting functions from the keyboard, connected to the fExec which is drawn on the canvas
+  
   //! Toggles between waveform and FFT view modes
   /*!
     \param option See MagicDisplayCanvasLayoutOption for options.
@@ -264,8 +270,10 @@ class MagicDisplay
   void zeroPointers();
   MagicDisplayFormatOption::MagicDisplayFormatOption_t fWaveformFormat; ///< The format for displaying waveforms.
   MagicDisplayCanvasLayoutOption::MagicDisplayCanvasLayoutOption_t fCanvasLayout; ///< The format for the canvas layout
-
-   TCanvas *fMagicCanvas; ///< The main event display canvas.
+  
+   TGMainFrame *fMainFrame; ///< The magic display frame, we need this to do fancy connecting
+   TRootEmbeddedCanvas *fMagicEmbedded; ///< The embedded canvas object (which embeds the main canvas)
+   TCanvas *fMagicCanvas; ///< The main event display canvas.  
    TPad *fMagicMainPad; ///< The main event display pad.
    TPad *fMagicEventInfoPad; ///< The event display info pad.
 

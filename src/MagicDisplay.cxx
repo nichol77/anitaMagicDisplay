@@ -71,6 +71,7 @@
 #include "TThread.h"
 #include "TEventList.h"
 #include <TGClient.h>
+#include "TRootEmbeddedCanvas.h"
 #include "TCut.h"
 
 #include "UCFilters.h"
@@ -188,6 +189,7 @@ void MagicDisplay::zeroPointers()
   fInterferometryMapMode=CrossCorrelator::kGlobal;
   fInterferometryZoomMode=CrossCorrelator::kZoomedOut;
 
+
   butFiltering = 0;
   
   FilterStrategy* fSineSub = new FilterStrategy();
@@ -202,6 +204,7 @@ void MagicDisplay::zeroPointers()
   setFilterStrategy(filterStrats["NoFilter"]);  
 
   fUCorr = new UCorrelator::Analyzer(0,true);
+
 }
 
 
@@ -367,16 +370,35 @@ int MagicDisplay::loadDataset()
   return 0;
 }
 
+
 void MagicDisplay::refreshEventDisplay()
 {
    if(!fMagicCanvas) {
-      fMagicCanvas = new TCanvas("canMagic","canMagic",1200,800);
-      fMagicCanvas->cd();
-      drawEventButtons();
+     fMainFrame = new TGMainFrame(gClient->GetRoot(),1200,800,kVerticalFrame);
+     fMagicEmbedded = new TRootEmbeddedCanvas("canMagic", fMainFrame, 1200, 800);
+     fMainFrame->AddFrame(fMagicEmbedded, new TGLayoutHints(kLHintsExpandX | kLHintsExpandY));       
+     fMainFrame->SetWindowName("MAGIC Display");
+     fMainFrame->MapSubwindows();  
+     // fMainFrame->Connect("CloseWindow()", "MagicDisplay", this, "closeWindow()");
+     fMainFrame->Resize();
+     fMainFrame->MapRaised();
+     
+     
+     fMagicCanvas = fMagicEmbedded->GetCanvas();
+     fMagicCanvas->SetName("canMagic");
+     fMagicCanvas->cd();
+     drawEventButtons();
    }
+   // if(!fMagicCanvas) {
+   //    fMagicCanvas = new TCanvas("canMagic","canMagic",1200,800);
+   //    fMagicCanvas->cd();
+   //    drawEventButtons();
+   // }
+   
    if(!fMagicMainPad) {
       fMagicCanvas->cd();
       fMagicMainPad= new TPad("canMagicMain","canMagicMain",0,0,1,0.9);
+      
       fMagicMainPad->Draw();
       fMagicCanvas->Update();
    }
@@ -488,6 +510,7 @@ int MagicDisplay::displayPreviousEvent(){
   }
   return retVal;
 }
+
 
 
 int MagicDisplay::displayThisEvent(UInt_t eventNumber, UInt_t runNumber){
