@@ -83,8 +83,8 @@ FilteringPanel::FilteringPanel()
   fAppliedTextView = new TGTextView(fAppliedFrame, 500, 94, id++, kFixedWidth | kFixedHeight);
   fSelectedTextView = new TGTextView(fSelectedFrame, 500, 94, id++, kFixedWidth | kFixedHeight);
   it = filterStrats.find(stratName);
-  setText(fAppliedText, fAppliedTextView, it);
-  setText(fSelectedText, fSelectedTextView, it);
+  setText(fAppliedTextView, it);
+  setText(fSelectedTextView, it);
 
   fAppliedTextView->SetBackgroundColor(backpxl);
   fSelectedTextView->SetBackgroundColor(backpxl);
@@ -151,7 +151,7 @@ void FilteringPanel::apply()
     if(entry==selectedEntry){
       
       md->setFilterStrategy(it->second);
-      setText(fAppliedText, fAppliedTextView, it);
+      setText(fAppliedTextView, it);
       break;
       
     }
@@ -160,38 +160,24 @@ void FilteringPanel::apply()
 }
 
 
-void FilteringPanel::updateText(){
-  fAppliedTextView->Clear();
 
-  // Now have a TObjArray of TObjStrings split by out delimeter :
-  TObjArray* tokens = fAppliedText.Tokenize("\n");
+void FilteringPanel::setText(TGTextView* tv, std::map<TString, FilterStrategy*>::iterator it){
 
-  int nTokens = tokens->GetEntries();
+  tv->Clear();
 
-  // If there are two tokens, then there was one delimeter
-  for(int i=0; i < nTokens; i++){
-    TString line = ((TObjString*) tokens->At(i))->GetString();
-    fAppliedTextView->AddLineFast(line.Data());
-  }  
-}
-
-
-void FilteringPanel::setText(TString& str, TGTextView* tv, std::map<TString, FilterStrategy*>::iterator it){
-
-
-
-  str.Clear();
-
-  
    // Set an appropriate title, showing the filter strategy name in MagicDisplay
-  str += tv == fAppliedTextView ? "Currently applied FilterStrategy: " : "Selected applied FilterStrategy: ";
-  str += it->first + "\n";
+
+  TString firstLine = tv == fAppliedTextView ? "Currently applied FilterStrategy: " : "Selected applied FilterStrategy: ";
+  firstLine += it->first;
+
+  tv->AddLineFast(firstLine.Data());
   
   for(unsigned i=0; i < it->second->nOperations(); i++){
     const FilterOperation * op = it->second->getOperation(i);
-    str += TString::Format("Step %u: %s \n", i+1, op->description());
+    TString thisLine = TString::Format("Step %u: %s \n", i+1, op->description());
+    tv->AddLineFast(thisLine.Data());
   }
 
-  std::cout << str.Data() << std::endl;
-  updateText();
+  tv->Update();
+
 }

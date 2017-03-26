@@ -67,8 +67,7 @@ public:
   // void goToEvent();
   void closeWindow();
   void apply();
-  void setText(TString& str, TGTextView* tv, std::map<TString, FilterStrategy*>::iterator it);
-  void updateText();
+  void setText(TGTextView* tv, std::map<TString, FilterStrategy*>::iterator it);
 
 protected:
   static FilteringPanel *fgInstance;   ///< Protect against multiple instances
@@ -88,9 +87,6 @@ protected:
   TGComboBox *fCombo; ///< Combo box for the filter strategies
   TGTextView* fAppliedTextView; ///!< For text describing filter strategy applied
   TGTextView* fSelectedTextView; ///!< For text describing filter strategy selected
-
-  TString fSelectedText;
-  TString fAppliedText;  
 
   TGVerticalFrame *fEntryPanel; ///< A vertical frame
   TGHorizontalFrame *fRunPanel; ///< A horizontal frame
