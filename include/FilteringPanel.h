@@ -44,10 +44,11 @@
 #include <TKey.h>
 #include <TGDockableFrame.h>
 #include <TGFontDialog.h>
+#include <TGTable.h>
 
-//!  The Magic Display control panel
+//!  The Filtering panel
 /*!
-  This is the horribly buggy control panel that was meant to enable easy control of magic Display, without resorting to command line power user mode. Unfortunately, it doesn't yet really work in a non segmentation violation frenzy way. I blame ROOT, others may have different opinions.
+  Set the FilterStrategy in MagicDisplay w/o the command line
 */
 class FilteringPanel 
 {
@@ -73,12 +74,8 @@ protected:
 
   
   TGTextButton    *fApplyBut; ///< Text button.
-
-  // TGCheckButton   *fEventBut; ///< Check button
-  // TGCheckButton   *fSurfBut; ///< Check button
-  // TGCheckButton   *fTurfBut; ///< Check button
-  // TGCheckButton   *fAvgSurfBut; ///< Check button
-  // TGCheckButton   *fSumTurfBut; ///< Check button
+  TGTextButton    *fCancelBut; ///< Text button.
+  
   TGLayoutHints   *fLayout; ///< Layout nonsense
   TGLayoutHints   *fLeftLayout; ///< Layout nonsense
   TGLayoutHints   *fRightLayout; ///< Layout nonsense
@@ -86,11 +83,8 @@ protected:
   TGLayoutHints   *fCenterLayout; ///< Layout nonsense
 
   TGComboBox *fCombo; ///< Combo box for the filter strategies
-  // TGNumberEntry   *fRunEntry; ///< Number entry form
-  // TGNumberEntry   *fEventEntry; ///< Number entry form
-  // TGLabel         *fRunLabel; ///< It's a label
-  // TGLabel         *fEventLabel; ///< It's a label
-  // TGLabel         *fUpdateLabel; ///< It's a label
+  TGTextView* fAppliedText; ///!< For text describing filter strategy applied
+  TGTextView* fSelectedText; ///!< For text describing filter strategy selected
 
   TGVerticalFrame *fEntryPanel; ///< A vertical frame
   TGHorizontalFrame *fRunPanel; ///< A horizontal frame
