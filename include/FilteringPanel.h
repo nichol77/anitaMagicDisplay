@@ -66,32 +66,16 @@ public:
    
   // void goToEvent();
   void closeWindow();
-  void apply();
-  void setText(TGTextView* tv, std::map<TString, FilterStrategy*>::iterator it);
+  void updateTextAndSetFilter();
+  void selectMagicDisplayFilterInComboBox();
 
 protected:
   static FilteringPanel *fgInstance;   ///< Protect against multiple instances
 
   TGMainFrame     *fMainFrame; ///< Main frame
-
-
   
-  TGTextButton    *fApplyBut; ///< Text button.
-  TGTextButton    *fCancelBut; ///< Text button.
-  TGLayoutHints   *fLayout; ///< Layout nonsense
-  TGLayoutHints   *fLeftLayout; ///< Layout nonsense
-  TGLayoutHints   *fRightLayout; ///< Layout nonsense
-  TGLayoutHints   *fButtonLayout; ///< Layout nonsense
-  TGLayoutHints   *fCenterLayout; ///< Layout nonsense
-
   TGComboBox *fCombo; ///< Combo box for the filter strategies
-  TGTextView* fAppliedTextView; ///!< For text describing filter strategy applied
   TGTextView* fSelectedTextView; ///!< For text describing filter strategy selected
-
-  TGVerticalFrame *fEntryPanel; ///< A vertical frame
-  TGHorizontalFrame *fRunPanel; ///< A horizontal frame
-  TGHorizontalFrame *fEventPanel; ///< A horizontal frame
-  TGVerticalFrame *fButtonPanel; ///< A vertical frame
 
   ClassDef(FilteringPanel,1); ///< One of the magic ROOT macros.
 };
