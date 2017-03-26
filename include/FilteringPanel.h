@@ -84,6 +84,8 @@ protected:
   TGLayoutHints   *fRightLayout; ///< Layout nonsense
   TGLayoutHints   *fButtonLayout; ///< Layout nonsense
   TGLayoutHints   *fCenterLayout; ///< Layout nonsense
+
+  TGComboBox *fCombo; ///< Combo box for the filter strategies
   // TGNumberEntry   *fRunEntry; ///< Number entry form
   // TGNumberEntry   *fEventEntry; ///< Number entry form
   // TGLabel         *fRunLabel; ///< It's a label

@@ -254,6 +254,7 @@ class MagicDisplay
   FilterStrategy * getNoFilterStrategy();
   FilterStrategy * getDefaultFilterStrategy();
 
+  std::map<TString, FilterStrategy*>& getFilterStrats(){return filterStrats;}  
 
  protected:
   static MagicDisplay *fgInstance;  ///< The pointer to the current MagicDisplay
@@ -318,6 +319,7 @@ class MagicDisplay
    TButton *fPayloadButton; ///< The payload view button.
    TButton *fInterferometryButton; ///< The Interferometry view button.
    TButton *fUCorrelatorButton; ///< The UCorrelator view button
+   TButton *butFiltering; ///< The filtering option panel button
 
    TButton *fWaveformButton; ///< The waveform view button.
    TButton *fPowerButton; ///< The FFT view button.
@@ -367,6 +369,9 @@ class MagicDisplay
   void drawUCorrelatorFilterButtons();
   UCorrelator::Analyzer * fUCorr;
   FilterStrategy * fStrategy;
+  std::map<TString, FilterStrategy*> filterStrats;
+
+
 };
 
 

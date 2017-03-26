@@ -404,8 +404,8 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr, RawAnitaHe
   TPad *retCan=0;
   static UInt_t lastEventNumber=0;
 
-  // FilteredAnitaEvent fEv(evPtr, MagicDisplay::Instance()->getStrategy(), pat, hdPtr);
-  FilteredAnitaEvent fEv(evPtr, MagicDisplay::Instance()->getNoFilterStrategy(), pat, hdPtr);    
+  FilteredAnitaEvent fEv(evPtr, MagicDisplay::Instance()->getStrategy(), pat, hdPtr);
+  // FilteredAnitaEvent fEv(evPtr, MagicDisplay::Instance()->getNoFilterStrategy(), pat, hdPtr);    
 
 
   if(fCanvasView==MagicDisplayCanvasLayoutOption::kInterferometry){

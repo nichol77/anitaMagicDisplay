@@ -88,10 +88,11 @@ FilteringPanel *fFilteringPanel=0;
 
 
 
-static FilterStrategy default_strategy;
-static int default_strategy_init = 0;
-static FilterStrategy no_filter_strategy;
-static int no_filter_strategy_init = 0;
+// static FilterStrategy default_strategy;
+// static int default_strategy_init = 0;
+// static FilterStrategy no_filter_strategy;
+// static int no_filter_strategy_init = 0;
+
 
 void MagicDisplay::zeroPointers()
 {
@@ -187,22 +188,18 @@ void MagicDisplay::zeroPointers()
   fInterferometryMapMode=CrossCorrelator::kGlobal;
   fInterferometryZoomMode=CrossCorrelator::kZoomedOut;
 
+  butFiltering = 0;
+  
+  FilterStrategy* fSineSub = new FilterStrategy();
+  filterStrats["SineSubtract"] = fSineSub;
+  fSineSub->addOperation(new UCorrelator::SineSubtractFilter);
+  fSineSub->addOperation(new ALFAFilter);
 
-  if (!default_strategy_init)
-    {
-      default_strategy_init = 1;
-      default_strategy.addOperation(new UCorrelator::SineSubtractFilter);
-      default_strategy.addOperation(new ALFAFilter);
-    }
+  FilterStrategy* fNoFilter = new FilterStrategy();
+  filterStrats["NoFilter"] = fNoFilter;
+  fNoFilter->addOperation(new ALFAFilter);  
 
-  if (!no_filter_strategy_init)
-    {
-      no_filter_strategy_init = 1;
-      no_filter_strategy.addOperation(new ALFAFilter);
-    }
-
-
-  setFilterStrategy(&default_strategy);
+  setFilterStrategy(filterStrats["NoFilter"]);  
 
   fUCorr = new UCorrelator::Analyzer(0,true);
 }
@@ -210,24 +207,49 @@ void MagicDisplay::zeroPointers()
 
 void MagicDisplay::drawUCorrelatorFilterButtons()
 {
-    if (fStrategy == &no_filter_strategy) fWaveformButton->SetFillColor(kGray + 3);
-    else fWaveformButton->SetFillColor(kGray);
-    if (fStrategy == &default_strategy) fPowerButton->SetFillColor(kGray + 3);
-    else fPowerButton->SetFillColor(kGray);
+    // if (fStrategy == &no_filter_strategy) fWaveformButton->SetFillColor(kGray + 3);
+    // else fWaveformButton->SetFillColor(kGray);
+    // if (fStrategy == &default_strategy) fPowerButton->SetFillColor(kGray + 3);
+    // else fPowerButton->SetFillColor(kGray);
 
-    fWaveformButton->Modified();
-    fPowerButton->Modified();
+    // fWaveformButton->Modified();
+    // fPowerButton->Modified();
 }
+
+
+
 
 void MagicDisplay::setFilterStrategy(FilterStrategy * s)
 {
   fStrategy = s;
 
+  
+  if(butFiltering){ // Prevent crash on startup
+
+    bool foundIt = false;
+    std::map<TString, FilterStrategy*>::iterator it = filterStrats.begin();
+    for(; it!= filterStrats.end(); it++)
+    {
+      if(it->second == fStrategy){
+	butFiltering->SetTitle(it->first);
+	foundIt = true;
+	break;
+      }
+    }
+
+    if(!foundIt){
+      butFiltering->SetTitle("?????");
+    }
+    butFiltering->Modified(); // force update
+    butFiltering->Update(); // force update
+    
+  }  
+
   //TODO: do a smarter job of this
-  if (fCanvasLayout == MagicDisplayCanvasLayoutOption::kUCorrelator)
-  {
-    drawUCorrelatorFilterButtons();
-  }
+  // if (fCanvasLayout == MagicDisplayCanvasLayoutOption::kUCorrelator)
+  // {
+  //   drawUCorrelatorFilterButtons();
+  // }
 }
 
 
@@ -541,7 +563,22 @@ void MagicDisplay::drawEventButtons() {
    fTimeEntryButton->SetFillColor(kGray);
    fTimeEntryButton->Draw();
 
-   TButton *butFiltering = new TButton("Filtering","MagicDisplay::Instance()->startFilteringPanel();",0.85,0.9,0.9,0.925);
+
+   butFiltering = new TButton("Filtering","MagicDisplay::Instance()->startFilteringPanel();",0.85,0.9,0.9,0.925);
+   bool foundIt = false;
+   std::map<TString, FilterStrategy*>::iterator it = filterStrats.begin();
+   for(; it!= filterStrats.end(); it++)
+   {
+     if(it->second == fStrategy){
+       butFiltering->SetTitle(it->first);
+       foundIt = true;
+       break;
+     }
+   }
+   if(!foundIt){
+     butFiltering->SetTitle("?????");
+   }
+   // TButton *butFiltering = new TButton("Filtering","MagicDisplay::Instance()->startFilteringPanel();",0.85,0.9,0.9,0.925);   
    // TButton *butFiltering = new TButton("Filtering","std::cout << \"some words\" << std::endl;",0.85,0.9,0.9,0.925);   
    butFiltering->SetTextSize(0.5);
    butFiltering->SetFillColor(kYellow);
@@ -655,8 +692,10 @@ void MagicDisplay::setInterferometryTypeFlags(CrossCorrelator::mapMode_t mapMode
 }
 
 
-FilterStrategy * MagicDisplay::getNoFilterStrategy() { return &no_filter_strategy; }
-FilterStrategy * MagicDisplay::getDefaultFilterStrategy() { return &default_strategy; }
+// FilterStrategy * MagicDisplay::getNoFilterStrategy() { return &no_filter_strategy; }
+// FilterStrategy * MagicDisplay::getDefaultFilterStrategy() { return &default_strategy; }
+FilterStrategy * MagicDisplay::getNoFilterStrategy() { return filterStrats["NoFilter"]; }
+FilterStrategy * MagicDisplay::getDefaultFilterStrategy() { return filterStrats["SineSubtract"];}
 
 
 void MagicDisplay::swapWaveformButtonFunctionsAndTitles(MagicDisplayCanvasLayoutOption::MagicDisplayCanvasLayoutOption_t option){

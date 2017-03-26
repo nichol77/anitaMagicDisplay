@@ -16,32 +16,36 @@ FilteringPanel::FilteringPanel()
   //Default constructor 
   fgInstance=this;  
   //MagicDisplay Stuff
-  MagicDisplay *magicDisPtr = MagicDisplay::Instance();
 
   fMainFrame = new TGMainFrame(gClient->GetRoot(),10,10,kVerticalFrame);
-
-  const int widthPx = 200;
-  const int heightPx = 1000;  
-  // fEntryPanel = new TGVerticalFrame(fMainFrame,200,300);
-  fEntryPanel = new TGVerticalFrame(fMainFrame,widthPx,heightPx);  
+  fEntryPanel = new TGVerticalFrame(fMainFrame,200,300);  
   fLeftLayout = new TGLayoutHints(kLHintsTop | kLHintsLeft,2,2,2,2);
   fRightLayout = new TGLayoutHints(kLHintsCenterY | kLHintsRight,2,2,2,2);
   fCenterLayout = new TGLayoutHints(kLHintsCenterY | kLHintsCenterX,2,2,2,2);
   fMainFrame->AddFrame(fEntryPanel,fLeftLayout);
 
-  // fRunPanel = new TGHorizontalFrame(fEntryPanel,200,30);
-  // fEntryPanel->AddFrame(fRunPanel,fRightLayout);
-  // fRunEntry =new TGNumberEntry(fRunPanel,magicDisPtr->getCurrentRun(),12,20,(TGNumberEntry::EStyle)0);
-  // fRunPanel->AddFrame(fRunEntry,fRightLayout);
-  // fRunLabel = new TGLabel(fRunPanel,"Run: ");
-  // fRunPanel->AddFrame(fRunLabel,fRightLayout);
+  fCombo = new TGComboBox(fMainFrame,100);
 
-  // fEventPanel = new TGHorizontalFrame(fEntryPanel,200,30);
-  // fEntryPanel->AddFrame(fEventPanel,fRightLayout);
-  // fEventEntry =new TGNumberEntry(fEventPanel,magicDisPtr->getCurrentEvent(),12,20,(TGNumberEntry::EStyle)0);  
-  // fEventPanel->AddFrame(fEventEntry,fRightLayout);
-  // fEventLabel = new TGLabel(fEventPanel,"Event: ");
-  // fEventPanel->AddFrame(fEventLabel,fRightLayout);
+  MagicDisplay *md = MagicDisplay::Instance();
+  FilterStrategy* currentStrat = md->getStrategy();
+  std::map<TString, FilterStrategy*> filterStrats = md->getFilterStrats();
+  std::map<TString, FilterStrategy*>::iterator it = filterStrats.begin();
+
+  int entry=1;
+  int thisEntry = entry;
+  for(; it!=filterStrats.end(); ++it){
+
+    fCombo->AddEntry(it->first.Data(), entry);
+
+    if(it->second == currentStrat){
+      thisEntry = entry;
+    }
+    entry++;
+  }
+  fCombo->Resize(150, 20);
+  fCombo->Select(thisEntry);
+
+  fMainFrame->AddFrame(fCombo, fCenterLayout);  
 
   fApplyBut = new TGTextButton(fEntryPanel, "&Apply", M_APPLY_BUT);
   //  fGotoBut->SetBackgroundColor(TColor::Number2Pixel(5));
@@ -51,7 +55,6 @@ FilteringPanel::FilteringPanel()
 
   fMainFrame->SetWindowName("FilteringPanel");
   fMainFrame->MapSubwindows();
-
   
   fMainFrame->Connect("CloseWindow()", "FilteringPanel", this, "closeWindow()");
 
@@ -84,5 +87,23 @@ void FilteringPanel::closeWindow()
 
 void FilteringPanel::apply()
 {
-  std::cout << "Congratulations, you pressed the button!" << std::endl;
+  // std::cout << "Congratulations, you pressed the button!" << std::endl;
+
+  MagicDisplay* md = MagicDisplay::Instance();
+  std::map<TString, FilterStrategy*> filterStrats = md->getFilterStrats();
+  std::map<TString, FilterStrategy*>::iterator it = filterStrats.begin();
+  
+  int selectedEntry = fCombo->GetSelected();
+  // std::cout << fCombo << "\t" << selectedEntry << std::endl;
+  int entry=1;
+  for(; it!=filterStrats.end(); ++it){
+    // std::cout << it->first.Data() << "\t" << entry << std::endl;
+    if(entry==selectedEntry){
+      md->setFilterStrategy(it->second);
+      std::cout << "Found it! " << it->first.Data() << std::endl;
+      break;
+    }
+    entry++;
+  }
+  
 }
