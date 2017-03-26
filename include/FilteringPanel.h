@@ -46,13 +46,15 @@
 #include <TGFontDialog.h>
 #include <TGTable.h>
 
+#include <map>
+class FilterStrategy;
+
 //!  The Filtering panel
 /*!
   Set the FilterStrategy in MagicDisplay w/o the command line
 */
 class FilteringPanel 
 {
- 
 public:
 
 
@@ -65,6 +67,8 @@ public:
   // void goToEvent();
   void closeWindow();
   void apply();
+  void setText(TString& str, TGTextView* tv, std::map<TString, FilterStrategy*>::iterator it);
+  void updateText();
 
 protected:
   static FilteringPanel *fgInstance;   ///< Protect against multiple instances
@@ -75,7 +79,6 @@ protected:
   
   TGTextButton    *fApplyBut; ///< Text button.
   TGTextButton    *fCancelBut; ///< Text button.
-  
   TGLayoutHints   *fLayout; ///< Layout nonsense
   TGLayoutHints   *fLeftLayout; ///< Layout nonsense
   TGLayoutHints   *fRightLayout; ///< Layout nonsense
@@ -83,8 +86,11 @@ protected:
   TGLayoutHints   *fCenterLayout; ///< Layout nonsense
 
   TGComboBox *fCombo; ///< Combo box for the filter strategies
-  TGTextView* fAppliedText; ///!< For text describing filter strategy applied
-  TGTextView* fSelectedText; ///!< For text describing filter strategy selected
+  TGTextView* fAppliedTextView; ///!< For text describing filter strategy applied
+  TGTextView* fSelectedTextView; ///!< For text describing filter strategy selected
+
+  TString fSelectedText;
+  TString fAppliedText;  
 
   TGVerticalFrame *fEntryPanel; ///< A vertical frame
   TGHorizontalFrame *fRunPanel; ///< A horizontal frame
