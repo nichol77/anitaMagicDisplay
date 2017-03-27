@@ -126,10 +126,7 @@ void FilteringPanel::selectMagicDisplayFilterInComboBox(){
 }
 
 
-
-
-
-void FilteringPanel::updateTextAndSetFilter(){//TGTextView* tv, std::map<TString, FilterStrategy*>::iterator it){
+void FilteringPanel::updateText(){//TGTextView* tv, std::map<TString, FilterStrategy*>::iterator it){
 
   fSelectedTextView->Clear();
 
@@ -142,10 +139,7 @@ void FilteringPanel::updateTextAndSetFilter(){//TGTextView* tv, std::map<TString
   int entry=1;
   for(; it!=filterStrats.end(); ++it){
     if(entry==selectedEntry){      
-      md->setFilterStrategy(it->second);
-      // setText(fAppliedTexfSelectedTextViewiew, it);
-      break;
-      
+      break;      
     }
     entry++;
   }  
@@ -164,4 +158,28 @@ void FilteringPanel::updateTextAndSetFilter(){//TGTextView* tv, std::map<TString
 
   fSelectedTextView->Update();
 
+}
+
+
+
+
+
+void FilteringPanel::setFilter(){//TGTextView* tv, std::map<TString, FilterStrategy*>::iterator it){
+
+  int selectedEntry = fCombo->GetSelected();
+
+  MagicDisplay* md = MagicDisplay::Instance();
+  std::map<TString, FilterStrategy*> filterStrats = md->getFilterStrats();
+  std::map<TString, FilterStrategy*>::iterator it = filterStrats.begin();
+  
+  int entry=1;
+  for(; it!=filterStrats.end(); ++it){
+    if(entry==selectedEntry){      
+      md->setFilterStrategy(it->second);
+      // setText(fAppliedTexfSelectedTextViewiew, it);
+      break;
+      
+    }
+    entry++;
+  }  
 }

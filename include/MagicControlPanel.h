@@ -91,6 +91,9 @@ public:
    TGLayoutHints   *fCenterLayout; ///< Layout nonsense
    TGNumberEntry   *fRunEntry; ///< Number entry form
    TGNumberEntry   *fEventEntry; ///< Number entry form
+   TGNumberEntryField   *fRunEntryField; ///< Number entry form field
+   TGNumberEntryField   *fEventEntryField; ///< Number entry form field
+  
    TGLabel         *fRunLabel; ///< It's a label
    TGLabel         *fEventLabel; ///< It's a label
    TGLabel         *fUpdateLabel; ///< It's a label

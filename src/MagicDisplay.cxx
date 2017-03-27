@@ -190,6 +190,8 @@ void MagicDisplay::zeroPointers()
 
 
   butFiltering = 0;
+  fFilteringPanel = 0;
+  fControlPanel = 0;
   fInEventPlayMode = 0;  
   
   FilterStrategy* fSineSub = new FilterStrategy();
@@ -226,6 +228,11 @@ void MagicDisplay::setFilterStrategy(FilterStrategy * s)
 {
   fStrategy = s;
 
+  if(fFilteringPanel){
+    fFilteringPanel->selectMagicDisplayFilterInComboBox();
+    fFilteringPanel->updateText();
+  }
+  
   
   if(butFiltering){ // Prevent crash on startup
 
@@ -247,7 +254,8 @@ void MagicDisplay::setFilterStrategy(FilterStrategy * s)
     butFiltering->Update(); // force update    
     
     this->refreshEventDisplay();
-  }  
+  }
+
 
   //TODO: do a smarter job of this
   // if (fCanvasLayout == MagicDisplayCanvasLayoutOption::kUCorrelator)

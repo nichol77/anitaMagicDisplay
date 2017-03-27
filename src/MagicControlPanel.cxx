@@ -63,13 +63,21 @@ MagicControlPanel::MagicControlPanel() : TGMainFrame(gClient->GetRoot(),200,300,
   fRunPanel = new TGHorizontalFrame(fEntryPanel,200,30);
   fEntryPanel->AddFrame(fRunPanel,fRightLayout);
   fRunEntry =new TGNumberEntry(fRunPanel,magicDisPtr->getCurrentRun(),12,20,(TGNumberEntry::EStyle)0);
+  fRunEntryField = fRunEntry->GetNumberEntry();
+  fRunEntryField->Connect("ReturnPressed()", "MagicControlPanel", this, "goToEvent()");
+  fRunEntryField->Connect("TabPressed()", "MagicControlPanel", this, "cycleThroughInputs()");
+  
   fRunPanel->AddFrame(fRunEntry,fRightLayout);
   fRunLabel = new TGLabel(fRunPanel,"Run: ");
   fRunPanel->AddFrame(fRunLabel,fRightLayout);
 
   fEventPanel = new TGHorizontalFrame(fEntryPanel,200,30);
   fEntryPanel->AddFrame(fEventPanel,fRightLayout);
-  fEventEntry =new TGNumberEntry(fEventPanel,magicDisPtr->getCurrentEvent(),12,20,(TGNumberEntry::EStyle)0);  
+  fEventEntry =new TGNumberEntry(fEventPanel,magicDisPtr->getCurrentEvent(),12,20,(TGNumberEntry::EStyle)0);
+  fEventEntryField = fEventEntry->GetNumberEntry();
+  fEventEntryField->Connect("ReturnPressed()", "MagicControlPanel", this, "goToEvent()");
+  fEventEntryField->Connect("TabPressed()", "MagicControlPanel", this, "cycleThroughInputs()");
+  
   fEventPanel->AddFrame(fEventEntry,fRightLayout);
   fEventLabel = new TGLabel(fEventPanel,"Event: ");
   fEventPanel->AddFrame(fEventLabel,fRightLayout);
@@ -78,8 +86,14 @@ MagicControlPanel::MagicControlPanel() : TGMainFrame(gClient->GetRoot(),200,300,
   //  fGotoBut->SetBackgroundColor(TColor::Number2Pixel(5));
   //  fGotoBut->Associate(this);
   fGotoBut->Connect("Pressed()","MagicControlPanel",this,"goToEvent()");
+
   fEntryPanel->AddFrame(fGotoBut, fCenterLayout);
 
+
+  // start with the cursor in run
+  fRunEntryField->SetFocus();
+
+  
 //   //  this->SetBackgroundColor(TColor::Number2Pixel(kRed));
 //   fButtonPanel = new TGVerticalFrame(this,200,500);
 //   fUpdateLabel = new TGLabel(fButtonPanel,"Update Canvas?");
@@ -139,7 +153,14 @@ MagicControlPanel*  MagicControlPanel::Instance()
 
 
 void MagicControlPanel::cycleThroughInputs(){
-  std::cout << "Do something here" << std::endl;
+
+  if (gTQSender == fRunEntryField){
+    fEventEntryField->SetFocus();
+  }
+  else{
+    fRunEntryField->SetFocus();    
+  }
+  // std::cout << "Do something here" << std::endl;
 }
 
   
@@ -188,6 +209,7 @@ MagicControlPanel::~MagicControlPanel()
 
 void MagicControlPanel::goToEvent() 
 {
+  
   MagicDisplay::Instance()->displayThisEvent((UInt_t)this->fEventEntry->GetNumber(),(UInt_t)this->fRunEntry->GetNumber());
   CloseWindow();
     

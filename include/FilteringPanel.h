@@ -67,7 +67,9 @@ public:
    
   // void goToEvent();
   void closeWindow();
-  void updateTextAndSetFilter();
+  void updateText();
+  void setFilter();  
+  void updateTextAndSetFilter(){updateText(); setFilter();}
   void selectMagicDisplayFilterInComboBox();
   virtual Bool_t HandleKey(Event_t* ev);
 
