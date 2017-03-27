@@ -52,9 +52,16 @@ Bool_t FilteringPanel::HandleKey(Event_t* ev){
     UInt_t keysym; 
     char tmp[2]; 
     gVirtualX->LookupString(ev,tmp,sizeof(tmp),keysym);
-    if(keysym==kKey_F || keysym==kKey_f){
+    switch(keysym){
+    case kKey_Q:
+    case kKey_q:
+    case kKey_F:
+    case kKey_f:
       CloseWindow();
       return false;
+    default:
+      ;
+      // do nothing
     }
   }
   

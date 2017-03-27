@@ -53,7 +53,7 @@
 /*!
   This is the horribly buggy control panel that was meant to enable easy control of magic Display, without resorting to command line power user mode. Unfortunately, it doesn't yet really work in a non segmentation violation frenzy way. I blame ROOT, others may have different opinions.
 */
-class MagicControlPanel 
+class MagicControlPanel : public TGMainFrame
 {
 public:
 
@@ -70,12 +70,13 @@ public:
    
    void goToEvent();
    void closeControlPanel();
-  
+   void cycleThroughInputs();
 
  protected:
    static MagicControlPanel *fgInstance;   ///< Protect against multiple instances
 
-   TGMainFrame     *fMainFrame; ///< Main frame
+   virtual Bool_t HandleKey(Event_t* ev);
+   // TGMainFrame     *fMainFrame; ///< Main frame
    TGTextButton    *fGotoBut; ///< Text button.
 
    TGCheckButton   *fEventBut; ///< Check button

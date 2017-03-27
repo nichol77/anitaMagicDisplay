@@ -31,7 +31,7 @@
 #include "TObject.h"
 #include "TTimeStamp.h"
 #include "TApplication.h"
-
+#include "KeySymbols.h"
 
 ClassImp(MagicControlPanel) ;
 
@@ -47,20 +47,18 @@ enum ETestCommandIdentifiers {
   M_GOTO_EVENT
 };
 
-MagicControlPanel::MagicControlPanel()
+MagicControlPanel::MagicControlPanel() : TGMainFrame(gClient->GetRoot(),200,300,kVerticalFrame)
 {
   
   //Default constructor 
   fgInstance=this;  
   MagicDisplay *magicDisPtr = MagicDisplay::Instance();
 
-  fMainFrame = new TGMainFrame(gClient->GetRoot(),200,300,kVerticalFrame);
-
-  fEntryPanel = new TGVerticalFrame(fMainFrame,200,300);
+  fEntryPanel = new TGVerticalFrame(this,200,300);
   fLeftLayout = new TGLayoutHints(kLHintsTop | kLHintsLeft,2,2,2,2);
   fRightLayout = new TGLayoutHints(kLHintsCenterY | kLHintsRight,2,2,2,2);
   fCenterLayout = new TGLayoutHints(kLHintsCenterY | kLHintsCenterX,2,2,2,2);
-  fMainFrame->AddFrame(fEntryPanel,fLeftLayout);
+  this->AddFrame(fEntryPanel,fLeftLayout);
 
   fRunPanel = new TGHorizontalFrame(fEntryPanel,200,30);
   fEntryPanel->AddFrame(fRunPanel,fRightLayout);
@@ -78,50 +76,50 @@ MagicControlPanel::MagicControlPanel()
 
   fGotoBut = new TGTextButton(fEntryPanel, "&Go to Event", M_GOTO_EVENT);
   //  fGotoBut->SetBackgroundColor(TColor::Number2Pixel(5));
-  //  fGotoBut->Associate(fMainFrame);
+  //  fGotoBut->Associate(this);
   fGotoBut->Connect("Pressed()","MagicControlPanel",this,"goToEvent()");
   fEntryPanel->AddFrame(fGotoBut, fCenterLayout);
 
-//   //  fMainFrame->SetBackgroundColor(TColor::Number2Pixel(kRed));
-//   fButtonPanel = new TGVerticalFrame(fMainFrame,200,500);
+//   //  this->SetBackgroundColor(TColor::Number2Pixel(kRed));
+//   fButtonPanel = new TGVerticalFrame(this,200,500);
 //   fUpdateLabel = new TGLabel(fButtonPanel,"Update Canvas?");
 //   fButtonPanel->AddFrame(fUpdateLabel,fLeftLayout);
 //   fButtonLayout = new TGLayoutHints(kLHintsLeft | kLHintsTop,2,2,2,2);
-//   fMainFrame->AddFrame(fButtonPanel,fButtonLayout);
+//   this->AddFrame(fButtonPanel,fButtonLayout);
 //   fEventBut = new TGCheckButton(fButtonPanel, "Event Canvas", M_EVENT_BUT);
-//   fEventBut->Associate(fMainFrame);
+//   fEventBut->Associate(this);
 //   fEventBut->SetBackgroundColor(TColor::Number2Pixel(5));
 //   fButtonPanel->AddFrame(fEventBut, fLayout);
 //   fSurfBut = new TGCheckButton(fButtonPanel, "SURF Canvas", M_SURF_BUT);
-//   fSurfBut->Associate(fMainFrame);
+//   fSurfBut->Associate(this);
 //   fSurfBut->SetBackgroundColor(TColor::Number2Pixel(5));
 //   fButtonPanel->AddFrame(fSurfBut, fLayout);
 //   fTurfBut = new TGCheckButton(fButtonPanel, "TURF Canvas", M_TURF_BUT);
-//   fTurfBut->Associate(fMainFrame);
+//   fTurfBut->Associate(this);
 //   fTurfBut->SetBackgroundColor(TColor::Number2Pixel(5));
 //   fButtonPanel->AddFrame(fTurfBut, fLayout);
 //   fAvgSurfBut = new TGCheckButton(fButtonPanel, "Avg. SURF Canvas", M_AVG_SURF_BUT);
-//   fAvgSurfBut->Associate(fMainFrame);
+//   fAvgSurfBut->Associate(this);
 //   fAvgSurfBut->SetBackgroundColor(TColor::Number2Pixel(5));
 //   fButtonPanel->AddFrame(fAvgSurfBut, fLayout);
 //   fSumTurfBut = new TGCheckButton(fButtonPanel, "Sum. TURF Canvas", M_SUM_TURF_BUT);
-//   fSumTurfBut->Associate(fMainFrame);
+//   fSumTurfBut->Associate(this);
 //   fSumTurfBut->SetBackgroundColor(TColor::Number2Pixel(5));
 //   fButtonPanel->AddFrame(fSumTurfBut, fLayout);
 
 
 
 
-  fMainFrame->SetWindowName("MagicControlPanel");
-  fMainFrame->MapSubwindows();
+  this->SetWindowName("MagicControlPanel");
+  this->MapSubwindows();
 
   
-  fMainFrame->Connect("CloseWindow()", "MagicControlPanel", this, "closeControlPanel()");
+  this->Connect("CloseWindow()", "MagicControlPanel", this, "closeControlPanel()");
 
    // we need to use GetDefault...() to initialize the layout algorithm...
-  fMainFrame->Resize();   // resize to default size
-  fMainFrame->MapRaised();  
-  //  fMainFrame->Print();   
+  this->Resize();   // resize to default size
+  this->MapRaised();  
+  //  this->Print();   
  
 }
 
@@ -131,7 +129,7 @@ MagicControlPanel*  MagicControlPanel::Instance()
 {
   //static function
   if(fgInstance){
-    delete fgInstance;
+    fgInstance->CloseWindow();
   }
   return new MagicControlPanel();
   // return (fgInstance) ? (MagicControlPanel*) fgInstance : new MagicControlPanel();
@@ -140,7 +138,46 @@ MagicControlPanel*  MagicControlPanel::Instance()
 }
 
 
+void MagicControlPanel::cycleThroughInputs(){
+  std::cout << "Do something here" << std::endl;
+}
+
   
+Bool_t MagicControlPanel::HandleKey(Event_t* ev){
+
+  // want a special case for the G/g keys to close the window...
+  // and tab to cycle through the boxes
+  // and enter to go to the event
+  if(ev->fType == kGKeyPress){
+
+    UInt_t keysym; 
+    char tmp[2]; 
+    gVirtualX->LookupString(ev,tmp,sizeof(tmp),keysym);
+    switch(keysym){
+    case kKey_G:
+    case kKey_g:
+    case kKey_Q:
+    case kKey_q:      
+      CloseWindow();
+      return false;
+      
+    case kKey_Tab:
+      cycleThroughInputs();
+      return false;
+
+    case kKey_Return:
+    case kKey_Enter:
+      goToEvent();
+      return false;
+      
+    default:
+      ;
+      // do nothing
+      
+    }
+  }
+  return MagicDisplay::Instance()->HandleKey(ev);    
+}
 
 
 MagicControlPanel::~MagicControlPanel()
@@ -151,11 +188,9 @@ MagicControlPanel::~MagicControlPanel()
 
 void MagicControlPanel::goToEvent() 
 {
-  //  std::cout << "Go To Event: " << this->fRunEntry->GetNumber()
-  //	    << "\t" << (Int_t) this->fEventEntry->GetNumber()
-  //	    << std::endl;
   MagicDisplay::Instance()->displayThisEvent((UInt_t)this->fEventEntry->GetNumber(),(UInt_t)this->fRunEntry->GetNumber());
-
+  CloseWindow();
+    
 }
 
 void MagicControlPanel::closeControlPanel()
