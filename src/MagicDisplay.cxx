@@ -28,6 +28,7 @@
  */
 
 
+#include "KeySymbols.h"
 
 //System includes
 #include <fstream>
@@ -83,8 +84,6 @@ MagicDisplay*  MagicDisplay::fgInstance = 0;
 AnitaCanvasMaker *fEventCanMaker=0;
 AnitaRFCanvasMaker *fRFCanMaker=0;
 AnitaGpsCanvasMaker *fGpsCanMaker=0;
-MagicControlPanel *fControlPanel=0;
-FilteringPanel *fFilteringPanel=0;
 //Leave these as global variables for now
 
 
@@ -244,9 +243,8 @@ void MagicDisplay::setFilterStrategy(FilterStrategy * s)
       butFiltering->SetTitle("?????");
     }
     butFiltering->Modified(); // force update
-    butFiltering->Update(); // force update
-
-
+    butFiltering->Update(); // force update    
+    
     this->refreshEventDisplay();
   }  
 
@@ -258,25 +256,30 @@ void MagicDisplay::setFilterStrategy(FilterStrategy * s)
 }
 
 
-MagicDisplay::MagicDisplay()
+MagicDisplay::MagicDisplay() : TGMainFrame(gClient->GetRoot(),1200,800,kVerticalFrame)
 {
   //Default constructor
   zeroPointers();
+  prepareKeyboardShortcuts();
+
+  
 }
 
 MagicDisplay::~MagicDisplay()
 {
    //Default destructor
    //
-
+  fgInstance = 0;
   delete fUCorr;
 }
 
 
-MagicDisplay::MagicDisplay(const char *baseDir, int run, WaveCalType::WaveCalType_t calType)
+MagicDisplay::MagicDisplay(const char *baseDir, int run, WaveCalType::WaveCalType_t calType) : TGMainFrame(gClient->GetRoot(),1200,800,kVerticalFrame)
 {
   //Offline constructor
   zeroPointers();
+  prepareKeyboardShortcuts();
+  
   std::cout << "MagicDisplay::MagicDisplay(" << baseDir << " , " << run << ")" << std::endl;
   fCurrentRun=run;
   strncpy(fCurrentBaseDir,baseDir,179);
@@ -298,11 +301,7 @@ MagicDisplay*  MagicDisplay::Instance()
 
 void MagicDisplay::startControlPanel()
 {
-  fControlPanel=MagicControlPanel::Instance();
-  //
-  //  fControlPanel=new MagicControlPanel(gClient->GetRoot(), 400, 200);
-  //  fControlPanel->DrawControlPanel();
-  //  fControlPanel->Draw();
+  fControlPanel = MagicControlPanel::Instance();
 }
 
 
@@ -371,20 +370,219 @@ int MagicDisplay::loadDataset()
 }
 
 
+int MagicDisplay::doKeyboardShortcut(Int_t event, Int_t key, Int_t keysym)
+{
+   // print key and keysym
+
+   TCanvas *c = (TCanvas *) gTQSender;
+   if(event != kKeyPress) return -1;
+   printf("symbol = %c (%x)\n", key, keysym);
+   switch ((EKeySym)keysym) {
+      case kKey_Left:
+         cout<<"left arrow"<<endl;
+         break;
+      case kKey_Right:
+         cout<<"rightarrow"<<endl;
+         break;
+      case kKey_Down:
+         cout<<"down arrow"<<endl;
+         break;
+      case kKey_Up:
+         cout<<"up arrow"<<endl;
+         break;
+   }
+   return 0;
+}
+
+
+// Bool_t MagicDisplay::HandleSelection(Event_t* event){
+//   prepareKeyboardShortcuts();
+
+//   return TGMainFrame::HandleSelection(event);
+// }
+
+// // Here we grab all the keys we want...
+void MagicDisplay::prepareKeyboardShortcuts(){
+  gVirtualX->GrabKey(fId, kAnyKey, kAnyModifier, kTRUE);
+  // gVirtualX->GrabButton(fId, kAnyButton, kAnyModifier,
+  // 			kButtonPressMask | kButtonReleaseMask |
+  // 			kPointerMotionMask, kNone, kNone);
+  
+  // gVirtualX->GrabButton(fId, kAnyButton, kAnyModifier,
+  // 			kButtonPressMask | kButtonReleaseMask |
+  // 			kPointerMotionMask, kNone, kNone);
+    
+  // AddInput(kKeyPressMask | kKeyReleaseMask | kPointerMotionMask |
+  // 	   kExposureMask | kStructureNotifyMask | kLeaveWindowMask);
+  // AddInput(kKeyPressMask | kKeyReleaseMask | kPointerMotionMask |
+  // 	   kExposureMask | kStructureNotifyMask | kLeaveWindowMask);
+  
+    
+  fEditDisabled = kEditDisableGrab;
+}
+
+
+// Googling how to do this... look who turns up in the first results page!
+// http://cozzyd.net/mt/cozzyd/2011/05/keyboard-bindings-in-the-root-gui-toolkit.html
+// which does make me wonder why I'm the one doing this...
+Bool_t MagicDisplay::HandleKey(Event_t * event) 
+{
+  // See ROOT's KeySymbols.h for the complete list...
+
+  if (event->fType == kGKeyPress){
+    //Look up the key
+    UInt_t keysym; 
+    char tmp[2]; 
+    gVirtualX->LookupString(event,tmp,sizeof(tmp),keysym);
+
+    switch(keysym){
+
+    case kKey_Left:
+      displayPreviousEvent();
+      break;
+    case kKey_Right:
+      displayNextEvent();
+      break;
+
+    case kKey_Space:
+      if(fInEventPlayMode){
+	stopEventPlaying();
+      }
+      else{
+	startEventPlaying();
+      }
+      break;
+    case kKey_Backspace:
+      if(fInEventPlayMode){
+	stopEventPlaying();
+      }
+      else{
+	startEventPlayingReverse();
+      }
+      break;
+      
+    case kKey_v:
+    case kKey_V:
+      setCanvasLayout(MagicDisplayCanvasLayoutOption::kPhiVerticalOnly);
+      refreshEventDisplay();
+      break;
+
+    case kKey_h:
+    case kKey_H:
+      setCanvasLayout(MagicDisplayCanvasLayoutOption::kPhiHorizontalOnly);
+      refreshEventDisplay();
+      break;
+
+    case kKey_x:
+    case kKey_X:
+      setCanvasLayout(MagicDisplayCanvasLayoutOption::kPhiCombined);
+      refreshEventDisplay();
+      break;
+
+
+    case kKey_s:
+    case kKey_S:
+      setCanvasLayout(MagicDisplayCanvasLayoutOption::kSurfOnly);
+      refreshEventDisplay();
+      break;
+
+
+    case kKey_i:
+    case kKey_I:
+      setCanvasLayout(MagicDisplayCanvasLayoutOption::kInterferometry);
+      refreshEventDisplay();
+      break;
+
+
+    case kKey_u:
+    case kKey_U:
+      setCanvasLayout(MagicDisplayCanvasLayoutOption::kUCorrelator);
+      refreshEventDisplay();
+      break;
+
+
+    case kKey_Tab:    
+      setNextFilter();
+      refreshEventDisplay();
+      break;
+
+
+    case kKey_F:
+    case kKey_f:          
+      startFilteringPanel();
+      break;
+
+
+    case kKey_G:
+    case kKey_g:          
+      startControlPanel();
+      break;
+      
+            
+    default:
+      break;
+    }
+    
+    // if(event->fState & kKeyControlMask){
+    //   std::cout << "Ctrl+";
+    // }
+    // std::cout << keysym << std::endl;
+  }
+  //Children must get their key events too 
+
+  if (!fBindList) return kFALSE;
+
+  TIter next(fBindList);
+  TGMapKey *m;
+  TGFrame  *w = 0;
+
+  while ((m = (TGMapKey *) next())) 
+  {
+    if (m->fKeyCode == event->fCode) 
+    {
+      w = (TGFrame *) m->fWindow;
+      if (w->HandleKey(event)) return kTRUE;
+    }
+  }
+
+  return kFALSE;
+}
+
+
 void MagicDisplay::refreshEventDisplay()
 {
    if(!fMagicCanvas) {
-     fMainFrame = new TGMainFrame(gClient->GetRoot(),1200,800,kVerticalFrame);
-     fMagicEmbedded = new TRootEmbeddedCanvas("canMagic", fMainFrame, 1200, 800);
-     fMainFrame->AddFrame(fMagicEmbedded, new TGLayoutHints(kLHintsExpandX | kLHintsExpandY));       
-     fMainFrame->SetWindowName("MAGIC Display");
-     fMainFrame->MapSubwindows();  
-     // fMainFrame->Connect("CloseWindow()", "MagicDisplay", this, "closeWindow()");
-     fMainFrame->Resize();
-     fMainFrame->MapRaised();
+     // fMainFrame = new TGMainFrame(gClient->GetRoot(),1200,800,kVerticalFrame);
+     // fMainFrame->Connect("HandleKey(Event_t*)", "MagicDisplay", this, "doKeyboardShortcut(Event_t*)");     
+     // fMagicEmbedded = new TRootEmbeddedCanvas("canMagic", fMainFrame, 1200, 800);
+     fMagicEmbedded = new TRootEmbeddedCanvas("canEmbeddedMagic", this, 1200, 800);
+     // prepareKeyboardShortcuts(); // do this here to grab keys back from the embedded canvas?
+     this->AddFrame(fMagicEmbedded, new TGLayoutHints(kLHintsExpandX | kLHintsExpandY));       
+     this->SetWindowName("MAGIC Display");
+     this->MapSubwindows();  
+     this->Resize();
+     this->MapRaised();
+
+
+     // fMainFrame = new TGMainFrame(gClient->GetRoot(),1200,800,kVerticalFrame);
+     // fMainFrame->Connect("HandleKey(Event_t*)", "MagicDisplay", this, "doKeyboardShortcut(Event_t*)");     
+     // fMagicEmbedded = new TRootEmbeddedCanvas("canMagic", fMainFrame, 1200, 800);
+     // fMainFrame->AddFrame(fMagicEmbedded, new TGLayoutHints(kLHintsExpandX | kLHintsExpandY));       
+     // fMainFrame->SetWindowName("MAGIC Display");
+     // fMainFrame->MapSubwindows();  
+     // // fMainFrame->Connect("CloseWindow()", "MagicDisplay", this, "closeWindow()");
+     // fMainFrame->Resize();
+     // fMainFrame->MapRaised();
      
      
      fMagicCanvas = fMagicEmbedded->GetCanvas();
+
+     // fMagicCanvas->Connect(
+     // fMagicCanvas->Connect("ProcessedEvent(Int_t,Int_t,Int_t,TObject*)", "MagicDisplay", this,
+     // 			   "doKeyboardShortcut(Int_t,Int_t,Int_t)");
+     // fMagicCanvas->Connect("ProcessedEvent(Int_t,Int_t,Int_t,TObject*)", 0, 0,
+     // 			   "MagicDisplay::doKeyboardShortcut(Int_t,Int_t,Int_t)");
+
      fMagicCanvas->SetName("canMagic");
      fMagicCanvas->cd();
      drawEventButtons();
@@ -427,6 +625,32 @@ void MagicDisplay::refreshEventDisplay()
   fMagicCanvas->Update();
 }
 
+
+void MagicDisplay::setNextFilter(){
+  // this is mostly for a keyboard cut to cycle through the available filters...
+
+  std::map<TString, FilterStrategy*>::iterator it = filterStrats.begin();
+  bool selectThisOne = false;
+
+  for(; it!=filterStrats.end(); ++it){    
+
+    if(selectThisOne){
+      setFilterStrategy(it->second);      
+      selectThisOne = false;
+      break;
+    }
+    
+    if(it->second == fStrategy){
+      // we want to select the next one...
+      selectThisOne = true;
+    }
+  }
+
+  if(selectThisOne==true){
+    it = filterStrats.begin();
+    setFilterStrategy(it->second);
+  }  
+}
 
 
 void MagicDisplay::applyCut(const char *cutString)

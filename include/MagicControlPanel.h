@@ -55,8 +55,7 @@
 */
 class MagicControlPanel 
 {
- 
- public:
+public:
 
 
    MagicControlPanel(); ///< The default constructor

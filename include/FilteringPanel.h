@@ -55,6 +55,7 @@ class FilterStrategy;
 */
 class FilteringPanel 
 {
+
 public:
 
 

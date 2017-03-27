@@ -46,17 +46,26 @@ FilteringPanel::FilteringPanel()
 //______________________________________________________________________________
 FilteringPanel*  FilteringPanel::Instance()
 {
-  //static function
-  FilteringPanel* fp = (fgInstance) ? (FilteringPanel*) fgInstance : new FilteringPanel();
-  // fp->fMainFrame->cd();
-  // fp->fMainFrame->RequestFocus();
-  return fp;  
+
+  // slightly different instance function, force redisplay by deleting if there is an instance...
+
+  if(fgInstance){
+    delete fgInstance;
+  }
+  return new FilteringPanel();
+  // FilteringPanel* fp = (fgInstance) ? (FilteringPanel*) fgInstance : new FilteringPanel();
+  // // 
+  // // fp->fMainFrame->cd();
+  // // fp->fMainFrame->RequestFocus();
+  // return fp;  
 }
 
 
 FilteringPanel::~FilteringPanel()
 {
-  fgInstance = 0;  
+  fgInstance = 0;
+  MagicDisplay* md = MagicDisplay::Instance();
+  md->fFilteringPanel = 0;
 }
 
 void FilteringPanel::closeWindow()

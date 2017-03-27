@@ -49,13 +49,12 @@ enum ETestCommandIdentifiers {
 
 MagicControlPanel::MagicControlPanel()
 {
+  
   //Default constructor 
   fgInstance=this;  
-  //MagicDisplay Stuff
   MagicDisplay *magicDisPtr = MagicDisplay::Instance();
 
-  fMainFrame = new TGMainFrame(gClient->GetRoot(),10,10,kVerticalFrame);
-
+  fMainFrame = new TGMainFrame(gClient->GetRoot(),200,300,kVerticalFrame);
 
   fEntryPanel = new TGVerticalFrame(fMainFrame,200,300);
   fLeftLayout = new TGLayoutHints(kLHintsTop | kLHintsLeft,2,2,2,2);
@@ -121,7 +120,7 @@ MagicControlPanel::MagicControlPanel()
 
    // we need to use GetDefault...() to initialize the layout algorithm...
   fMainFrame->Resize();   // resize to default size
-  fMainFrame->MapRaised();
+  fMainFrame->MapRaised();  
   //  fMainFrame->Print();   
  
 }
@@ -131,7 +130,13 @@ MagicControlPanel::MagicControlPanel()
 MagicControlPanel*  MagicControlPanel::Instance()
 {
   //static function
-  return (fgInstance) ? (MagicControlPanel*) fgInstance : new MagicControlPanel();
+  if(fgInstance){
+    delete fgInstance;
+  }
+  return new MagicControlPanel();
+  // return (fgInstance) ? (MagicControlPanel*) fgInstance : new MagicControlPanel();
+  // return (fgInstance) ? (MagicControlPanel*) fgInstance : new MagicControlPanel();
+  
 }
 
 
@@ -140,6 +145,8 @@ MagicControlPanel*  MagicControlPanel::Instance()
 
 MagicControlPanel::~MagicControlPanel()
 {
+  fgInstance=0;
+  MagicDisplay::Instance()->fControlPanel = 0;
 }
 
 void MagicControlPanel::goToEvent() 
@@ -153,7 +160,6 @@ void MagicControlPanel::goToEvent()
 
 void MagicControlPanel::closeControlPanel()
 {
-  fgInstance=0;
   delete this;
 }
 

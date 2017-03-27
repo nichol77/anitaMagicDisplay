@@ -55,6 +55,10 @@ class TTreeIndex;
 class TFile;
 class TEventList;
 
+
+class MagicControlPanel;
+class FilteringPanel;
+
 //!  The Marvellous ANITA Graphical Interface and Class Display (Magic Display)
 /*!
   MagicDisplay is the main class that controls the display. This class is responsible for opening files and reading trees and owns the various canvases and that sort of thing.
@@ -63,9 +67,12 @@ Typically one starts MagicDisplay by giving the constructor the base directory t
 
 Most of the functions are called by pressig one of the buttons on the display. They can, of course, be called directly through MagicDisplay::Instance()->functionName().
 */
-class MagicDisplay// : public TGMainFrame
+class MagicDisplay : public TGMainFrame
 {
-  // RQ_OBJECT("MagicDisplay") // for the signals/slots fun times
+
+  friend class MagicControlPanel;
+  friend class FilteringPanel;
+  
  public:
 
  //! The assignment constructor. Most MagicDisplay sessions start with a call to this.
@@ -109,7 +116,7 @@ class MagicDisplay// : public TGMainFrame
   void refreshEventDisplay(); ///< Refresh the event display and redraw the graphs, this is called everytime a new event is displayed.
   int getEventEntry(); ///< Tries to retrieve the event corresponding to entry <i>fEventEntry</i> from the evnt file. Returns zero on success.
   void drawEventButtons(); ///< Worker function to draw the buttons on the main event display canvas.
-  int doKeyboardShortcut(); ///!< Execute intesting functions from the keyboard, connected to the fExec which is drawn on the canvas
+  int doKeyboardShortcut(Int_t event, Int_t key, Int_t keysym); ///!< Execute intesting functions from the keyboard, connected to the fExec which is drawn on the canvas
   
   //! Toggles between waveform and FFT view modes
   /*!
@@ -267,11 +274,15 @@ class MagicDisplay// : public TGMainFrame
    // protect against multiple instances
 
  private:
+  int doKeyboardShortcut(Event_t* event);
+  void prepareKeyboardShortcuts();
+  
+  Bool_t HandleKey(Event_t* event);  
   void zeroPointers();
   MagicDisplayFormatOption::MagicDisplayFormatOption_t fWaveformFormat; ///< The format for displaying waveforms.
   MagicDisplayCanvasLayoutOption::MagicDisplayCanvasLayoutOption_t fCanvasLayout; ///< The format for the canvas layout
   
-   TGMainFrame *fMainFrame; ///< The magic display frame, we need this to do fancy connecting
+   // TGMainFrame *fMainFrame; ///< The magic display frame, we need this to do fancy connecting
    TRootEmbeddedCanvas *fMagicEmbedded; ///< The embedded canvas object (which embeds the main canvas)
    TCanvas *fMagicCanvas; ///< The main event display canvas.  
    TPad *fMagicMainPad; ///< The main event display pad.
@@ -375,9 +386,13 @@ class MagicDisplay// : public TGMainFrame
 
 
   void drawUCorrelatorFilterButtons();
+  void setNextFilter(); // cycle through available filters...
   UCorrelator::Analyzer * fUCorr;
   FilterStrategy * fStrategy;
   std::map<TString, FilterStrategy*> filterStrats;
+
+  MagicControlPanel* fControlPanel;
+  FilteringPanel* fFilteringPanel;  
 
 
 };
