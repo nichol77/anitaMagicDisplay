@@ -270,8 +270,8 @@ class MagicDisplay : public TGMainFrame
 
   UCorrelator::Analyzer * getUCorr() { return fUCorr; }
   FilterStrategy * getStrategy() { return fStrategy; }
-  FilterStrategy * getNoFilterStrategy();
-  FilterStrategy * getDefaultFilterStrategy();
+  // FilterStrategy * getNoFilterStrategy();
+  // FilterStrategy * getDefaultFilterStrategy();
 
   std::map<TString, FilterStrategy*>& getFilterStrats(){return filterStrats;}  
 

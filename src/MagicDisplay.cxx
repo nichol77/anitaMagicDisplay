@@ -199,7 +199,7 @@ void MagicDisplay::zeroPointers()
 
 /** 
  * If you want your favourite filter strategy to be available in MagicDisplay... add it here!
- * 
+ * Add as many as you like...
  */
 void MagicDisplay::initializeFilterStrategies(){
 
@@ -208,14 +208,16 @@ void MagicDisplay::initializeFilterStrategies(){
   fSineSub->addOperation(new UCorrelator::SineSubtractFilter);
   fSineSub->addOperation(new ALFAFilter);
 
-  FilterStrategy* fMinFilter = new FilterStrategy();
-  filterStrats["JustAlfaFilter"] = fMinFilter;
-  fMinFilter->addOperation(new ALFAFilter);
+  FilterStrategy* justAlfa = new FilterStrategy();
+  filterStrats["JustAlfaFilter"] = justAlfa;
+  justAlfa->addOperation(new ALFAFilter);
 
   FilterStrategy* fNoFilter = new FilterStrategy();
   filterStrats["NoFilter"] = fNoFilter;
 
-  setFilterStrategy(filterStrats["MinFilter"]);  
+
+  // it's important that this gets set here.
+  setFilterStrategy(filterStrats["JustAlfaFilter"]);  
   
 }
 
@@ -491,7 +493,7 @@ Bool_t MagicDisplay::HandleKey(Event_t * event)
       break;
 
 
-    case kKey_Tab:    
+    case kKey_Tab:
       setNextFilter();
       refreshEventDisplay();
       break;
@@ -512,9 +514,8 @@ Bool_t MagicDisplay::HandleKey(Event_t * event)
     default:
       break;
     }
-    
-    // if(event->fState & kKeyControlMask){
-    //   std::cout << "Ctrl+";
+  // if(event->fState & kKeyControlMask){
+  //   std::cout << "Ctrl+";
     // }
     // std::cout << keysym << std::endl;
   }
@@ -935,8 +936,8 @@ void MagicDisplay::setInterferometryTypeFlags(CrossCorrelator::mapMode_t mapMode
 
 // FilterStrategy * MagicDisplay::getNoFilterStrategy() { return &no_filter_strategy; }
 // FilterStrategy * MagicDisplay::getDefaultFilterStrategy() { return &default_strategy; }
-FilterStrategy * MagicDisplay::getNoFilterStrategy() { return filterStrats["NoFilter"]; }
-FilterStrategy * MagicDisplay::getDefaultFilterStrategy() { return filterStrats["SineSubtract"];}
+// FilterStrategy * MagicDisplay::getNoFilterStrategy() { return filterStrats["NoFilter"]; }
+// FilterStrategy * MagicDisplay::getDefaultFilterStrategy() { return filterStrats["SineSubtract"];}
 
 
 void MagicDisplay::swapWaveformButtonFunctionsAndTitles(MagicDisplayCanvasLayoutOption::MagicDisplayCanvasLayoutOption_t option){
@@ -960,14 +961,16 @@ void MagicDisplay::swapWaveformButtonFunctionsAndTitles(MagicDisplayCanvasLayout
   }
   else if (option == MagicDisplayCanvasLayoutOption::kUCorrelator)
   {
-    fWaveformButton->SetTitle("NoFilter");
-    fWaveformButton->SetMethod("MagicDisplay::Instance()->setFilterStrategy(MagicDisplay::Instance()->getNoFilterStrategy()); MagicDisplay::Instance()->refreshEventDisplay();");
-    fWaveformButton->SetTextSize(0.4);
+    fWaveformButton->SetTitle("");
+    fWaveformButton->SetMethod("std::cout << \"Sorry Cosmin, I broke your buttons. Use the TAB key instead...\" << std::endl;");
+    // fWaveformButton->SetMethod("MagicDisplay::Instance()->setFilterStrategy(MagicDisplay::Instance()->getNoFilterStrategy()); MagicDisplay::Instance()->refreshEventDisplay();");    
+    // fWaveformButton->SetTextSize(0.4);
 
 
-    fPowerButton->SetTitle("SineSubtract");
-    fPowerButton->SetMethod("MagicDisplay::Instance()->setFilterStrategy(MagicDisplay::Instance()->getDefaultFilterStrategy()); MagicDisplay::Instance()->refreshEventDisplay();");
-    fPowerButton->SetTextSize(0.4);
+    fPowerButton->SetTitle("");
+    fPowerButton->SetMethod("std::cout << \"Sorry Cosmin, I broke your buttons. Use the TAB key instead...\" << std::endl;");    
+    // fPowerButton->SetMethod("MagicDisplay::Instance()->setFilterStrategy(MagicDisplay::Instance()->getDefaultFilterStrategy()); MagicDisplay::Instance()->refreshEventDisplay();");
+    // fPowerButton->SetTextSize(0.4);
 
     fHilbertButton->SetTitle("");
     fHilbertButton->SetMethod("");
