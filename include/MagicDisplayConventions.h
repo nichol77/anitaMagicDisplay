@@ -31,6 +31,18 @@ namespace MagicDisplayCanvasLayoutOption {
     kInterferometry, 
     kUCorrelator
   } MagicDisplayCanvasLayoutOption_t; ///< Enumeration for canvas layout.
+
+  static const char * toString(MagicDisplayCanvasLayoutOption_t option)
+  {
+    return option == kPhiVerticalOnly ? "vpol" : 
+           option == kPhiHorizontalOnly ? "hpol" : 
+           option == kPhiCombined ? "allpol" : 
+           option == kSurfOnly ? "surf" : 
+           option == kPayloadView ? "payload" : 
+           option == kInterferometry ? "int" : 
+           option == kInterferometry ? "UCorr"  : 
+           0; 
+  }
 };
 
 
@@ -46,6 +58,16 @@ namespace MagicDisplayFormatOption {
     kHilbertEnvelope, ///< View of hilbert envelopes
     kAveragedFFT ///< View of avergaed FFTs
   } MagicDisplayFormatOption_t; ///< Enumeration for plot style.
+
+  static const char * toString(MagicDisplayFormatOption_t opt)
+  {
+    return opt == kWaveform ? "wf" : 
+           opt == kPowerSpectralDensity ? "psd" : 
+           opt == kFFT ? "psd" : 
+           opt == kHilbertEnvelope ? "hilbert" : 
+           opt == kAveragedFFT ? "avgpsd" : 
+           0;
+  }
 };
 
 //!  SURF hk display format option

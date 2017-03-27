@@ -437,7 +437,8 @@ Bool_t MagicDisplay::HandleKey(Event_t * event)
   // See ROOT's KeySymbols.h for the complete list...
   
 
-  int evN; 
+  int evN = 0; 
+  int start_index = numeric_buf_index; 
 
   if (event->fType == kGKeyPress){
     //Look up the key
@@ -555,10 +556,25 @@ Bool_t MagicDisplay::HandleKey(Event_t * event)
         }
         break;
         
+      case kKey_W:
+      case kKey_w:
+        fMagicCanvas->SaveAs(TString::Format("run%d_ev%d_a%d_%s_%s_%s.png",
+                                             getCurrentRun(), getCurrentEvent(), AnitaVersion::get(), 
+                                             MagicDisplayCanvasLayoutOption::toString(fCanvasLayout), 
+                                             MagicDisplayFormatOption::toString(fWaveformFormat),
+                                             butFiltering->GetTitle()
+                ));
+      break; 
+
               
       default:
         break;
     }
+
+    //consume the number 
+    if (numeric_buf_index == start_index)
+      getNumeric(); 
+
   // if(event->fState & kKeyControlMask){
   //   std::cout << "Ctrl+";
     // }
