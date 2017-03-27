@@ -29,7 +29,7 @@ i) ROOT -- If you don't have it installed get the latest version from http://roo
 
 ii) FFTW3 -- The Fastest Fourier Transform in the west. If you don't have libfftw3.so on your machine then you need to install it. Most linux distributions have a package ready to install, otherwise head to http://www.fftw.org/
 
-iii) Pretty much all the ANITA libraries (eventReaderRoot, libRootFftwWrapper, AnitaAnalysisFramework, AnitaAnalysisTools, UCorrelator...). The recommended way to install MagicDisplay is by using the anitaBuildTool.
+iii) Pretty much all the ANITA libraries (eventReaderRoot, libRootFftwWrapper, AnitaAnalysisFramework, AnitaAnalysisTools, UCorrelator...). The recommended way to install MagicDisplay is by using the anitaBuildTool
 ```bash
 git clone https://github.com/anitaNeutrino/anitaBuildTool.git
 ```
@@ -37,15 +37,14 @@ git clone https://github.com/anitaNeutrino/anitaBuildTool.git
 ## Running
 
 i) Get some ANITA III/IV data. UCL has a web facing copy of the ANITA-3 data here: http://www.hep.ucl.ac.uk/uhen/anita/private/anita3/flight1415/root/
-(The usual ANITA username and password are required).
+(The usual ANITA username and password are required)
 
-ii) Navigate to the directory where anitaMagicDisplay is installed
+ii) Navigate to the directory where anitaMagicDisplay is installed and edit the runMagicDisplay.C macro to point to where you put the ANITA data
 
-iii) On the command line do
+iii) Then, to look at run 352, do
 ```bash
 root macros/runMagicDisplay.C\(352\)
 ```
-to look at run 352.
 
 ## Keyboard shortcuts
 
