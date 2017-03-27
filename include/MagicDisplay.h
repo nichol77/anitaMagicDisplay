@@ -27,9 +27,11 @@
 #include "TGFrame.h"
 
 // #include <RQ_OBJECT.h>
+#include "TRootEmbeddedCanvas.h"
+
 
 class TCanvas;
-class TRootEmbeddedCanvas;
+
 class TPad;
 class RawAnitaHeader;
 class PrettyAnitaHk;
@@ -56,8 +58,11 @@ class TFile;
 class TEventList;
 
 
+
+
 class MagicControlPanel;
 class FilteringPanel;
+class AnitaEmbeddedCanvas;
 
 //!  The Marvellous ANITA Graphical Interface and Class Display (Magic Display)
 /*!
@@ -72,6 +77,7 @@ class MagicDisplay : public TGMainFrame
 
   friend class MagicControlPanel;
   friend class FilteringPanel;
+  friend class AnitaEmbeddedCanvas;
   
  public:
 
@@ -274,16 +280,19 @@ class MagicDisplay : public TGMainFrame
    // protect against multiple instances
 
  private:
+  virtual Bool_t HandleSelection(Event_t* event);
+  virtual Bool_t HandleKey(Event_t* event);    
   int doKeyboardShortcut(Event_t* event);
   void prepareKeyboardShortcuts();
   
-  Bool_t HandleKey(Event_t* event);  
+
   void zeroPointers();
   MagicDisplayFormatOption::MagicDisplayFormatOption_t fWaveformFormat; ///< The format for displaying waveforms.
   MagicDisplayCanvasLayoutOption::MagicDisplayCanvasLayoutOption_t fCanvasLayout; ///< The format for the canvas layout
   
    // TGMainFrame *fMainFrame; ///< The magic display frame, we need this to do fancy connecting
-   TRootEmbeddedCanvas *fMagicEmbedded; ///< The embedded canvas object (which embeds the main canvas)
+  AnitaEmbeddedCanvas* fMagicEmbedded; ///< The embedded canvas object (which embeds the main canvas)
+  // TRootEmbeddedCanvas *fMagicEmbedded; 
    TCanvas *fMagicCanvas; ///< The main event display canvas.  
    TPad *fMagicMainPad; ///< The main event display pad.
    TPad *fMagicEventInfoPad; ///< The event display info pad.
@@ -396,6 +405,20 @@ class MagicDisplay : public TGMainFrame
 
 
 };
+
+
+// turn off the fucking keyboard stealing...
+class AnitaEmbeddedCanvas : public TRootEmbeddedCanvas{
+public:
+  AnitaEmbeddedCanvas(const char *name=0, const TGWindow *p=0, UInt_t w=10, UInt_t h=10, UInt_t options=kSunkenFrame|kDoubleBorder, Pixel_t back=GetDefaultFrameBackground())
+    : TRootEmbeddedCanvas(name, p, w, h, options, back) {;}
+protected:
+  virtual Bool_t 	HandleContainerKey (Event_t *ev){
+    MagicDisplay* md = MagicDisplay::Instance();
+    return md->HandleKey(ev);
+  }
+};
+
 
 
 #endif //MAGICDISPLAY_H

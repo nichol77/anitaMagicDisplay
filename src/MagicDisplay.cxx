@@ -260,8 +260,7 @@ MagicDisplay::MagicDisplay() : TGMainFrame(gClient->GetRoot(),1200,800,kVertical
 {
   //Default constructor
   zeroPointers();
-  prepareKeyboardShortcuts();
-
+  prepareKeyboardShortcuts();  
   
 }
 
@@ -269,8 +268,15 @@ MagicDisplay::~MagicDisplay()
 {
    //Default destructor
    //
-  fgInstance = 0;
   delete fUCorr;
+  if(fControlPanel){
+    delete fControlPanel;
+  }
+  if(fFilteringPanel){
+    delete fFilteringPanel;
+  }
+  
+  fgInstance = 0;
 }
 
 
@@ -395,30 +401,19 @@ int MagicDisplay::doKeyboardShortcut(Int_t event, Int_t key, Int_t keysym)
 }
 
 
-// Bool_t MagicDisplay::HandleSelection(Event_t* event){
-//   prepareKeyboardShortcuts();
-
-//   return TGMainFrame::HandleSelection(event);
-// }
+// Don't think this does anything?
+Bool_t MagicDisplay::HandleSelection(Event_t* event){
+  prepareKeyboardShortcuts();
+  std::cout << "here" << std::endl;
+  return TGMainFrame::HandleSelection(event);
+}
 
 // // Here we grab all the keys we want...
 void MagicDisplay::prepareKeyboardShortcuts(){
+
   gVirtualX->GrabKey(fId, kAnyKey, kAnyModifier, kTRUE);
-  // gVirtualX->GrabButton(fId, kAnyButton, kAnyModifier,
-  // 			kButtonPressMask | kButtonReleaseMask |
-  // 			kPointerMotionMask, kNone, kNone);
-  
-  // gVirtualX->GrabButton(fId, kAnyButton, kAnyModifier,
-  // 			kButtonPressMask | kButtonReleaseMask |
-  // 			kPointerMotionMask, kNone, kNone);
     
-  // AddInput(kKeyPressMask | kKeyReleaseMask | kPointerMotionMask |
-  // 	   kExposureMask | kStructureNotifyMask | kLeaveWindowMask);
-  // AddInput(kKeyPressMask | kKeyReleaseMask | kPointerMotionMask |
-  // 	   kExposureMask | kStructureNotifyMask | kLeaveWindowMask);
-  
-    
-  fEditDisabled = kEditDisableGrab;
+  // fEditDisabled = kEditDisableGrab;
 }
 
 
@@ -555,7 +550,9 @@ void MagicDisplay::refreshEventDisplay()
      // fMainFrame = new TGMainFrame(gClient->GetRoot(),1200,800,kVerticalFrame);
      // fMainFrame->Connect("HandleKey(Event_t*)", "MagicDisplay", this, "doKeyboardShortcut(Event_t*)");     
      // fMagicEmbedded = new TRootEmbeddedCanvas("canMagic", fMainFrame, 1200, 800);
-     fMagicEmbedded = new TRootEmbeddedCanvas("canEmbeddedMagic", this, 1200, 800);
+     // fMagicEmbedded = new TRootEmbeddedCanvas("canEmbeddedMagic", this, 1200, 800);
+     fMagicEmbedded = new AnitaEmbeddedCanvas("canEmbeddedMagic", this, 1200, 800);     
+     
      // prepareKeyboardShortcuts(); // do this here to grab keys back from the embedded canvas?
      this->AddFrame(fMagicEmbedded, new TGLayoutHints(kLHintsExpandX | kLHintsExpandY));       
      this->SetWindowName("MAGIC Display");
