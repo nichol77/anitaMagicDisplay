@@ -115,10 +115,10 @@ class MagicDisplay : public TGMainFrame
     \return Zero on success
   */
   int displayThisEvent(UInt_t eventNumber, UInt_t runNumber);
-  int displayNextEvent(); ///< Displays the next event in the file, normally called by pressing the "Next" button.
+  int displayNextEvent(int nskip = 0); ///< Displays the next event in the file, normally called by pressing the "Next" button. If nskip > 0, will skip so many events.
   int displayFirstEvent(); ///< Displays the first event in the file, normally called by pressing the "First" button.
   int displayLastEvent(); ///< Displays the last event in the file, normally called by pressing the "Last" button.
-  int displayPreviousEvent(); ///< Displays the previous event in the file, normally called by pressing the "Previous" button.
+  int displayPreviousEvent(int nskip =0); ///< Displays the previous event in the file, normally called by pressing the "Previous" button. if nskyp > 0, will skip so many events
   void refreshEventDisplay(); ///< Refresh the event display and redraw the graphs, this is called everytime a new event is displayed.
   int getEventEntry(); ///< Tries to retrieve the event corresponding to entry <i>fEventEntry</i> from the evnt file. Returns zero on success.
   void drawEventButtons(); ///< Worker function to draw the buttons on the main event display canvas.

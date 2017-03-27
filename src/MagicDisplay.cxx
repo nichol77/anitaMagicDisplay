@@ -413,6 +413,19 @@ void MagicDisplay::prepareKeyboardShortcuts(){
   // fEditDisabled = kEditDisableGrab;
 }
 
+/** Vi-like behavior */ 
+static const int max_numeric_buf=9; 
+static int numeric_buf_index = 0; 
+static char numeric_buf[max_numeric_buf+1] = {0}; 
+
+static int getNumeric()
+{
+  if (numeric_buf_index == 0) return 0; 
+  int ret =atoi(numeric_buf); 
+  numeric_buf_index = 0; 
+  memset(numeric_buf,0,sizeof(numeric_buf)); 
+  return ret; 
+}
 
 // Googling how to do this... look who turns up in the first results page!
 // http://cozzyd.net/mt/cozzyd/2011/05/keyboard-bindings-in-the-root-gui-toolkit.html
@@ -427,92 +440,111 @@ Bool_t MagicDisplay::HandleKey(Event_t * event)
     char tmp[2]; 
     gVirtualX->LookupString(event,tmp,sizeof(tmp),keysym);
 
-    switch(keysym){
+    switch(keysym)
+    {
 
-    case kKey_Left:
-      displayPreviousEvent();
-      break;
-    case kKey_Right:
-      displayNextEvent();
-      break;
+      case kKey_0:     
+      case kKey_1:     
+      case kKey_2:     
+      case kKey_3:     
+      case kKey_4:     
+      case kKey_5:     
+      case kKey_6:     
+      case kKey_7:     
+      case kKey_8:     
+      case kKey_9:     
+        numeric_buf_index = numeric_buf_index % max_numeric_buf; 
+        numeric_buf[numeric_buf_index++] = '0' + keysym - kKey_0; 
+        break;
 
-    case kKey_Space:
-      if(fInEventPlayMode){
-	stopEventPlaying();
-      }
-      else{
-	startEventPlaying();
-      }
-      break;
-    case kKey_Backspace:
-      if(fInEventPlayMode){
-	stopEventPlaying();
-      }
-      else{
-	startEventPlayingReverse();
-      }
-      break;
-      
-    case kKey_v:
-    case kKey_V:
-      setCanvasLayout(MagicDisplayCanvasLayoutOption::kPhiVerticalOnly);
-      refreshEventDisplay();
-      break;
+      case kKey_Left:
+      case kKey_j:
+      case kKey_J:
+        displayPreviousEvent(getNumeric()-1);
+        break;
+      case kKey_Right:
+      case kKey_k:
+      case kKey_K:
+        displayNextEvent(getNumeric()-1);
+        break;
 
-    case kKey_h:
-    case kKey_H:
-      setCanvasLayout(MagicDisplayCanvasLayoutOption::kPhiHorizontalOnly);
-      refreshEventDisplay();
-      break;
+      case kKey_Space:
+        if(fInEventPlayMode){
+          stopEventPlaying();
+        }
+        else{
+          startEventPlaying();
+        }
+        break;
+      case kKey_Backspace:
+        if(fInEventPlayMode){
+          stopEventPlaying();
+        }
+        else{
+          startEventPlayingReverse();
+        }
+        break;
+        
+      case kKey_v:
+      case kKey_V:
+        setCanvasLayout(MagicDisplayCanvasLayoutOption::kPhiVerticalOnly);
+        refreshEventDisplay();
+        break;
 
-    case kKey_x:
-    case kKey_X:
-      setCanvasLayout(MagicDisplayCanvasLayoutOption::kPhiCombined);
-      refreshEventDisplay();
-      break;
+      case kKey_h:
+      case kKey_H:
+        setCanvasLayout(MagicDisplayCanvasLayoutOption::kPhiHorizontalOnly);
+        refreshEventDisplay();
+        break;
 
-
-    case kKey_s:
-    case kKey_S:
-      setCanvasLayout(MagicDisplayCanvasLayoutOption::kSurfOnly);
-      refreshEventDisplay();
-      break;
-
-
-    case kKey_i:
-    case kKey_I:
-      setCanvasLayout(MagicDisplayCanvasLayoutOption::kInterferometry);
-      refreshEventDisplay();
-      break;
-
-
-    case kKey_u:
-    case kKey_U:
-      setCanvasLayout(MagicDisplayCanvasLayoutOption::kUCorrelator);
-      refreshEventDisplay();
-      break;
+      case kKey_x:
+      case kKey_X:
+        setCanvasLayout(MagicDisplayCanvasLayoutOption::kPhiCombined);
+        refreshEventDisplay();
+        break;
 
 
-    case kKey_Tab:
-      setNextFilter();
-      refreshEventDisplay();
-      break;
+      case kKey_s:
+      case kKey_S:
+        setCanvasLayout(MagicDisplayCanvasLayoutOption::kSurfOnly);
+        refreshEventDisplay();
+        break;
 
 
-    case kKey_F:
-    case kKey_f:          
-      startFilteringPanel();
-      break;
+      case kKey_i:
+      case kKey_I:
+        setCanvasLayout(MagicDisplayCanvasLayoutOption::kInterferometry);
+        refreshEventDisplay();
+        break;
 
 
-    case kKey_G:
-    case kKey_g:          
-      startControlPanel();
-      break;
-      
-            
-    default:
-      break;
+      case kKey_u:
+      case kKey_U:
+        setCanvasLayout(MagicDisplayCanvasLayoutOption::kUCorrelator);
+        refreshEventDisplay();
+        break;
+
+
+      case kKey_Tab:
+        setNextFilter();
+        refreshEventDisplay();
+        break;
+
+
+      case kKey_F:
+      case kKey_f:          
+        startFilteringPanel();
+        break;
+
+
+      case kKey_G:
+      case kKey_g:          
+        startControlPanel();
+        break;
+        
+              
+      default:
+        break;
     }
   // if(event->fState & kKeyControlMask){
   //   std::cout << "Ctrl+";
@@ -663,12 +695,15 @@ void MagicDisplay::applyCut(const char *cutString)
   }
 }
 
-int MagicDisplay::displayNextEvent(){
+int MagicDisplay::displayNextEvent(int nskip){
 
   if(fApplyEventCut==0){
+    for (int i = 0; i < nskip; i++) fDataset->next();  //TODO skip properly 
     fEventEntry = fDataset->next();
   }
   else{
+    for (int i = 0; i < nskip; i++) fDataset->nextInCut(); 
+
     fEventEntry = fDataset->nextInCut();
   }
   int retVal = getEventEntry();
@@ -713,12 +748,14 @@ int MagicDisplay::displayLastEvent(){
 }
 
 
-int MagicDisplay::displayPreviousEvent(){
+int MagicDisplay::displayPreviousEvent(int nskip){
 
   if(fApplyEventCut==0){
+    for (int i = 0; i < nskip; i++) fDataset->previous();  //TODO skip properly 
     fEventEntry = fDataset->previous();
   }
   else{
+    for (int i = 0; i < nskip; i++) fDataset->previousInCut();  //TODO skip properly 
     fEventEntry = fDataset->previousInCut();
   }
   int retVal = getEventEntry();
