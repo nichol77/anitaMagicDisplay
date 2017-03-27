@@ -8,7 +8,7 @@ ClassImp(FilteringPanel)
 FilteringPanel*  FilteringPanel::fgInstance = 0;
 
 
-FilteringPanel::FilteringPanel() : TGMainFrame(gClient->GetRoot(),200,300,kVerticalFrame)
+FilteringPanel::FilteringPanel() : TGMainFrame(gClient->GetRoot(),1200,300,kVerticalFrame)
 {
   //Default constructor 
   fgInstance=this;  
@@ -21,8 +21,7 @@ FilteringPanel::FilteringPanel() : TGMainFrame(gClient->GetRoot(),200,300,kVerti
   fCombo->Resize(150, 20); // needed to set reasonable height.
   
   int id=0;
-  // fSelectedTextView = new TGTextView(this, 500, 94, id, kFixedWidth | kFixedHeight);
-  fSelectedTextView = new TGTextView(this, 500, 94, id, kLHintsExpandX | kLHintsExpandY);  
+  fSelectedTextView = new TGTextView(this, 1200, 100, id, kLHintsExpandX | kLHintsExpandY);  
 
   TColor* yellow = gROOT->GetColor(kYellow - 9); // -9 tones down the yellow, which is a bit in-your-face otherwise
   fSelectedTextView->SetBackgroundColor(yellow->GetPixel());  
