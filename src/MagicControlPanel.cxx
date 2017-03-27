@@ -60,6 +60,7 @@ MagicControlPanel::MagicControlPanel() : TGMainFrame(gClient->GetRoot(),200,300,
   fCenterLayout = new TGLayoutHints(kLHintsCenterY | kLHintsCenterX,2,2,2,2);
   this->AddFrame(fEntryPanel,fLeftLayout);
 
+
   fRunPanel = new TGHorizontalFrame(fEntryPanel,200,30);
   fEntryPanel->AddFrame(fRunPanel,fRightLayout);
   fRunEntry =new TGNumberEntry(fRunPanel,magicDisPtr->getCurrentRun(),12,20,(TGNumberEntry::EStyle)0);
@@ -87,11 +88,12 @@ MagicControlPanel::MagicControlPanel() : TGMainFrame(gClient->GetRoot(),200,300,
   //  fGotoBut->Associate(this);
   fGotoBut->Connect("Pressed()","MagicControlPanel",this,"goToEvent()");
 
+  
   fEntryPanel->AddFrame(fGotoBut, fCenterLayout);
 
 
   // start with the cursor in run
-  fRunEntryField->SetFocus();
+  cycleThroughInputs();
 
   
 //   //  this->SetBackgroundColor(TColor::Number2Pixel(kRed));
@@ -126,9 +128,11 @@ MagicControlPanel::MagicControlPanel() : TGMainFrame(gClient->GetRoot(),200,300,
 
   this->SetWindowName("MagicControlPanel");
   this->MapSubwindows();
-
   
-  this->Connect("CloseWindow()", "MagicControlPanel", this, "closeControlPanel()");
+  // this->DontCallClose();
+  // this->Connect("CloseWindow()", "MagicControlPanel", this, "closeControlPanel()");
+  
+  this->Connect("CloseWindow()", "MagicControlPanel", this, "DontCallClose()");  
 
    // we need to use GetDefault...() to initialize the layout algorithm...
   this->Resize();   // resize to default size
@@ -149,6 +153,11 @@ MagicControlPanel*  MagicControlPanel::Instance()
   // return (fgInstance) ? (MagicControlPanel*) fgInstance : new MagicControlPanel();
   // return (fgInstance) ? (MagicControlPanel*) fgInstance : new MagicControlPanel();
   
+}
+
+void MagicControlPanel::CloseWindow(){
+  this->RequestFocus(); // the magic line that stops the stupid blink cursor timer causing seg faults...  
+  TGMainFrame::CloseWindow();  
 }
 
 
@@ -209,7 +218,6 @@ MagicControlPanel::~MagicControlPanel()
 
 void MagicControlPanel::goToEvent() 
 {
-  
   MagicDisplay::Instance()->displayThisEvent((UInt_t)this->fEventEntry->GetNumber(),(UInt_t)this->fRunEntry->GetNumber());
   CloseWindow();
     

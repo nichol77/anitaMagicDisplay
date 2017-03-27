@@ -72,10 +72,12 @@ public:
    void closeControlPanel();
    void cycleThroughInputs();
 
+  virtual void CloseWindow();
  protected:
    static MagicControlPanel *fgInstance;   ///< Protect against multiple instances
 
    virtual Bool_t HandleKey(Event_t* ev);
+
    // TGMainFrame     *fMainFrame; ///< Main frame
    TGTextButton    *fGotoBut; ///< Text button.
 
