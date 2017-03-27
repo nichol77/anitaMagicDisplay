@@ -53,7 +53,7 @@ class FilterStrategy;
 /*!
   Set the FilterStrategy in MagicDisplay w/o the command line
 */
-class FilteringPanel 
+class FilteringPanel : public TGMainFrame
 {
 
 public:
@@ -69,12 +69,11 @@ public:
   void closeWindow();
   void updateTextAndSetFilter();
   void selectMagicDisplayFilterInComboBox();
+  virtual Bool_t HandleKey(Event_t* ev);
 
 protected:
   static FilteringPanel *fgInstance;   ///< Protect against multiple instances
 
-  TGMainFrame     *fMainFrame; ///< Main frame
-  
   TGComboBox *fCombo; ///< Combo box for the filter strategies
   TGTextView* fSelectedTextView; ///!< For text describing filter strategy selected
 

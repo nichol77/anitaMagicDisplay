@@ -190,6 +190,7 @@ void MagicDisplay::zeroPointers()
 
 
   butFiltering = 0;
+  fInEventPlayMode = 0;  
   
   FilterStrategy* fSineSub = new FilterStrategy();
   filterStrats["SineSubtract"] = fSineSub;
@@ -375,30 +376,6 @@ int MagicDisplay::loadDataset()
   return 0;
 }
 
-
-int MagicDisplay::doKeyboardShortcut(Int_t event, Int_t key, Int_t keysym)
-{
-   // print key and keysym
-
-   TCanvas *c = (TCanvas *) gTQSender;
-   if(event != kKeyPress) return -1;
-   printf("symbol = %c (%x)\n", key, keysym);
-   switch ((EKeySym)keysym) {
-      case kKey_Left:
-         cout<<"left arrow"<<endl;
-         break;
-      case kKey_Right:
-         cout<<"rightarrow"<<endl;
-         break;
-      case kKey_Down:
-         cout<<"down arrow"<<endl;
-         break;
-      case kKey_Up:
-         cout<<"up arrow"<<endl;
-         break;
-   }
-   return 0;
-}
 
 
 // Don't think this does anything?

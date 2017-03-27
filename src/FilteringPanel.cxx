@@ -1,45 +1,64 @@
 #include "FilteringPanel.h"
 #include "MagicDisplay.h"
 #include "FilterOperation.h"
+#include "KeySymbols.h"
 
 ClassImp(FilteringPanel)
 
 FilteringPanel*  FilteringPanel::fgInstance = 0;
 
 
-FilteringPanel::FilteringPanel()
+FilteringPanel::FilteringPanel() : TGMainFrame(gClient->GetRoot(),200,300,kVerticalFrame)
 {
   //Default constructor 
   fgInstance=this;  
   //MagicDisplay Stuff
 
-  fMainFrame = new TGMainFrame(gClient->GetRoot(),200,300,kVerticalFrame);
-
-  fCombo = new TGComboBox(fMainFrame,100);
+  fCombo = new TGComboBox(this,100);
   selectMagicDisplayFilterInComboBox();
   fCombo->Connect("Selected(Int_t)", "FilteringPanel", this, "updateTextAndSetFilter()"); // then connect selection to updating MagicDisplay
   fCombo->Resize(150, 20); // needed to set reasonable height.
   
   int id=0;
-  // fSelectedTextView = new TGTextView(fMainFrame, 500, 94, id, kFixedWidth | kFixedHeight);
-  fSelectedTextView = new TGTextView(fMainFrame, 500, 94, id, kLHintsExpandX | kLHintsExpandY);  
+  // fSelectedTextView = new TGTextView(this, 500, 94, id, kFixedWidth | kFixedHeight);
+  fSelectedTextView = new TGTextView(this, 500, 94, id, kLHintsExpandX | kLHintsExpandY);  
 
   TColor* yellow = gROOT->GetColor(kYellow - 9); // -9 tones down the yellow, which is a bit in-your-face otherwise
   fSelectedTextView->SetBackgroundColor(yellow->GetPixel());  
   
-  // fMainFrame->AddFrame(fCombo, new TGLayoutHints(kLHintsTop | kLHintsLeft,2,2,2,2));
-  fMainFrame->AddFrame(fCombo, new TGLayoutHints(kLHintsTop | kLHintsExpandX,2,2,2,2));  
-  fMainFrame->AddFrame(fSelectedTextView, new TGLayoutHints(kLHintsExpandX | kLHintsExpandY,2,2,2,2));  
+  // this->AddFrame(fCombo, new TGLayoutHints(kLHintsTop | kLHintsLeft,2,2,2,2));
+  this->AddFrame(fCombo, new TGLayoutHints(kLHintsTop | kLHintsExpandX,2,2,2,2));  
+  this->AddFrame(fSelectedTextView, new TGLayoutHints(kLHintsExpandX | kLHintsExpandY,2,2,2,2));  
 
-  fMainFrame->SetWindowName("FilteringPanel");
-  fMainFrame->MapSubwindows();  
-  fMainFrame->Connect("CloseWindow()", "FilteringPanel", this, "closeWindow()");  
+  this->SetWindowName("FilteringPanel");
+  this->MapSubwindows();  
+  this->Connect("CloseWindow()", "FilteringPanel", this, "closeWindow()");  
 
-  fMainFrame->Resize();
-  fMainFrame->MapRaised();
+  this->Resize();
+  this->MapRaised();
 
   updateTextAndSetFilter();
+  gVirtualX->GrabKey(fId, kAnyKey, kAnyModifier, kTRUE);
+  
 
+}
+
+
+Bool_t FilteringPanel::HandleKey(Event_t* ev){
+
+  // want a special case for the F/f keys to close the window...
+  if(ev->fType == kGKeyPress){
+
+    UInt_t keysym; 
+    char tmp[2]; 
+    gVirtualX->LookupString(ev,tmp,sizeof(tmp),keysym);
+    if(keysym==kKey_F || keysym==kKey_f){
+      CloseWindow();
+      return false;
+    }
+  }
+  
+  return MagicDisplay::Instance()->HandleKey(ev);
 }
 
 
@@ -50,13 +69,13 @@ FilteringPanel*  FilteringPanel::Instance()
   // slightly different instance function, force redisplay by deleting if there is an instance...
 
   if(fgInstance){
-    delete fgInstance;
+    fgInstance->CloseWindow();
   }
   return new FilteringPanel();
   // FilteringPanel* fp = (fgInstance) ? (FilteringPanel*) fgInstance : new FilteringPanel();
   // // 
-  // // fp->fMainFrame->cd();
-  // // fp->fMainFrame->RequestFocus();
+  // // fp->this->cd();
+  // // fp->this->RequestFocus();
   // return fp;  
 }
 
