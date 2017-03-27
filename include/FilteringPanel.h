@@ -79,6 +79,8 @@ protected:
   TGComboBox *fCombo; ///< Combo box for the filter strategies
   TGTextView* fSelectedTextView; ///!< For text describing filter strategy selected
 
+  Bool_t fAddedEntries;
+
   ClassDef(FilteringPanel,1); ///< One of the magic ROOT macros.
 };
 

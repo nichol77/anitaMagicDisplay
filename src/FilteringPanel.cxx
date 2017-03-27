@@ -15,6 +15,7 @@ FilteringPanel::FilteringPanel() : TGMainFrame(gClient->GetRoot(),200,300,kVerti
   //MagicDisplay Stuff
 
   fCombo = new TGComboBox(this,100);
+  fAddedEntries = false; // must come before selectMagicDisplayFilterInComboBox in constructor;
   selectMagicDisplayFilterInComboBox();
   fCombo->Connect("Selected(Int_t)", "FilteringPanel", this, "updateTextAndSetFilter()"); // then connect selection to updating MagicDisplay
   fCombo->Resize(150, 20); // needed to set reasonable height.
@@ -113,8 +114,10 @@ void FilteringPanel::selectMagicDisplayFilterInComboBox(){
   TString stratName;  
   for(; it!=filterStrats.end(); ++it){
 
-    fCombo->AddEntry(it->first.Data(), entry);
-
+    if(!fAddedEntries){
+      fCombo->AddEntry(it->first.Data(), entry);
+    }
+    
     if(it->second == currentStrat){
       thisEntry = entry;
       stratName = it->first;
@@ -123,6 +126,7 @@ void FilteringPanel::selectMagicDisplayFilterInComboBox(){
   }  
   fCombo->Select(thisEntry); // select the current filter
 
+  fAddedEntries = true;
 }
 
 
