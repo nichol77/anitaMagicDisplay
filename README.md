@@ -68,6 +68,8 @@ root macros/runMagicDisplay.C\(352\)
 | U            |              | UCorrelator view                                                                             |
 | I            |              | Interferometry (CrossCorrelator... currently put to shame by all UCorrelator's features)     |
 | ?            |              | show keybindings                                                                             |
+| .            |              | repeat movement command (E.g. 10j)                                                           |
+| #            |              | save fftw wisdom to current directory (automatically loaded on startup if exists)            |
 | [0-9]        |              | vi-like numerical modifier for next / previous / go to event.  e.g. 40k goes forward 40, 3141516g goes to 314156                 |
 
 

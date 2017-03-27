@@ -316,6 +316,14 @@ MagicDisplay::MagicDisplay(const char *baseDir, int run, WaveCalType::WaveCalTyp
 
   // AnitaDataset needs this, so set it
   setenv("ANITA_ROOT_DATA", baseDir,1);
+
+  //try to load wisdom
+  if (FILE * wf = fopen("magicwisdom.dat","r"))
+  {
+    fclose(wf); 
+    FFTtools::loadWisdom("magicwisdom.dat"); 
+  }
+  
 }
 
 
@@ -418,6 +426,8 @@ void MagicDisplay::prepareKeyboardShortcuts(){
 static const int max_numeric_buf=9; 
 static int numeric_buf_index = 0; 
 static char numeric_buf[max_numeric_buf+1] = {0}; 
+static int last_direction =0; 
+static int last_nskip=0; 
 
 static int getNumeric()
 {
@@ -467,12 +477,16 @@ Bool_t MagicDisplay::HandleKey(Event_t * event)
       case kKey_Left:
       case kKey_j:
       case kKey_J:
-        displayPreviousEvent(getNumeric()-1);
+        last_nskip = getNumeric()-1;
+        last_direction=-1; 
+        displayPreviousEvent(last_nskip);
         break;
       case kKey_Right:
       case kKey_k:
       case kKey_K:
-        displayNextEvent(getNumeric()-1);
+        last_nskip = getNumeric()-1; 
+        last_direction=1; 
+        displayNextEvent(last_nskip);
         break;
 
       case kKey_Space:
@@ -567,9 +581,38 @@ Bool_t MagicDisplay::HandleKey(Event_t * event)
                 ));
       break; 
 
+      case kKey_Period: 
+        if (last_direction == 1) displayNextEvent(last_nskip); 
+        if (last_direction ==-1) displayPreviousEvent(last_nskip); 
+        break; 
+
+      case kKey_NumberSign:
+        FFTtools::saveWisdom("magicwisdom.dat"); 
+
+        break;
+
       case kKey_Question:
-        new TGMsgBox(gClient->GetRoot(),0,"MagicDisplay key bindings (case insensitive)", 
-            "THIS IS A MODAL DIALOG YOU MUST DISMISS IT!\n[left]/j: previous\n[right]/k: next\n[space]: start/stop play\n[bksp] play reverse\nv: show vpol\nh: show hpol\nx: show both pols\ns: show surf\ni: show interferometry\nu: show UCorrelator\n[tab]:cycle filter\nf: show filter panel\ng: goto event\nw: save canvas image\n[0-9]*: vi-like numerical modifier for jkg\nn: find neutrinos (not implemented yet)\n? show keybindings"
+        new TGMsgBox(gClient->GetRoot(),0,"MagicDisplay key bindings", 
+            "Key bindings are case-insensitive. Also,this is a modal dialog so you must dismiss it!\n\n"
+            "[left]/j: previous\n"
+            "[right]/k: next\n"
+            "[space]: start/stop play\n"
+            "[bksp] play reverse\n"
+            "v: show vpol\n"
+            "h: show hpol\n"
+            "x: show both pols\n"
+            "s: show surf\n"
+            "i: show interferometry\n"
+            "u: show UCorrelator\n"
+            "[tab]:cycle filter\n"
+            "f: show filter panel\n"
+            "g: goto event\n"
+            "w: save canvas image to currentdir\n"
+            "[0-9]*: vi-like numerical modifier for jkg\n"
+            "n: find neutrinos (not implemented yet)\n"
+            ".: repeat last movement command\n"
+            "#: save wisdom to currentdir\n" 
+            "?: show keybindings"
             ,0, kMBDismiss,0, kVerticalFrame, kTextLeft | kTextTop); 
 
               
