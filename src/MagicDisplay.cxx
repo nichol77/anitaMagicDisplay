@@ -420,12 +420,14 @@ static char numeric_buf[max_numeric_buf+1] = {0};
 
 static int getNumeric()
 {
-  if (numeric_buf_index == 0) return 0; 
+  if (numeric_buf_index == 0) return -1; 
   int ret =atoi(numeric_buf); 
   numeric_buf_index = 0; 
   memset(numeric_buf,0,sizeof(numeric_buf)); 
+//  printf("%d\n", ret); 
   return ret; 
 }
+
 
 // Googling how to do this... look who turns up in the first results page!
 // http://cozzyd.net/mt/cozzyd/2011/05/keyboard-bindings-in-the-root-gui-toolkit.html
@@ -433,6 +435,9 @@ static int getNumeric()
 Bool_t MagicDisplay::HandleKey(Event_t * event) 
 {
   // See ROOT's KeySymbols.h for the complete list...
+  
+
+  int evN; 
 
   if (event->fType == kGKeyPress){
     //Look up the key
@@ -539,7 +544,15 @@ Bool_t MagicDisplay::HandleKey(Event_t * event)
 
       case kKey_G:
       case kKey_g:          
-        startControlPanel();
+        evN = getNumeric(); 
+        if (evN >= 0)
+        {
+          displayThisEvent(evN, getCurrentRun()); 
+        }
+        else
+        {
+          startControlPanel();
+        }
         break;
         
               
