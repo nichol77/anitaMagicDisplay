@@ -46,26 +46,28 @@ iii) Then, to look at run 352, do
 root macros/runMagicDisplay.C\(352\)
 ```
 
-## Keyboard shortcuts
+## Keyboard shortcuts (case-independent) 
 
 | Key          | (Key 2)      | Command                                                                                      |
 | ------------ |--------------| ---------------------------------------------------------------------------------------------|
-| RIGHT ARROW  |              | Next event																					 |
-| LEFT ARROW   |              | Previous event																				 |
-| SPACE        |              | Start playing events forwards																 |
-| BACKSPACE    |              | Start playing events reversed																 |
-| V            |              | VPol waveforms (default view)																 |
-| H	           |              | HPol waveforms																				 |
-| X	           |              | Both polarizations																			 |
-| TAB	       |              | Cycle filters																				 |
-| F	           |              | Show/Hide filtering panel																	 |
-| 	           | Q or F       | Quit filtering panel															             |
-| G 	       |              | Show/Hide event selection panel															     |
-| 	           | Q or G       | Quit event selection panel (only works before pressing tab)					                 |
-| 	           | TAB          | Cycle through run/eventNumber fields											             |
-| 	           | ENTER/RETURN | Go to selected event (and close panel)											             |
-| U	           |              | UCorrelator view																			 |
-| I	           |              | Interferometry (CrossCorrelator... currently put to shame by all UCorrelator's features)	 |
+| RIGHT ARROW  |    K         | Next event                                                                                   |
+| LEFT ARROW   |    J         | Previous event                                                                               |
+| SPACE        |              | Start playing events forwards                                                                |
+| BACKSPACE    |              | Start playing events reversed                                                                |
+| V            |              | VPol waveforms (default view)                                                                |
+| H            |              | HPol waveforms                                                                               |
+| X            |              | Both polarizations                                                                           |
+| TAB          |              | Cycle filters                                                                                |
+| F            |              | Show/Hide filtering panel                                                                    |
+| W            |              | save autonamed canvas as png in current directory                                            |
+|              | Q or F       | Quit filtering panel                                                                         |
+| G            |              | Show/Hide event selection panel                                                              |
+|              | Q or G       | Quit event selection panel (only works before pressing tab)                                  |
+|              | TAB          | Cycle through run/eventNumber fields                                                         |
+|              | ENTER/RETURN | Go to selected event (and close panel)                                                       |
+| U            |              | UCorrelator view                                                                             |
+| I            |              | Interferometry (CrossCorrelator... currently put to shame by all UCorrelator's features)     |
+| [0-9]        |              | vi-like numerical modifier for next / previous / go to event.  e.g. 40k goes forward 40, 3141516g goes to 314156                 |
 
 
 
