@@ -394,6 +394,7 @@ class MagicDisplay : public TGMainFrame
   CrossCorrelator::zoomMode_t fInterferometryZoomMode;
 
 
+  void initializeFilterStrategies(); // If you want your favourite filter strategy to be available in MagicDisplay... add it here!
   void drawUCorrelatorFilterButtons();
   void setNextFilter(); // cycle through available filters...
   UCorrelator::Analyzer * fUCorr;

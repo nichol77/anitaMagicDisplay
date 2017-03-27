@@ -84,14 +84,8 @@ MagicDisplay*  MagicDisplay::fgInstance = 0;
 AnitaCanvasMaker *fEventCanMaker=0;
 AnitaRFCanvasMaker *fRFCanMaker=0;
 AnitaGpsCanvasMaker *fGpsCanMaker=0;
-//Leave these as global variables for now
 
 
-
-// static FilterStrategy default_strategy;
-// static int default_strategy_init = 0;
-// static FilterStrategy no_filter_strategy;
-// static int no_filter_strategy_init = 0;
 
 
 void MagicDisplay::zeroPointers()
@@ -192,21 +186,37 @@ void MagicDisplay::zeroPointers()
   butFiltering = 0;
   fFilteringPanel = 0;
   fControlPanel = 0;
-  fInEventPlayMode = 0;  
+  fInEventPlayMode = 0;
+
+  initializeFilterStrategies();
   
+  fUCorr = new UCorrelator::Analyzer(0,true);
+
+}
+
+
+
+
+/** 
+ * If you want your favourite filter strategy to be available in MagicDisplay... add it here!
+ * 
+ */
+void MagicDisplay::initializeFilterStrategies(){
+
   FilterStrategy* fSineSub = new FilterStrategy();
   filterStrats["SineSubtract"] = fSineSub;
   fSineSub->addOperation(new UCorrelator::SineSubtractFilter);
   fSineSub->addOperation(new ALFAFilter);
 
+  FilterStrategy* fMinFilter = new FilterStrategy();
+  filterStrats["JustAlfaFilter"] = fMinFilter;
+  fMinFilter->addOperation(new ALFAFilter);
+
   FilterStrategy* fNoFilter = new FilterStrategy();
   filterStrats["NoFilter"] = fNoFilter;
-  fNoFilter->addOperation(new ALFAFilter);  
 
-  setFilterStrategy(filterStrats["NoFilter"]);  
-
-  fUCorr = new UCorrelator::Analyzer(0,true);
-
+  setFilterStrategy(filterStrats["MinFilter"]);  
+  
 }
 
 
