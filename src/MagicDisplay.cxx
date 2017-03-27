@@ -74,6 +74,7 @@
 #include <TGClient.h>
 #include "TRootEmbeddedCanvas.h"
 #include "TCut.h"
+#include "TGMsgBox.h" 
 
 #include "UCFilters.h"
 #include "BasicFilters.h"
@@ -565,6 +566,11 @@ Bool_t MagicDisplay::HandleKey(Event_t * event)
                                              butFiltering->GetTitle()
                 ));
       break; 
+
+      case kKey_Question:
+        new TGMsgBox(gClient->GetRoot(),0,"MagicDisplay key bindings (case insensitive)", 
+            "THIS IS A MODAL DIALOG YOU MUST DISMISS IT!\n[left]/j: previous\n[right]/k: next\n[space]: start/stop play\n[bksp] play reverse\nv: show vpol\nh: show hpol\nx: show both pols\ns: show surf\ni: show interferometry\nu: show UCorrelator\n[tab]:cycle filter\nf: show filter panel\ng: goto event\nw: save canvas image\n[0-9]*: vi-like numerical modifier for jkg\nn: find neutrinos (not implemented yet)\n? show keybindings"
+            ,0, kMBDismiss,0, kVerticalFrame, kTextLeft | kTextTop); 
 
               
       default:

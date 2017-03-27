@@ -67,6 +67,7 @@ root macros/runMagicDisplay.C\(352\)
 |              | ENTER/RETURN | Go to selected event (and close panel)                                                       |
 | U            |              | UCorrelator view                                                                             |
 | I            |              | Interferometry (CrossCorrelator... currently put to shame by all UCorrelator's features)     |
+| ?            |              | show keybindings                                                                             |
 | [0-9]        |              | vi-like numerical modifier for next / previous / go to event.  e.g. 40k goes forward 40, 3141516g goes to 314156                 |
 
 
