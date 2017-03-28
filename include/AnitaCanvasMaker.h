@@ -16,7 +16,7 @@
 #include <TVector3.h>
 #include "AnitaConventions.h"
 #include "MagicDisplayConventions.h"
-#include "CrossCorrelator.h"
+#include "InterferometricMapMaker.h"
 
 class UsefulAnitaEvent;
 class RawAnitaHeader;
@@ -34,7 +34,7 @@ class AnitaCanvasMaker
 
   void setCanvasLayout(MagicDisplayCanvasLayoutOption::MagicDisplayCanvasLayoutOption_t canLay) {fCanvasView=canLay;}
   void setWaveformFormat(MagicDisplayFormatOption::MagicDisplayFormatOption_t waveOption) {fWaveformOption=waveOption;}
-  void setInterferometryTypeFlags(CrossCorrelator::mapMode_t mapMode, CrossCorrelator::zoomMode_t zoomMode){
+  void setInterferometryTypeFlags(InterferometricMapMaker::mapMode_t mapMode, InterferometricMapMaker::zoomMode_t zoomMode){
     fInterferometryMapMode=mapMode;
     fInterferometryZoomMode=zoomMode;
   }
@@ -65,10 +65,10 @@ class AnitaCanvasMaker
    MagicDisplayFormatOption::MagicDisplayFormatOption_t fLastWaveformFormat; ///< What did we plot last time??
    Int_t fNewEvent; ///< Is this a new event?
 
-  CrossCorrelator::mapMode_t fInterferometryMapMode;
-  CrossCorrelator::mapMode_t fLastInterferometryMapMode;
-  CrossCorrelator::zoomMode_t fInterferometryZoomMode;	  
-  CrossCorrelator::zoomMode_t fLastInterferometryZoomMode;
+  InterferometricMapMaker::mapMode_t fInterferometryMapMode;
+  InterferometricMapMaker::mapMode_t fLastInterferometryMapMode;
+  InterferometricMapMaker::zoomMode_t fInterferometryZoomMode;	  
+  InterferometricMapMaker::zoomMode_t fLastInterferometryZoomMode;
   
    //!  The main event view canvas getter.
    /*!
@@ -129,7 +129,7 @@ class AnitaCanvasMaker
    ~AnitaCanvasMaker(); ///<Destructor.
 
 
-  CrossCorrelator& getCrossCorrelator(); ///< get command line access with a reference
+  InterferometricMapMaker& getInterferometricMapMaker(); ///< get command line access with a reference
 
   
    //Instance generator
@@ -152,7 +152,7 @@ class AnitaCanvasMaker
 
  private:
 
-  static CrossCorrelator* fCrossCorr; ///< Might return a reference to this to allow interaction but not deletion
+  static InterferometricMapMaker* fCrossCorr; ///< Might return a reference to this to allow interaction but not deletion
   
    Int_t fPhiMax;
    TFile *fAnitaGeomFile;

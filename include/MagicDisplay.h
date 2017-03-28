@@ -18,7 +18,7 @@
 #include "MagicDisplayConventions.h"
 #include "AnitaConventions.h"
 #include "CalibratedAnitaEvent.h"
-#include "CrossCorrelator.h"
+#include "InterferometricMapMaker.h"
 #include "Analyzer.h"
 #include "FilterStrategy.h"
 
@@ -135,7 +135,7 @@ class MagicDisplay : public TGMainFrame
     \param waveformView See MagicDisplayFormatOption for options.
   */
   void setWaveformFormat(MagicDisplayFormatOption::MagicDisplayFormatOption_t waveformView);
-  void setInterferometryTypeFlags(CrossCorrelator::mapMode_t mapMode, CrossCorrelator::zoomMode_t zoomMode);
+  void setInterferometryTypeFlags(InterferometricMapMaker::mapMode_t mapMode, InterferometricMapMaker::zoomMode_t zoomMode);
 
   // For UCorrelator integration
   void setFilterStrategy(FilterStrategy * filter_strategy);
@@ -265,7 +265,7 @@ class MagicDisplay : public TGMainFrame
   Char_t fCurrentBaseDir[180]; ///< The base directory for the ROOT files.
 
 
-  CrossCorrelator& getCrossCorrelator(); /// < for command line interface
+  InterferometricMapMaker& getInterferometricMapMaker(); /// < for command line interface
 
 
   UCorrelator::Analyzer * getUCorr() { return fUCorr; }
@@ -390,8 +390,8 @@ class MagicDisplay : public TGMainFrame
 
    WaveCalType::WaveCalType_t fCalType; ///< The waveform calibration type.
 
-  CrossCorrelator::mapMode_t fInterferometryMapMode;
-  CrossCorrelator::zoomMode_t fInterferometryZoomMode;
+  InterferometricMapMaker::mapMode_t fInterferometryMapMode;
+  InterferometricMapMaker::zoomMode_t fInterferometryZoomMode;
 
 
   void initializeFilterStrategies(); // If you want your favourite filter strategy to be available in MagicDisplay... add it here!

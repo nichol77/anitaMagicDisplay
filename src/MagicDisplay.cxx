@@ -78,7 +78,7 @@
 
 #include "UCFilters.h"
 #include "BasicFilters.h"
-#include "CrossCorrelator.h"
+#include "InterferometricMapMaker.h"
 using namespace std;
 
 MagicDisplay*  MagicDisplay::fgInstance = 0;
@@ -180,8 +180,8 @@ void MagicDisplay::zeroPointers()
 
   fWaveformFormat=MagicDisplayFormatOption::kWaveform;
   fCanvasLayout=MagicDisplayCanvasLayoutOption::kPhiVerticalOnly;
-  fInterferometryMapMode=CrossCorrelator::kGlobal;
-  fInterferometryZoomMode=CrossCorrelator::kZoomedOut;
+  fInterferometryMapMode=InterferometricMapMaker::kGlobal;
+  fInterferometryZoomMode=InterferometricMapMaker::kZoomedOut;
 
 
   butFiltering = 0;
@@ -1002,16 +1002,16 @@ void MagicDisplay::drawEventButtons() {
 
 
 
-void MagicDisplay::setInterferometryTypeFlags(CrossCorrelator::mapMode_t mapMode, CrossCorrelator::zoomMode_t zoomMode){
+void MagicDisplay::setInterferometryTypeFlags(InterferometricMapMaker::mapMode_t mapMode, InterferometricMapMaker::zoomMode_t zoomMode){
 
   fInterferometryZoomMode = zoomMode;
-  if(zoomMode==CrossCorrelator::kZoomedIn){
-    fInterferometryMapMode = CrossCorrelator::kTriggered;
+  if(zoomMode==InterferometricMapMaker::kZoomedIn){
+    fInterferometryMapMode = InterferometricMapMaker::kTriggered;
   }
   else{
     fInterferometryMapMode = mapMode;
   }
-  if(fInterferometryMapMode==CrossCorrelator::kGlobal) {
+  if(fInterferometryMapMode==InterferometricMapMaker::kGlobal) {
     fWaveformButton->SetFillColor(kGray+3);
     fPowerButton->SetFillColor(kGray);
     fHilbertButton->SetFillColor(kGray);
@@ -1021,7 +1021,7 @@ void MagicDisplay::setInterferometryTypeFlags(CrossCorrelator::mapMode_t mapMode
     fHilbertButton->Modified();
     fAverageFFTButton->Modified();
   }
-  else if(fInterferometryZoomMode==CrossCorrelator::kZoomedOut) {
+  else if(fInterferometryZoomMode==InterferometricMapMaker::kZoomedOut) {
     fWaveformButton->SetFillColor(kGray);
     fPowerButton->SetFillColor(kGray+3);
     fHilbertButton->SetFillColor(kGray);
@@ -1031,8 +1031,8 @@ void MagicDisplay::setInterferometryTypeFlags(CrossCorrelator::mapMode_t mapMode
     fHilbertButton->Modified();
     fAverageFFTButton->Modified();
   }
-  else if(fInterferometryZoomMode==CrossCorrelator::kZoomedIn &&
-	  fInterferometryMapMode==CrossCorrelator::kTriggered) {
+  else if(fInterferometryZoomMode==InterferometricMapMaker::kZoomedIn &&
+	  fInterferometryMapMode==InterferometricMapMaker::kTriggered) {
     //Turn fft view on
     fWaveformButton->SetFillColor(kGray);
     fPowerButton->SetFillColor(kGray);
@@ -1059,15 +1059,15 @@ void MagicDisplay::swapWaveformButtonFunctionsAndTitles(MagicDisplayCanvasLayout
 
   if(option==MagicDisplayCanvasLayoutOption::kInterferometry){
     fWaveformButton->SetTitle("Global");
-    fWaveformButton->SetMethod("MagicDisplay::Instance()->setInterferometryTypeFlags(CrossCorrelator::kGlobal, CrossCorrelator::kZoomedOut); MagicDisplay::Instance()->refreshEventDisplay();");
+    fWaveformButton->SetMethod("MagicDisplay::Instance()->setInterferometryTypeFlags(InterferometricMapMaker::kGlobal, InterferometricMapMaker::kZoomedOut); MagicDisplay::Instance()->refreshEventDisplay();");
     fWaveformButton->SetTextSize(0.4);
 
     fPowerButton->SetTitle("Triggered");
-    fPowerButton->SetMethod("MagicDisplay::Instance()->setInterferometryTypeFlags(CrossCorrelator::kTriggered, CrossCorrelator::kZoomedOut); MagicDisplay::Instance()->refreshEventDisplay();");
+    fPowerButton->SetMethod("MagicDisplay::Instance()->setInterferometryTypeFlags(InterferometricMapMaker::kTriggered, InterferometricMapMaker::kZoomedOut); MagicDisplay::Instance()->refreshEventDisplay();");
     fPowerButton->SetTextSize(0.4);
 
     fHilbertButton->SetTitle("Zoom");
-    fHilbertButton->SetMethod("MagicDisplay::Instance()->setInterferometryTypeFlags(CrossCorrelator::kTriggered, CrossCorrelator::kZoomedIn); MagicDisplay::Instance()->refreshEventDisplay();");
+    fHilbertButton->SetMethod("MagicDisplay::Instance()->setInterferometryTypeFlags(InterferometricMapMaker::kTriggered, InterferometricMapMaker::kZoomedIn); MagicDisplay::Instance()->refreshEventDisplay();");
     fHilbertButton->SetTextSize(0.4);
 
     fAverageFFTButton->SetTitle("");
@@ -2542,10 +2542,10 @@ void MagicDisplay::stopGpsPlaying()
    fInGpsPlayMode=0;
  }
 
-CrossCorrelator& MagicDisplay::getCrossCorrelator(){
+InterferometricMapMaker& MagicDisplay::getInterferometricMapMaker(){
 
   if(fEventCanMaker==NULL){
     startEventDisplay();
   }
-  return fEventCanMaker->getCrossCorrelator();
+  return fEventCanMaker->getInterferometricMapMaker();
 }

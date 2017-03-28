@@ -15,7 +15,7 @@
 #include "RawAnitaHeader.h"
 #include "WaveformGraph.h"
 #include "FFTGraph.h"
-#include "CrossCorrelator.h"
+#include "InterferometricMapMaker.h"
 
 #include "TH2D.h"
 #include "TString.h"
@@ -47,7 +47,7 @@
 
 
 AnitaCanvasMaker*  AnitaCanvasMaker::fgInstance = 0;
-CrossCorrelator* AnitaCanvasMaker::fCrossCorr = 0;
+InterferometricMapMaker* AnitaCanvasMaker::fCrossCorr = 0;
 
 // These classes are such a mess anyway, I might as well leave these here...
 FilteredAnitaEvent* fEv = NULL;
@@ -140,7 +140,7 @@ AnitaCanvasMaker::AnitaCanvasMaker(WaveCalType::WaveCalType_t calType)
 
   //RJN chnge to try and speed up web plotter
   fCrossCorr=NULL;
-  //  fCrossCorr=new CrossCorrelator();
+  //  fCrossCorr=new InterferometricMapMaker();
 }
 
 AnitaCanvasMaker::~AnitaCanvasMaker()
@@ -597,7 +597,7 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr, RawAnitaHe
   if(fCanvasView==MagicDisplayCanvasLayoutOption::kInterferometry){
 
     if(!fCrossCorr){
-      fCrossCorr=new CrossCorrelator();
+      fCrossCorr=new InterferometricMapMaker();
     }
 
     const int numPeaksCoarse = 1;
@@ -620,12 +620,12 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr, RawAnitaHe
 	Double_t imagePeak, peakPhiDeg, peakThetaDeg;
 	// UShort_t l3TrigPattern = pol==AnitaPol::kHorizontal ? hdPtr->l3TrigPatternH : hdPtr->l3TrigPattern;
 
-	if(fInterferometryZoomMode!=CrossCorrelator::kZoomedIn){
+	if(fInterferometryZoomMode!=InterferometricMapMaker::kZoomedIn){
 	  hImage[polInd] = fCrossCorr->getMap(pol, imagePeak,
 					      peakPhiDeg, peakThetaDeg);
 	}
 	else{
-	  // if(fInterferometryZoomMode==CrossCorrelator::kZoomedIn){
+	  // if(fInterferometryZoomMode==InterferometricMapMaker::kZoomedIn){
 	  hImage[polInd] = fCrossCorr->getZoomMap(pol);
 	}
 	hImage[polInd]->SetTitleSize(0.1);
@@ -1425,7 +1425,7 @@ TPad *AnitaCanvasMaker::getInterferometryCanvas(RawAnitaHeader *hdPtr,TPad *useC
     }
     // paddy1->SetEditable(kFALSE);
   }
-  if(fInterferometryZoomMode==CrossCorrelator::kZoomedOut){
+  if(fInterferometryZoomMode==InterferometricMapMaker::kZoomedOut){
     for(Int_t polInd=0; polInd<AnitaPol::kNotAPol; polInd++){
       hImage[polInd]->SetMaximum(fMaxInterfLimit);
       hImage[polInd]->SetMinimum(fMinInterfLimit);
@@ -2285,9 +2285,9 @@ void AnitaCanvasMaker::loadPayloadViewSutff()
 
 }
 
-CrossCorrelator& AnitaCanvasMaker::getCrossCorrelator(){
+InterferometricMapMaker& AnitaCanvasMaker::getInterferometricMapMaker(){
   if(fCrossCorr==NULL){
-    fCrossCorr = new CrossCorrelator();
+    fCrossCorr = new InterferometricMapMaker();
   }
   return (*fCrossCorr);
 }
