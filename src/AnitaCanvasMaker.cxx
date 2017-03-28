@@ -78,7 +78,8 @@ WaveformGraph *grSurfHilbert[ACTIVE_SURFS][CHANNELS_PER_SURF]={{0}};
 FFTGraph *grSurfFFT[ACTIVE_SURFS][CHANNELS_PER_SURF]={{0}};
 FFTGraph *grSurfAveragedFFT[ACTIVE_SURFS][CHANNELS_PER_SURF]={{0}};
 
-TH2D* hImage[AnitaPol::kNotAPol] = {0};
+TH2D* hImageFine[AnitaPol::kNotAPol] = {0};
+InterferometricMap* hImage[AnitaPol::kNotAPol] = {0};
 TGraph* grL3Trig[AnitaPol::kNotAPol] = {0};
 TGraph* grPhiMask[AnitaPol::kNotAPol] = {0};
 
@@ -610,6 +611,10 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr, RawAnitaHe
 	delete hImage[polInd];
 	hImage[polInd] = NULL;
       }
+      if(hImageFine[polInd]!=NULL){
+	delete hImageFine[polInd];
+	hImageFine[polInd] = NULL;
+      }
       fMinInterfLimit = 1;
       fMaxInterfLimit = -1;
     }
@@ -623,14 +628,18 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr, RawAnitaHe
 	if(fInterferometryZoomMode!=InterferometricMapMaker::kZoomedIn){
 	  hImage[polInd] = fCrossCorr->getMap(pol, imagePeak,
 					      peakPhiDeg, peakThetaDeg);
+	  hImage[polInd]->SetTitleSize(0.1);
+	  hImage[polInd]->GetXaxis()->SetTitleSize(0.04);
+	  hImage[polInd]->GetYaxis()->SetTitleSize(0.04);
+	  
 	}
 	else{
 	  // if(fInterferometryZoomMode==InterferometricMapMaker::kZoomedIn){
-	  hImage[polInd] = fCrossCorr->getZoomMap(pol);
+	  hImageFine[polInd] = fCrossCorr->getZoomMap(pol);
+	  hImageFine[polInd]->SetTitleSize(0.1);
+	  hImageFine[polInd]->GetXaxis()->SetTitleSize(0.04);
+	  hImageFine[polInd]->GetYaxis()->SetTitleSize(0.04);	  
 	}
-	hImage[polInd]->SetTitleSize(0.1);
-	hImage[polInd]->GetXaxis()->SetTitleSize(0.04);
-	hImage[polInd]->GetYaxis()->SetTitleSize(0.04);
       }
     }
   }
@@ -1412,17 +1421,24 @@ TPad *AnitaCanvasMaker::getInterferometryCanvas(RawAnitaHeader *hdPtr,TPad *useC
     TPad *paddy1 = (TPad*) plotPad->FindObject(padName);
     paddy1->SetEditable(kTRUE);
     paddy1->cd();
-    hImage[polInd]->Draw("colz");
+    if(fInterferometryZoomMode==InterferometricMapMaker::kZoomedOut){
+      hImage[polInd]->Draw("colz");
 
-    Double_t tempMax = hImage[polInd]->GetMaximum();
-    Double_t tempMin = hImage[polInd]->GetMinimum();
+      Double_t tempMax = hImage[polInd]->GetMaximum();
+      Double_t tempMin = hImage[polInd]->GetMinimum();
 
-    if(tempMax > fMaxInterfLimit){
-      fMaxInterfLimit = tempMax;
+      if(tempMax > fMaxInterfLimit){
+	fMaxInterfLimit = tempMax;
+      }
+      if(tempMin < fMinInterfLimit){
+	fMinInterfLimit = tempMin;
+      }
+      
     }
-    if(tempMin < fMinInterfLimit){
-      fMinInterfLimit = tempMin;
+    else{
+      hImageFine[polInd]->Draw("colz");
     }
+
     // paddy1->SetEditable(kFALSE);
   }
   if(fInterferometryZoomMode==InterferometricMapMaker::kZoomedOut){
