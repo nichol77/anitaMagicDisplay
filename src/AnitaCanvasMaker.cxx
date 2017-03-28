@@ -622,12 +622,8 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr, RawAnitaHe
     for(Int_t polInd=0; polInd<AnitaPol::kNotAPol; polInd++){
       AnitaPol::AnitaPol_t pol = AnitaPol::AnitaPol_t(polInd);
       if(hImage[polInd]==NULL){
-	Double_t imagePeak, peakPhiDeg, peakThetaDeg;
-	// UShort_t l3TrigPattern = pol==AnitaPol::kHorizontal ? hdPtr->l3TrigPatternH : hdPtr->l3TrigPattern;
-
 	if(fInterferometryZoomMode!=InterferometricMapMaker::kZoomedIn){
-	  hImage[polInd] = fCrossCorr->getMap(pol, imagePeak,
-					      peakPhiDeg, peakThetaDeg);
+	  hImage[polInd] = fCrossCorr->getMap(pol);
 	  hImage[polInd]->SetTitleSize(0.1);
 	  hImage[polInd]->GetXaxis()->SetTitleSize(0.04);
 	  hImage[polInd]->GetYaxis()->SetTitleSize(0.04);
