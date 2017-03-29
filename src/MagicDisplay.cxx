@@ -180,8 +180,8 @@ void MagicDisplay::zeroPointers()
 
   fWaveformFormat=MagicDisplayFormatOption::kWaveform;
   fCanvasLayout=MagicDisplayCanvasLayoutOption::kPhiVerticalOnly;
-  fInterferometryMapMode=InterferometricMapMaker::kGlobal;
-  fInterferometryZoomMode=InterferometricMapMaker::kZoomedOut;
+  // fInterferometryMapMode=InterferometricMapMaker::kGlobal;
+  // fInterferometryZoomMode=InterferometricMapMaker::kZoomedOut;
 
 
   butFiltering = 0;
@@ -716,7 +716,7 @@ void MagicDisplay::refreshEventDisplay()
 
    fEventCanMaker->setWaveformFormat(fWaveformFormat);
    fEventCanMaker->setCanvasLayout(fCanvasLayout);
-   fEventCanMaker->setInterferometryTypeFlags(fInterferometryMapMode, fInterferometryZoomMode);
+   // fEventCanMaker->setInterferometryTypeFlags(fInterferometryMapMode, fInterferometryZoomMode);
 
 
    // fEventCanMaker->getEventViewerCanvas(fUsefulEventPtr,fHeadPtr,fMagicMainPad);
@@ -775,6 +775,8 @@ void MagicDisplay::applyCut(const char *cutString)
 
 int MagicDisplay::displayNextEvent(int nskip){
 
+  std::cerr << "here???" << std::endl;
+  
   if(fApplyEventCut==0){
     for (int i = 0; i < nskip; i++) fDataset->next();  //TODO skip properly 
     fEventEntry = fDataset->next();
@@ -788,6 +790,8 @@ int MagicDisplay::displayNextEvent(int nskip){
   if(retVal==0){
     refreshEventDisplay();
   }
+
+  std::cerr << retVal << std::endl;  
   return retVal;
 }
 
@@ -1002,51 +1006,51 @@ void MagicDisplay::drawEventButtons() {
 
 
 
-void MagicDisplay::setInterferometryTypeFlags(InterferometricMapMaker::mapMode_t mapMode, InterferometricMapMaker::zoomMode_t zoomMode){
+// void MagicDisplay::setInterferometryTypeFlags(InterferometricMapMaker::mapMode_t mapMode, InterferometricMapMaker::zoomMode_t zoomMode){
 
-  fInterferometryZoomMode = zoomMode;
-  if(zoomMode==InterferometricMapMaker::kZoomedIn){
-    fInterferometryMapMode = InterferometricMapMaker::kTriggered;
-  }
-  else{
-    fInterferometryMapMode = mapMode;
-  }
-  if(fInterferometryMapMode==InterferometricMapMaker::kGlobal) {
-    fWaveformButton->SetFillColor(kGray+3);
-    fPowerButton->SetFillColor(kGray);
-    fHilbertButton->SetFillColor(kGray);
-    fAverageFFTButton->SetFillColor(kGray);
-    fWaveformButton->Modified();
-    fPowerButton->Modified();
-    fHilbertButton->Modified();
-    fAverageFFTButton->Modified();
-  }
-  else if(fInterferometryZoomMode==InterferometricMapMaker::kZoomedOut) {
-    fWaveformButton->SetFillColor(kGray);
-    fPowerButton->SetFillColor(kGray+3);
-    fHilbertButton->SetFillColor(kGray);
-    fAverageFFTButton->SetFillColor(kGray);
-    fWaveformButton->Modified();
-    fPowerButton->Modified();
-    fHilbertButton->Modified();
-    fAverageFFTButton->Modified();
-  }
-  else if(fInterferometryZoomMode==InterferometricMapMaker::kZoomedIn &&
-	  fInterferometryMapMode==InterferometricMapMaker::kTriggered) {
-    //Turn fft view on
-    fWaveformButton->SetFillColor(kGray);
-    fPowerButton->SetFillColor(kGray);
-    fHilbertButton->SetFillColor(kGray+3);
-    fAverageFFTButton->SetFillColor(kGray);
-    fWaveformButton->Modified();
-    fPowerButton->Modified();
-    fHilbertButton->Modified();
-    fAverageFFTButton->Modified();
-  }
+//   fInterferometryZoomMode = zoomMode;
+//   if(zoomMode==InterferometricMapMaker::kZoomedIn){
+//     fInterferometryMapMode = InterferometricMapMaker::kTriggered;
+//   }
+//   else{
+//     fInterferometryMapMode = mapMode;
+//   }
+//   if(fInterferometryMapMode==InterferometricMapMaker::kGlobal) {
+//     fWaveformButton->SetFillColor(kGray+3);
+//     fPowerButton->SetFillColor(kGray);
+//     fHilbertButton->SetFillColor(kGray);
+//     fAverageFFTButton->SetFillColor(kGray);
+//     fWaveformButton->Modified();
+//     fPowerButton->Modified();
+//     fHilbertButton->Modified();
+//     fAverageFFTButton->Modified();
+//   }
+//   else if(fInterferometryZoomMode==InterferometricMapMaker::kZoomedOut) {
+//     fWaveformButton->SetFillColor(kGray);
+//     fPowerButton->SetFillColor(kGray+3);
+//     fHilbertButton->SetFillColor(kGray);
+//     fAverageFFTButton->SetFillColor(kGray);
+//     fWaveformButton->Modified();
+//     fPowerButton->Modified();
+//     fHilbertButton->Modified();
+//     fAverageFFTButton->Modified();
+//   }
+//   else if(fInterferometryZoomMode==InterferometricMapMaker::kZoomedIn &&
+// 	  fInterferometryMapMode==InterferometricMapMaker::kTriggered) {
+//     //Turn fft view on
+//     fWaveformButton->SetFillColor(kGray);
+//     fPowerButton->SetFillColor(kGray);
+//     fHilbertButton->SetFillColor(kGray+3);
+//     fAverageFFTButton->SetFillColor(kGray);
+//     fWaveformButton->Modified();
+//     fPowerButton->Modified();
+//     fHilbertButton->Modified();
+//     fAverageFFTButton->Modified();
+//   }
 
   // std::cout << fInterferometryMapMode << "\t" << fInterferometryZoomMode << std::endl;
 
-}
+// }
 
 
 // FilterStrategy * MagicDisplay::getNoFilterStrategy() { return &no_filter_strategy; }
@@ -1058,20 +1062,31 @@ void MagicDisplay::setInterferometryTypeFlags(InterferometricMapMaker::mapMode_t
 void MagicDisplay::swapWaveformButtonFunctionsAndTitles(MagicDisplayCanvasLayoutOption::MagicDisplayCanvasLayoutOption_t option){
 
   if(option==MagicDisplayCanvasLayoutOption::kInterferometry){
-    fWaveformButton->SetTitle("Global");
-    fWaveformButton->SetMethod("MagicDisplay::Instance()->setInterferometryTypeFlags(InterferometricMapMaker::kGlobal, InterferometricMapMaker::kZoomedOut); MagicDisplay::Instance()->refreshEventDisplay();");
+
+    // do nothing, unset all buttons
+    fWaveformButton->SetFillColor(kGray);
+    fPowerButton->SetFillColor(kGray);
+    fHilbertButton->SetFillColor(kGray);
+    fAverageFFTButton->SetFillColor(kGray);
+    fWaveformButton->Modified();
+    fPowerButton->Modified();
+    fHilbertButton->Modified();
+    fAverageFFTButton->Modified();
+    
+    fWaveformButton->SetTitle("");
+    fWaveformButton->SetMethod("cout << \"button 1\" << endl;");
     fWaveformButton->SetTextSize(0.4);
 
-    fPowerButton->SetTitle("Triggered");
-    fPowerButton->SetMethod("MagicDisplay::Instance()->setInterferometryTypeFlags(InterferometricMapMaker::kTriggered, InterferometricMapMaker::kZoomedOut); MagicDisplay::Instance()->refreshEventDisplay();");
+    fPowerButton->SetTitle("");
+    fPowerButton->SetMethod("cout << \"button 2\" << endl;");    
     fPowerButton->SetTextSize(0.4);
 
-    fHilbertButton->SetTitle("Zoom");
-    fHilbertButton->SetMethod("MagicDisplay::Instance()->setInterferometryTypeFlags(InterferometricMapMaker::kTriggered, InterferometricMapMaker::kZoomedIn); MagicDisplay::Instance()->refreshEventDisplay();");
+    fHilbertButton->SetTitle("");
+    fHilbertButton->SetMethod("cout << \"button 3\" << endl;");
     fHilbertButton->SetTextSize(0.4);
 
     fAverageFFTButton->SetTitle("");
-    fAverageFFTButton->SetMethod("");
+    fAverageFFTButton->SetMethod("cout << \"button 4\" << endl;");    
     fAverageFFTButton->SetTextSize(0.4);
   }
   else if (option == MagicDisplayCanvasLayoutOption::kUCorrelator)

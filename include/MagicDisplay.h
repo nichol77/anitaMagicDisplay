@@ -135,7 +135,7 @@ class MagicDisplay : public TGMainFrame
     \param waveformView See MagicDisplayFormatOption for options.
   */
   void setWaveformFormat(MagicDisplayFormatOption::MagicDisplayFormatOption_t waveformView);
-  void setInterferometryTypeFlags(InterferometricMapMaker::mapMode_t mapMode, InterferometricMapMaker::zoomMode_t zoomMode);
+  // void setInterferometryTypeFlags(InterferometricMapMaker::mapMode_t mapMode, InterferometricMapMaker::zoomMode_t zoomMode);
 
   // For UCorrelator integration
   void setFilterStrategy(FilterStrategy * filter_strategy);
@@ -390,8 +390,8 @@ class MagicDisplay : public TGMainFrame
 
    WaveCalType::WaveCalType_t fCalType; ///< The waveform calibration type.
 
-  InterferometricMapMaker::mapMode_t fInterferometryMapMode;
-  InterferometricMapMaker::zoomMode_t fInterferometryZoomMode;
+  // InterferometricMapMaker::mapMode_t fInterferometryMapMode;
+  // InterferometricMapMaker::zoomMode_t fInterferometryZoomMode;
 
 
   void initializeFilterStrategies(); // If you want your favourite filter strategy to be available in MagicDisplay... add it here!

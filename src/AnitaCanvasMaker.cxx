@@ -78,7 +78,7 @@ WaveformGraph *grSurfHilbert[ACTIVE_SURFS][CHANNELS_PER_SURF]={{0}};
 FFTGraph *grSurfFFT[ACTIVE_SURFS][CHANNELS_PER_SURF]={{0}};
 FFTGraph *grSurfAveragedFFT[ACTIVE_SURFS][CHANNELS_PER_SURF]={{0}};
 
-TH2D* hImageFine[AnitaPol::kNotAPol] = {0};
+InterferometricMap* hImageFine[AnitaPol::kNotAPol] = {0};
 InterferometricMap* hImage[AnitaPol::kNotAPol] = {0};
 TGraph* grL3Trig[AnitaPol::kNotAPol] = {0};
 TGraph* grPhiMask[AnitaPol::kNotAPol] = {0};
@@ -601,11 +601,10 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr, RawAnitaHe
       fCrossCorr=new InterferometricMapMaker();
     }
 
-    const int numPeaksCoarse = 1;
-    const int numPeaksFine = 1;
-    // fCrossCorr->reconstructEvent(evPtr, numPeaksCoarse, numPeaksFine);
-    fCrossCorr->reconstructEvent(fEv, numPeaksCoarse, numPeaksFine);
-
+    AnitaEventSummary sum;
+    std::cerr << "before" << std::endl;
+    fCrossCorr->process(fEv, NULL, &sum);    
+    std::cerr << "after" << std::endl;
     for(Int_t polInd=0; polInd<AnitaPol::kNotAPol; polInd++){
       if(hImage[polInd]!=NULL){
 	delete hImage[polInd];
@@ -620,23 +619,15 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr, RawAnitaHe
     }
 
     for(Int_t polInd=0; polInd<AnitaPol::kNotAPol; polInd++){
-      AnitaPol::AnitaPol_t pol = AnitaPol::AnitaPol_t(polInd);
-      if(hImage[polInd]==NULL){
-	if(fInterferometryZoomMode!=InterferometricMapMaker::kZoomedIn){
-	  hImage[polInd] = fCrossCorr->getMap(pol);
-	  hImage[polInd]->SetTitleSize(0.1);
-	  hImage[polInd]->GetXaxis()->SetTitleSize(0.04);
-	  hImage[polInd]->GetYaxis()->SetTitleSize(0.04);
-	  
-	}
-	else{
-	  // if(fInterferometryZoomMode==InterferometricMapMaker::kZoomedIn){
-	  hImageFine[polInd] = fCrossCorr->getZoomMap(pol);
-	  hImageFine[polInd]->SetTitleSize(0.1);
-	  hImageFine[polInd]->GetXaxis()->SetTitleSize(0.04);
-	  hImageFine[polInd]->GetYaxis()->SetTitleSize(0.04);	  
-	}
-      }
+      AnitaPol::AnitaPol_t pol = (AnitaPol::AnitaPol_t)polInd;
+      hImage[polInd] = fCrossCorr->getMap(pol);
+      hImage[polInd]->SetTitleSize(0.1);
+      hImage[polInd]->GetXaxis()->SetTitleSize(0.04);
+      hImage[polInd]->GetYaxis()->SetTitleSize(0.04);	  
+      hImageFine[polInd] = fCrossCorr->getZoomMap(pol, 0);
+      hImageFine[polInd]->SetTitleSize(0.1);
+      hImageFine[polInd]->GetXaxis()->SetTitleSize(0.04);
+      hImageFine[polInd]->GetYaxis()->SetTitleSize(0.04);	  
     }
   }
 
@@ -652,8 +643,8 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr, RawAnitaHe
   fRedoEventCanvas=0;
   if(fLastWaveformFormat!=fWaveformOption) fRedoEventCanvas=1;
   if(fLastCanvasView!=fCanvasView) fRedoEventCanvas=1;
-  if(fLastInterferometryMapMode!=fInterferometryMapMode)fRedoEventCanvas=1;
-  if(fLastInterferometryZoomMode!=fInterferometryZoomMode)fRedoEventCanvas=1;
+  // if(fLastInterferometryMapMode!=fInterferometryMapMode)fRedoEventCanvas=1;
+  // if(fLastInterferometryZoomMode!=fInterferometryZoomMode)fRedoEventCanvas=1;
 
 
   if(fCanvasView==MagicDisplayCanvasLayoutOption::kPhiVerticalOnly) retCan=AnitaCanvasMaker::getVerticalCanvas(hdPtr,useCan);
@@ -666,8 +657,8 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr, RawAnitaHe
 
   fLastWaveformFormat=fWaveformOption;
   fLastCanvasView=fCanvasView;
-  fLastInterferometryMapMode=fInterferometryMapMode;
-  fLastInterferometryZoomMode=fInterferometryZoomMode;
+  // fLastInterferometryMapMode=fInterferometryMapMode;
+  // fLastInterferometryZoomMode=fInterferometryZoomMode;
   return retCan;
 
 }
@@ -1411,37 +1402,39 @@ TPad *AnitaCanvasMaker::getInterferometryCanvas(RawAnitaHeader *hdPtr,TPad *useC
   plotPad->cd();
   setupInterfPadWithFrames(plotPad);
 
+  int padInd = 0;
   for(Int_t polInd=0; polInd<AnitaPol::kNotAPol; polInd++){
     plotPad->cd();
-    sprintf(padName,"interfPad%d",polInd);
+    sprintf(padName,"interfPad%d",padInd);
+    padInd++;
     TPad *paddy1 = (TPad*) plotPad->FindObject(padName);
     paddy1->SetEditable(kTRUE);
     paddy1->cd();
-    if(fInterferometryZoomMode==InterferometricMapMaker::kZoomedOut){
-      hImage[polInd]->Draw("colz");
+    hImage[polInd]->Draw("colz");
 
-      Double_t tempMax = hImage[polInd]->GetMaximum();
-      Double_t tempMin = hImage[polInd]->GetMinimum();
+    Double_t tempMax = hImage[polInd]->GetMaximum();
+    Double_t tempMin = hImage[polInd]->GetMinimum();
 
-      if(tempMax > fMaxInterfLimit){
-	fMaxInterfLimit = tempMax;
-      }
-      if(tempMin < fMinInterfLimit){
-	fMinInterfLimit = tempMin;
-      }
-      
+    if(tempMax > fMaxInterfLimit){
+      fMaxInterfLimit = tempMax;
     }
-    else{
-      hImageFine[polInd]->Draw("colz");
+    if(tempMin < fMinInterfLimit){
+      fMinInterfLimit = tempMin;
     }
-
     // paddy1->SetEditable(kFALSE);
+
+
+    sprintf(padName,"interfPad%d",padInd);
+    padInd++;
+    paddy1 = (TPad*) plotPad->FindObject(padName);
+    paddy1->SetEditable(kTRUE);
+    paddy1->cd();
+    hImageFine[polInd]->Draw("colz");
   }
-  if(fInterferometryZoomMode==InterferometricMapMaker::kZoomedOut){
-    for(Int_t polInd=0; polInd<AnitaPol::kNotAPol; polInd++){
-      hImage[polInd]->SetMaximum(fMaxInterfLimit);
-      hImage[polInd]->SetMinimum(fMinInterfLimit);
-    }
+  
+  for(Int_t polInd=0; polInd<AnitaPol::kNotAPol; polInd++){
+    hImageFine[polInd]->SetMaximum(fMaxInterfLimit);
+    hImageFine[polInd]->SetMinimum(fMinInterfLimit);
   }
   // plotPad->Update();
 
@@ -1964,8 +1957,8 @@ void AnitaCanvasMaker::setupInterfPadWithFrames(TPad *plotPad)
 
   if(interfPadsDone && !fRedoEventCanvas) {
     int errors=0;
-    for(Int_t polInd=0; polInd<AnitaPol::kNotAPol; polInd++){
-      sprintf(padName,"interfPad%d",polInd);
+    for(Int_t padInd=0; padInd<interfPadsDone; padInd++){
+      sprintf(padName,"interfPad%d",padInd);
       TPad *paddy = (TPad*) plotPad->FindObject(padName);
       if(!paddy)
   	errors++;
@@ -1976,19 +1969,19 @@ void AnitaCanvasMaker::setupInterfPadWithFrames(TPad *plotPad)
   }
 
   // std::cerr << "here" << std::endl;
-
-  interfPadsDone=1;
-
+  const int desiredPads = 4;
   int count=0;
-  Double_t left[AnitaPol::kNotAPol] = {0.03, 0.5};
-  Double_t right[AnitaPol::kNotAPol] = {0.5, 0.97};
-  Double_t top = 0.9;
-  Double_t bottom = 0.03;
+  // should go top-left, top-right, bottom-left, bottom-right
+  Double_t left[desiredPads]   = {0.03, 0.5,  0.03, 0.5 };
+  Double_t right[desiredPads]  = {0.5,  0.97, 0.5,  0.97};
 
-  for(Int_t polInd=0; polInd<AnitaPol::kNotAPol; polInd++){
+  Double_t top[desiredPads]    = {0.9,  0.9 ,  0.5 ,  0.5 };
+  Double_t bottom[desiredPads] = {0.5,  0.5,   0.03,  0.03};
+
+  for(Int_t padInd=0; padInd<desiredPads; padInd++){
     plotPad->cd();
-    sprintf(padName,"interfPad%d",polInd);
-    TPad *paddy1 = new TPad(padName,padName,left[polInd],bottom,right[polInd],top);
+    sprintf(padName,"interfPad%d",padInd);
+    TPad *paddy1 = new TPad(padName,padName,left[padInd],bottom[padInd],right[padInd],top[padInd]);
     // TCanvas *paddy1 = new TCanvas(padName,padName,left[polInd],bottom,right[polInd],top);
     // paddy1->SetTopMargin(0);
     // paddy1->SetBottomMargin(0);

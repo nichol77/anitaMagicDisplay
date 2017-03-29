@@ -34,10 +34,10 @@ class AnitaCanvasMaker
 
   void setCanvasLayout(MagicDisplayCanvasLayoutOption::MagicDisplayCanvasLayoutOption_t canLay) {fCanvasView=canLay;}
   void setWaveformFormat(MagicDisplayFormatOption::MagicDisplayFormatOption_t waveOption) {fWaveformOption=waveOption;}
-  void setInterferometryTypeFlags(InterferometricMapMaker::mapMode_t mapMode, InterferometricMapMaker::zoomMode_t zoomMode){
-    fInterferometryMapMode=mapMode;
-    fInterferometryZoomMode=zoomMode;
-  }
+  // void setInterferometryTypeFlags(InterferometricMapMaker::mapMode_t mapMode, InterferometricMapMaker::zoomMode_t zoomMode){
+  //   fInterferometryMapMode=mapMode;
+  //   fInterferometryZoomMode=zoomMode;
+  // }
   
   void resetAverage();
 
@@ -65,10 +65,10 @@ class AnitaCanvasMaker
    MagicDisplayFormatOption::MagicDisplayFormatOption_t fLastWaveformFormat; ///< What did we plot last time??
    Int_t fNewEvent; ///< Is this a new event?
 
-  InterferometricMapMaker::mapMode_t fInterferometryMapMode;
-  InterferometricMapMaker::mapMode_t fLastInterferometryMapMode;
-  InterferometricMapMaker::zoomMode_t fInterferometryZoomMode;	  
-  InterferometricMapMaker::zoomMode_t fLastInterferometryZoomMode;
+  // InterferometricMapMaker::mapMode_t fInterferometryMapMode;
+  // InterferometricMapMaker::mapMode_t fLastInterferometryMapMode;
+  // InterferometricMapMaker::zoomMode_t fInterferometryZoomMode;	  
+  // InterferometricMapMaker::zoomMode_t fLastInterferometryZoomMode;
   
    //!  The main event view canvas getter.
    /*!
