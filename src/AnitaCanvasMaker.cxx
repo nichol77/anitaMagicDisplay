@@ -78,10 +78,6 @@ WaveformGraph *grSurfHilbert[ACTIVE_SURFS][CHANNELS_PER_SURF]={{0}};
 FFTGraph *grSurfFFT[ACTIVE_SURFS][CHANNELS_PER_SURF]={{0}};
 FFTGraph *grSurfAveragedFFT[ACTIVE_SURFS][CHANNELS_PER_SURF]={{0}};
 
-InterferometricMap* hImageFine[AnitaPol::kNotAPol] = {0};
-InterferometricMap* hImage[AnitaPol::kNotAPol] = {0};
-TGraph* grL3Trig[AnitaPol::kNotAPol] = {0};
-TGraph* grPhiMask[AnitaPol::kNotAPol] = {0};
 
 
 AnitaCanvasMaker::AnitaCanvasMaker(WaveCalType::WaveCalType_t calType)
@@ -602,33 +598,9 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr, RawAnitaHe
     }
 
     AnitaEventSummary sum;
-    std::cerr << "before" << std::endl;
-    fCrossCorr->process(fEv, NULL, &sum);    
-    std::cerr << "after" << std::endl;
-    for(Int_t polInd=0; polInd<AnitaPol::kNotAPol; polInd++){
-      if(hImage[polInd]!=NULL){
-	delete hImage[polInd];
-	hImage[polInd] = NULL;
-      }
-      if(hImageFine[polInd]!=NULL){
-	delete hImageFine[polInd];
-	hImageFine[polInd] = NULL;
-      }
-      fMinInterfLimit = 1;
-      fMaxInterfLimit = -1;
-    }
-
-    for(Int_t polInd=0; polInd<AnitaPol::kNotAPol; polInd++){
-      AnitaPol::AnitaPol_t pol = (AnitaPol::AnitaPol_t)polInd;
-      hImage[polInd] = fCrossCorr->getMap(pol);
-      hImage[polInd]->SetTitleSize(0.1);
-      hImage[polInd]->GetXaxis()->SetTitleSize(0.04);
-      hImage[polInd]->GetYaxis()->SetTitleSize(0.04);	  
-      hImageFine[polInd] = fCrossCorr->getZoomMap(pol, 0);
-      hImageFine[polInd]->SetTitleSize(0.1);
-      hImageFine[polInd]->GetXaxis()->SetTitleSize(0.04);
-      hImageFine[polInd]->GetYaxis()->SetTitleSize(0.04);	  
-    }
+    // std::cerr << "before" << std::endl;
+    fCrossCorr->process(fEv, NULL, &sum);
+    // std::cerr << "after" << std::endl;
   }
 
   if (fCanvasView==MagicDisplayCanvasLayoutOption::kUCorrelator)
@@ -1398,44 +1370,19 @@ TPad *AnitaCanvasMaker::getInterferometryCanvas(RawAnitaHeader *hdPtr,TPad *useC
   }
   else {
     plotPad=useCan;
-  }
-  plotPad->cd();
-  setupInterfPadWithFrames(plotPad);
-
-  int padInd = 0;
-  for(Int_t polInd=0; polInd<AnitaPol::kNotAPol; polInd++){
-    plotPad->cd();
-    sprintf(padName,"interfPad%d",padInd);
-    padInd++;
-    TPad *paddy1 = (TPad*) plotPad->FindObject(padName);
-    paddy1->SetEditable(kTRUE);
-    paddy1->cd();
-    hImage[polInd]->Draw("colz");
-
-    Double_t tempMax = hImage[polInd]->GetMaximum();
-    Double_t tempMin = hImage[polInd]->GetMinimum();
-
-    if(tempMax > fMaxInterfLimit){
-      fMaxInterfLimit = tempMax;
-    }
-    if(tempMin < fMinInterfLimit){
-      fMinInterfLimit = tempMin;
-    }
-    // paddy1->SetEditable(kFALSE);
-
-
-    sprintf(padName,"interfPad%d",padInd);
-    padInd++;
-    paddy1 = (TPad*) plotPad->FindObject(padName);
-    paddy1->SetEditable(kTRUE);
-    paddy1->cd();
-    hImageFine[polInd]->Draw("colz");
+    // std::cerr << "useCan = " << useCan << std::endl;
   }
   
+  plotPad->cd();
+  plotPad->Clear();
+  plotPad->Divide(2);
+
   for(Int_t polInd=0; polInd<AnitaPol::kNotAPol; polInd++){
-    hImageFine[polInd]->SetMaximum(fMaxInterfLimit);
-    hImageFine[polInd]->SetMinimum(fMinInterfLimit);
+    TPad* subPad = (TPad*) plotPad->GetPad(polInd+1);
+    fCrossCorr->drawSummary(subPad, AnitaPol::AnitaPol_t(polInd));
   }
+  
+  
   // plotPad->Update();
 
   if(!useCan)
@@ -1942,6 +1889,9 @@ void AnitaCanvasMaker::setupPhiPadWithFrames(TPad *plotPad)
 
 void AnitaCanvasMaker::setupInterfPadWithFrames(TPad *plotPad)
 {
+
+  // really don't think this function is necesary, it's not called anywhere now...
+  
   static int interfPadsDone=0;
   char padName[180];
   plotPad->cd();
@@ -1968,20 +1918,41 @@ void AnitaCanvasMaker::setupInterfPadWithFrames(TPad *plotPad)
     }
   }
 
-  // std::cerr << "here" << std::endl;
-  const int desiredPads = 4;
   int count=0;
-  // should go top-left, top-right, bottom-left, bottom-right
-  Double_t left[desiredPads]   = {0.03, 0.5,  0.03, 0.5 };
-  Double_t right[desiredPads]  = {0.5,  0.97, 0.5,  0.97};
+  Double_t left[AnitaPol::kNotAPol] = {0.03, 0.5};
+  Double_t right[AnitaPol::kNotAPol] = {0.5, 0.97};
+  Double_t top = 0.9;
+  Double_t bottom = 0.03;
+  
 
-  Double_t top[desiredPads]    = {0.9,  0.9 ,  0.5 ,  0.5 };
-  Double_t bottom[desiredPads] = {0.5,  0.5,   0.03,  0.03};
+  // // std::cerr << "here" << std::endl;
+  // const int desiredPads = 4;
+  // int count=0;
+  // // should go top-left, top-right, bottom-left, bottom-right
+  // Double_t left[desiredPads]   = {0.03, 0.5,  0.03, 0.5 };
+  // Double_t right[desiredPads]  = {0.5,  0.97, 0.5,  0.97};
 
-  for(Int_t padInd=0; padInd<desiredPads; padInd++){
+  // Double_t top[desiredPads]    = {0.9,  0.9 ,  0.5 ,  0.5 };
+  // Double_t bottom[desiredPads] = {0.5,  0.5,   0.03,  0.03};
+
+  // const int desiredPads = 2;
+  // Double_t left[desiredPads]   = {0.03, 0.5,  0.03, 0.5 };
+  // Double_t right[desiredPads]  = {0.5,  0.97, 0.5,  0.97};
+
+  // Double_t top[desiredPads]    = {0.9,  0.9 ,  0.5 ,  0.5 };
+
+  // // Double_t bottom[desiredPads] = {0.5,  0.5,   0.03,  0.03};
+
+
+  for(Int_t polInd=0; polInd<AnitaPol::kNotAPol; polInd++){
     plotPad->cd();
-    sprintf(padName,"interfPad%d",padInd);
-    TPad *paddy1 = new TPad(padName,padName,left[padInd],bottom[padInd],right[padInd],top[padInd]);
+    sprintf(padName,"interfPad%d",polInd);
+    // std::cout << padName << std::endl;
+    TPad *paddy1 = new TPad(padName,padName,left[polInd],bottom,right[polInd],top);
+
+    
+    // sprintf(padName,"interfPad%d",padInd);
+    // TPad *paddy1 = new TPad(padName,padName,left[padInd],bottom[padInd],right[padInd],top[padInd]);
     // TCanvas *paddy1 = new TCanvas(padName,padName,left[polInd],bottom,right[polInd],top);
     // paddy1->SetTopMargin(0);
     // paddy1->SetBottomMargin(0);
@@ -1990,7 +1961,12 @@ void AnitaCanvasMaker::setupInterfPadWithFrames(TPad *plotPad)
     paddy1->Draw();
     paddy1->cd();
     count++;
+
+    interfPadsDone++;    
   }
+
+
+  
 }
 
 

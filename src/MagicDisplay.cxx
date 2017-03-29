@@ -775,8 +775,6 @@ void MagicDisplay::applyCut(const char *cutString)
 
 int MagicDisplay::displayNextEvent(int nskip){
 
-  std::cerr << "here???" << std::endl;
-  
   if(fApplyEventCut==0){
     for (int i = 0; i < nskip; i++) fDataset->next();  //TODO skip properly 
     fEventEntry = fDataset->next();
@@ -790,8 +788,7 @@ int MagicDisplay::displayNextEvent(int nskip){
   if(retVal==0){
     refreshEventDisplay();
   }
-
-  std::cerr << retVal << std::endl;  
+  
   return retVal;
 }
 
