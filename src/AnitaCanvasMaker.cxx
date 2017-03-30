@@ -598,9 +598,9 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr, RawAnitaHe
     }
 
     AnitaEventSummary sum;
-    // std::cerr << "before" << std::endl;
+    // std::cerr << "before" << "\t" << fEv->eventNumber << "\t" << std::endl;
     fCrossCorr->process(fEv, NULL, &sum);
-    // std::cerr << "after" << std::endl;
+    // std::cerr << "after" << "\t" << fEv->eventNumber << "\t" << std::endl;
   }
 
   if (fCanvasView==MagicDisplayCanvasLayoutOption::kUCorrelator)
