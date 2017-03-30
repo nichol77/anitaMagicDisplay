@@ -78,7 +78,7 @@
 
 #include "UCFilters.h"
 #include "BasicFilters.h"
-#include "InterferometricMapMaker.h"
+#include "AnalysisReco.h"
 using namespace std;
 
 MagicDisplay*  MagicDisplay::fgInstance = 0;
@@ -180,8 +180,8 @@ void MagicDisplay::zeroPointers()
 
   fWaveformFormat=MagicDisplayFormatOption::kWaveform;
   fCanvasLayout=MagicDisplayCanvasLayoutOption::kPhiVerticalOnly;
-  // fInterferometryMapMode=InterferometricMapMaker::kGlobal;
-  // fInterferometryZoomMode=InterferometricMapMaker::kZoomedOut;
+  // fInterferometryMapMode=AnalysisReco::kGlobal;
+  // fInterferometryZoomMode=AnalysisReco::kZoomedOut;
 
 
   butFiltering = 0;
@@ -1003,16 +1003,16 @@ void MagicDisplay::drawEventButtons() {
 
 
 
-// void MagicDisplay::setInterferometryTypeFlags(InterferometricMapMaker::mapMode_t mapMode, InterferometricMapMaker::zoomMode_t zoomMode){
+// void MagicDisplay::setInterferometryTypeFlags(AnalysisReco::mapMode_t mapMode, AnalysisReco::zoomMode_t zoomMode){
 
 //   fInterferometryZoomMode = zoomMode;
-//   if(zoomMode==InterferometricMapMaker::kZoomedIn){
-//     fInterferometryMapMode = InterferometricMapMaker::kTriggered;
+//   if(zoomMode==AnalysisReco::kZoomedIn){
+//     fInterferometryMapMode = AnalysisReco::kTriggered;
 //   }
 //   else{
 //     fInterferometryMapMode = mapMode;
 //   }
-//   if(fInterferometryMapMode==InterferometricMapMaker::kGlobal) {
+//   if(fInterferometryMapMode==AnalysisReco::kGlobal) {
 //     fWaveformButton->SetFillColor(kGray+3);
 //     fPowerButton->SetFillColor(kGray);
 //     fHilbertButton->SetFillColor(kGray);
@@ -1022,7 +1022,7 @@ void MagicDisplay::drawEventButtons() {
 //     fHilbertButton->Modified();
 //     fAverageFFTButton->Modified();
 //   }
-//   else if(fInterferometryZoomMode==InterferometricMapMaker::kZoomedOut) {
+//   else if(fInterferometryZoomMode==AnalysisReco::kZoomedOut) {
 //     fWaveformButton->SetFillColor(kGray);
 //     fPowerButton->SetFillColor(kGray+3);
 //     fHilbertButton->SetFillColor(kGray);
@@ -1032,8 +1032,8 @@ void MagicDisplay::drawEventButtons() {
 //     fHilbertButton->Modified();
 //     fAverageFFTButton->Modified();
 //   }
-//   else if(fInterferometryZoomMode==InterferometricMapMaker::kZoomedIn &&
-// 	  fInterferometryMapMode==InterferometricMapMaker::kTriggered) {
+//   else if(fInterferometryZoomMode==AnalysisReco::kZoomedIn &&
+// 	  fInterferometryMapMode==AnalysisReco::kTriggered) {
 //     //Turn fft view on
 //     fWaveformButton->SetFillColor(kGray);
 //     fPowerButton->SetFillColor(kGray);
@@ -2554,10 +2554,10 @@ void MagicDisplay::stopGpsPlaying()
    fInGpsPlayMode=0;
  }
 
-InterferometricMapMaker& MagicDisplay::getInterferometricMapMaker(){
+Acclaim::AnalysisReco& MagicDisplay::getAnalysisReco(){
 
   if(fEventCanMaker==NULL){
     startEventDisplay();
   }
-  return fEventCanMaker->getInterferometricMapMaker();
+  return fEventCanMaker->getAnalysisReco();
 }

@@ -18,7 +18,7 @@
 #include "MagicDisplayConventions.h"
 #include "AnitaConventions.h"
 #include "CalibratedAnitaEvent.h"
-#include "InterferometricMapMaker.h"
+#include "AnalysisReco.h"
 #include "Analyzer.h"
 #include "FilterStrategy.h"
 
@@ -135,7 +135,7 @@ class MagicDisplay : public TGMainFrame
     \param waveformView See MagicDisplayFormatOption for options.
   */
   void setWaveformFormat(MagicDisplayFormatOption::MagicDisplayFormatOption_t waveformView);
-  // void setInterferometryTypeFlags(InterferometricMapMaker::mapMode_t mapMode, InterferometricMapMaker::zoomMode_t zoomMode);
+  // void setInterferometryTypeFlags(AnalysisReco::mapMode_t mapMode, AnalysisReco::zoomMode_t zoomMode);
 
   // For UCorrelator integration
   void setFilterStrategy(FilterStrategy * filter_strategy);
@@ -265,7 +265,7 @@ class MagicDisplay : public TGMainFrame
   Char_t fCurrentBaseDir[180]; ///< The base directory for the ROOT files.
 
 
-  InterferometricMapMaker& getInterferometricMapMaker(); /// < for command line interface
+  Acclaim::AnalysisReco& getAnalysisReco(); /// < for command line interface
 
 
   UCorrelator::Analyzer * getUCorr() { return fUCorr; }
@@ -390,8 +390,8 @@ class MagicDisplay : public TGMainFrame
 
    WaveCalType::WaveCalType_t fCalType; ///< The waveform calibration type.
 
-  // InterferometricMapMaker::mapMode_t fInterferometryMapMode;
-  // InterferometricMapMaker::zoomMode_t fInterferometryZoomMode;
+  // AnalysisReco::mapMode_t fInterferometryMapMode;
+  // AnalysisReco::zoomMode_t fInterferometryZoomMode;
 
 
   void initializeFilterStrategies(); // If you want your favourite filter strategy to be available in MagicDisplay... add it here!

@@ -15,7 +15,7 @@
 #include "RawAnitaHeader.h"
 #include "WaveformGraph.h"
 #include "FFTGraph.h"
-#include "InterferometricMapMaker.h"
+#include "AnalysisReco.h"
 
 #include "TH2D.h"
 #include "TString.h"
@@ -47,7 +47,7 @@
 
 
 AnitaCanvasMaker*  AnitaCanvasMaker::fgInstance = 0;
-InterferometricMapMaker* AnitaCanvasMaker::fCrossCorr = 0;
+Acclaim::AnalysisReco* AnitaCanvasMaker::reco = 0;
 
 // These classes are such a mess anyway, I might as well leave these here...
 FilteredAnitaEvent* fEv = NULL;
@@ -136,14 +136,14 @@ AnitaCanvasMaker::AnitaCanvasMaker(WaveCalType::WaveCalType_t calType)
   }
 
   //RJN chnge to try and speed up web plotter
-  fCrossCorr=NULL;
-  //  fCrossCorr=new InterferometricMapMaker();
+  reco=NULL;
+  //  reco=new AnalysisReco();
 }
 
 AnitaCanvasMaker::~AnitaCanvasMaker()
 {
-  if(fCrossCorr) {
-    delete fCrossCorr;
+  if(reco) {
+    delete reco;
   }
    //Default destructor
 }
@@ -593,13 +593,13 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr, RawAnitaHe
 
   if(fCanvasView==MagicDisplayCanvasLayoutOption::kInterferometry){
 
-    if(!fCrossCorr){
-      fCrossCorr=new InterferometricMapMaker();
+    if(!reco){
+      reco=new Acclaim::AnalysisReco();
     }
 
     AnitaEventSummary sum;
     // std::cerr << "before" << "\t" << fEv->eventNumber << "\t" << std::endl;
-    fCrossCorr->process(fEv, NULL, &sum);
+    reco->process(fEv, NULL, &sum);
     // std::cerr << "after" << "\t" << fEv->eventNumber << "\t" << std::endl;
   }
 
@@ -1379,7 +1379,7 @@ TPad *AnitaCanvasMaker::getInterferometryCanvas(RawAnitaHeader *hdPtr,TPad *useC
 
   for(Int_t polInd=0; polInd<AnitaPol::kNotAPol; polInd++){
     TPad* subPad = (TPad*) plotPad->GetPad(polInd+1);
-    fCrossCorr->drawSummary(subPad, AnitaPol::AnitaPol_t(polInd));
+    reco->drawSummary(subPad, AnitaPol::AnitaPol_t(polInd));
   }
   
   
@@ -2266,9 +2266,9 @@ void AnitaCanvasMaker::loadPayloadViewSutff()
 
 }
 
-InterferometricMapMaker& AnitaCanvasMaker::getInterferometricMapMaker(){
-  if(fCrossCorr==NULL){
-    fCrossCorr = new InterferometricMapMaker();
+Acclaim::AnalysisReco& AnitaCanvasMaker::getAnalysisReco(){
+  if(reco==NULL){
+    reco = new Acclaim::AnalysisReco();
   }
-  return (*fCrossCorr);
+  return (*reco);
 }
