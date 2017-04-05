@@ -101,6 +101,8 @@ void FFTGraph::drawInNewCanvas()
   can->SetTopMargin(0.1);
   can->SetRightMargin(0.1);
   thisCopy->Draw("al");
+  can->Modified();
+  can->Update();
   //  fNewCanvas=1;
 }
 

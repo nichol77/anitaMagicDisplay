@@ -127,8 +127,8 @@ void WaveformGraph::drawInNewCanvas()
   can->SetRightMargin(0.1);
   thisCopy->Draw("al");
   int numPoints=thisCopy->GetN();
+  can->Modified();  
   can->Update();
-  can->Modified();
 
 
   //  fNewCanvas=1;
