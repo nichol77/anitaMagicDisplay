@@ -571,7 +571,7 @@ Bool_t MagicDisplay::HandleKey(Event_t * event)
 
       case kKey_Tab:
         setNextFilter();
-        refreshEventDisplay();
+//        refreshEventDisplay();//  This is redundant! 
         break;
 
 
