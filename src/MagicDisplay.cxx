@@ -213,6 +213,10 @@ void MagicDisplay::initializeFilterStrategies(){
   while(f && !feof(f))
   {
     fgets(buf,128,f); 
+    //replace \n with 0 
+
+    while (char * pos = strchr(buf,'\n')) *pos = 0; 
+
     filterStrats[buf] = UCorrelator::getStrategyWithKey(buf,fCurrentRun); 
   }
 
