@@ -328,11 +328,11 @@ MagicDisplay::~MagicDisplay()
 MagicDisplay::MagicDisplay(const char *baseDir, int run, WaveCalType::WaveCalType_t calType) : TGMainFrame(gClient->GetRoot(),1200,800,kVerticalFrame)
 {
   //Offline constructor
+  fCurrentRun=run;
   zeroPointers();
   prepareKeyboardShortcuts();
   
   std::cout << "MagicDisplay::MagicDisplay(" << baseDir << " , " << run << ")" << std::endl;
-  fCurrentRun=run;
   strncpy(fCurrentBaseDir,baseDir,179);
   fCalType=calType;
 
