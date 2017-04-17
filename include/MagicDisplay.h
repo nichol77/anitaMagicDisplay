@@ -395,6 +395,7 @@ class MagicDisplay : public TGMainFrame
 
 
   void initializeFilterStrategies(); // If you want your favourite filter strategy to be available in MagicDisplay... add it here!
+  void clearFilterStrategies(); //destroy the strategies
   void drawUCorrelatorFilterButtons();
   void setNextFilter(); // cycle through available filters...
   UCorrelator::Analyzer * fUCorr;

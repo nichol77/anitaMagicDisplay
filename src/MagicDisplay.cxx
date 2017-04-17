@@ -204,10 +204,17 @@ void MagicDisplay::zeroPointers()
  */
 void MagicDisplay::initializeFilterStrategies(){
 
-  FilterStrategy* fSineSub = new FilterStrategy();
-  filterStrats["SineSubtract"] = fSineSub;
-  fSineSub->addOperation(new UCorrelator::SineSubtractFilter);
-  fSineSub->addOperation(new ALFAFilter);
+
+  clearFilterStrategies(); 
+  /** Todo make this somewhere other than current dir */ 
+  FILE * f = fopen("ucfilters.cfg","r"); 
+
+  char buf[128]; 
+  while(f && !feof(f))
+  {
+    fgets(buf,128,f); 
+    filterStrats[buf] = UCorrelator::getStrategyWithKey(buf,fCurrentRun); 
+  }
 
   FilterStrategy* justAlfa = new FilterStrategy();
   filterStrats["JustAlfaFilter"] = justAlfa;
@@ -234,7 +241,17 @@ void MagicDisplay::drawUCorrelatorFilterButtons()
     // fPowerButton->Modified();
 }
 
+void MagicDisplay::clearFilterStrategies()
+{
 
+    for (std::map<TString, FilterStrategy*>::iterator it = filterStrats.begin(); it != filterStrats.end(); it++)
+    {
+      delete (*it).second; 
+
+    }
+
+    filterStrats.clear(); 
+}
 
 
 void MagicDisplay::setFilterStrategy(FilterStrategy * s)
@@ -281,6 +298,7 @@ void MagicDisplay::setFilterStrategy(FilterStrategy * s)
 MagicDisplay::MagicDisplay() : TGMainFrame(gClient->GetRoot(),1200,800,kVerticalFrame)
 {
   //Default constructor
+  fCurrentRun = 1; 
   zeroPointers();
   prepareKeyboardShortcuts();  
   
@@ -298,6 +316,7 @@ MagicDisplay::~MagicDisplay()
     delete fFilteringPanel;
   }
   
+  clearFilterStrategies(); 
   fgInstance = 0;
 }
 
