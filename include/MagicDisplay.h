@@ -405,6 +405,7 @@ class MagicDisplay : public TGMainFrame
   MagicControlPanel* fControlPanel;
   FilteringPanel* fFilteringPanel;  
 
+  ClassDef(MagicDisplay,0); 
 
 };
 
