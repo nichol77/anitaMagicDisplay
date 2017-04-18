@@ -78,6 +78,7 @@
 
 #include "UCFilters.h"
 #include "BasicFilters.h"
+#include "SystemResponse.h" 
 #include "AnalysisReco.h"
 using namespace std;
 
@@ -191,7 +192,12 @@ void MagicDisplay::zeroPointers()
 
   initializeFilterStrategies();
   
-  fUCorr = new UCorrelator::Analyzer(0,true);
+  UCorrelator::AnalysisConfig * cfg = new UCorrelator::AnalysisConfig; 
+  cfg->nmaxima=3; 
+  cfg->response_option = UCorrelator::AnalysisConfig::ResponseIndividualBRotter; 
+  cfg->deconvolution_method = new UCorrelator::AllPassDeconvolution; 
+
+  fUCorr = new UCorrelator::Analyzer(cfg,true);
 
 }
 
