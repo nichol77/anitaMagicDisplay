@@ -44,6 +44,7 @@
 #include "MagicDisplay.h"
 
 #include "FilteredAnitaEvent.h"
+#include "AcclaimFilters.h"
 
 
 AnitaCanvasMaker*  AnitaCanvasMaker::fgInstance = 0;
@@ -1375,13 +1376,25 @@ TPad *AnitaCanvasMaker::getInterferometryCanvas(RawAnitaHeader *hdPtr,TPad *useC
   
   plotPad->cd();
   plotPad->Clear();
-  plotPad->Divide(2);
 
-  for(Int_t polInd=0; polInd<AnitaPol::kNotAPol; polInd++){
-    TPad* subPad = (TPad*) plotPad->GetPad(polInd+1);
-    reco->drawSummary(subPad, AnitaPol::AnitaPol_t(polInd));
+  FilterStrategy* strat = MagicDisplay::Instance()->getStrategy();
+  bool foundRayleigh = false;
+  for(size_t i=0; i < strat->nOperations(); i++){
+    const FilterOperation* fo = strat->getOperation(i);
+    const Acclaim::Filters::RayleighMonitor* rm = dynamic_cast<const Acclaim::Filters::RayleighMonitor*>(fo);
+    if(rm){
+      rm->getFourierBuffer().drawSummary(plotPad);
+      foundRayleigh = true;
+      break;
+    }
   }
-  
+  if(!foundRayleigh){
+    plotPad->Divide(2);      
+    for(Int_t polInd=0; polInd<AnitaPol::kNotAPol; polInd++){
+      TPad* subPad = (TPad*) plotPad->GetPad(polInd+1);
+      reco->drawSummary(subPad, AnitaPol::AnitaPol_t(polInd));
+    }
+  }
   
   // plotPad->Update();
 

@@ -79,6 +79,7 @@
 #include "UCFilters.h"
 #include "BasicFilters.h"
 #include "AnalysisReco.h"
+#include "AcclaimFilters.h"
 using namespace std;
 
 MagicDisplay*  MagicDisplay::fgInstance = 0;
@@ -216,6 +217,8 @@ void MagicDisplay::initializeFilterStrategies(){
   FilterStrategy* fNoFilter = new FilterStrategy();
   filterStrats["NoFilter"] = fNoFilter;
 
+
+  Acclaim::Filters::appendFilterStrategies(filterStrats);
 
   // it's important that this gets set here.
   setFilterStrategy(filterStrats["JustAlfaFilter"]);  
