@@ -21,6 +21,7 @@
 #include "AnalysisReco.h"
 #include "Analyzer.h"
 #include "FilterStrategy.h"
+#include "FourierBuffer.h"
 
 //#include "AnitaDataset.h"
 #include "BlindDataset.h"
@@ -202,6 +203,12 @@ class MagicDisplay : public TGMainFrame
   void setGpsView(MagicDisplayGpsDisplay::MagicDisplayGpsDisplay_t theDisplay);
 
 
+  
+  void setFourierBufferSummaryOption(Acclaim::FourierBuffer::SummaryOption_t opt){ // set the fledgling FourierBuffer display
+    fFourierBufferSummaryOpt = opt;
+  }
+  Acclaim::FourierBuffer::SummaryOption_t getFourierBufferSummaryOption() const { return fFourierBufferSummaryOpt;}
+
   //! Returns a pointer to the active MagicDisplay. This is very useful if you want to access the TTree's directly or if you want to explicitly call one of the methods.
   /*!
     \return A pointer to the active MagicDisplay.
@@ -289,6 +296,7 @@ class MagicDisplay : public TGMainFrame
   void zeroPointers();
   MagicDisplayFormatOption::MagicDisplayFormatOption_t fWaveformFormat; ///< The format for displaying waveforms.
   MagicDisplayCanvasLayoutOption::MagicDisplayCanvasLayoutOption_t fCanvasLayout; ///< The format for the canvas layout
+  Acclaim::FourierBuffer::SummaryOption_t fFourierBufferSummaryOpt;
   
    // TGMainFrame *fMainFrame; ///< The magic display frame, we need this to do fancy connecting
   AnitaEmbeddedCanvas* fMagicEmbedded; ///< The embedded canvas object (which embeds the main canvas)

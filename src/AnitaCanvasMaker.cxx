@@ -1383,7 +1383,7 @@ TPad *AnitaCanvasMaker::getInterferometryCanvas(RawAnitaHeader *hdPtr,TPad *useC
     const FilterOperation* fo = strat->getOperation(i);
     const Acclaim::Filters::RayleighMonitor* rm = dynamic_cast<const Acclaim::Filters::RayleighMonitor*>(fo);
     if(rm){
-      rm->getFourierBuffer().drawSummary(plotPad);
+      rm->getFourierBuffer().drawSummary(plotPad, MagicDisplay::Instance()->getFourierBufferSummaryOption());
       foundRayleigh = true;
       break;
     }

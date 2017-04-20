@@ -184,6 +184,7 @@ void MagicDisplay::zeroPointers()
   fCanvasLayout=MagicDisplayCanvasLayoutOption::kPhiVerticalOnly;
   // fInterferometryMapMode=AnalysisReco::kGlobal;
   // fInterferometryZoomMode=AnalysisReco::kZoomedOut;
+  fFourierBufferSummaryOpt = Acclaim::FourierBuffer::Prob;
 
 
   butFiltering = 0;
@@ -1101,21 +1102,27 @@ void MagicDisplay::swapWaveformButtonFunctionsAndTitles(MagicDisplayCanvasLayout
     fPowerButton->Modified();
     fHilbertButton->Modified();
     fAverageFFTButton->Modified();
+
+    // Chisquare,
+    //   ReducedChisquare,
+    //   NDF,
+    //   RayleighAmplitude,
+    //   Prob
     
-    fWaveformButton->SetTitle("");
-    fWaveformButton->SetMethod("cout << \"button 1\" << endl;");
+    fWaveformButton->SetTitle("Reduced #Chi^{2}");
+    fWaveformButton->SetMethod("MagicDisplay::Instance()->setFourierBufferSummaryOption(Acclaim::FourierBuffer::ReducedChisquare);");
     fWaveformButton->SetTextSize(0.4);
 
-    fPowerButton->SetTitle("");
-    fPowerButton->SetMethod("cout << \"button 2\" << endl;");    
+    fPowerButton->SetTitle("NDF");
+    fPowerButton->SetMethod("MagicDisplay::Instance()->setFourierBufferSummaryOption(Acclaim::FourierBuffer::NDF);");    
     fPowerButton->SetTextSize(0.4);
 
-    fHilbertButton->SetTitle("");
-    fHilbertButton->SetMethod("cout << \"button 3\" << endl;");
+    fHilbertButton->SetTitle("RayleighAmplitude");
+    fHilbertButton->SetMethod("MagicDisplay::Instance()->setFourierBufferSummaryOption(Acclaim::FourierBuffer::RayleighAmplitude);");        
     fHilbertButton->SetTextSize(0.4);
 
-    fAverageFFTButton->SetTitle("");
-    fAverageFFTButton->SetMethod("cout << \"button 4\" << endl;");    
+    fAverageFFTButton->SetTitle("Prob");
+    fAverageFFTButton->SetMethod("MagicDisplay::Instance()->setFourierBufferSummaryOption(Acclaim::FourierBuffer::Prob);");    
     fAverageFFTButton->SetTextSize(0.4);
   }
   else if (option == MagicDisplayCanvasLayoutOption::kUCorrelator)
@@ -1165,6 +1172,7 @@ void MagicDisplay::swapWaveformButtonFunctionsAndTitles(MagicDisplayCanvasLayout
   fAverageFFTButton->Modified();
 
 }
+
 
 void MagicDisplay::setCanvasLayout(MagicDisplayCanvasLayoutOption::MagicDisplayCanvasLayoutOption_t option)
 {
