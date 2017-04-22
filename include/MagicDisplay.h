@@ -120,7 +120,7 @@ class MagicDisplay : public TGMainFrame
   int displayFirstEvent(); ///< Displays the first event in the file, normally called by pressing the "First" button.
   int displayLastEvent(); ///< Displays the last event in the file, normally called by pressing the "Last" button.
   int displayPreviousEvent(int nskip =0); ///< Displays the previous event in the file, normally called by pressing the "Previous" button. if nskyp > 0, will skip so many events
-  void refreshEventDisplay(); ///< Refresh the event display and redraw the graphs, this is called everytime a new event is displayed.
+  void refreshEventDisplay(bool forceRedo=false); ///< Refresh the event display and redraw the graphs, this is called everytime a new event is displayed.
   int getEventEntry(); ///< Tries to retrieve the event corresponding to entry <i>fEventEntry</i> from the evnt file. Returns zero on success.
   void drawEventButtons(); ///< Worker function to draw the buttons on the main event display canvas.
   int doKeyboardShortcut(Int_t event, Int_t key, Int_t keysym); ///!< Execute intesting functions from the keyboard, connected to the fExec which is drawn on the canvas
@@ -205,7 +205,12 @@ class MagicDisplay : public TGMainFrame
 
   
   void setFourierBufferSummaryOption(Acclaim::FourierBuffer::SummaryOption_t opt){ // set the fledgling FourierBuffer display
-    fFourierBufferSummaryOpt = opt;
+
+    if(fCanvasLayout==MagicDisplayCanvasLayoutOption::kInterferometry && fFourierBufferSummaryOpt!=opt){
+      fFourierBufferSummaryOpt = opt;
+      refreshEventDisplay();
+    }
+    
   }
   Acclaim::FourierBuffer::SummaryOption_t getFourierBufferSummaryOption() const { return fFourierBufferSummaryOpt;}
 

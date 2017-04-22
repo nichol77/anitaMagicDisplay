@@ -79,7 +79,7 @@ class AnitaCanvasMaker
      /param useCan Optional pointer to a canvas to draw the squiggly ines in (if zero a canvas will be created).
    */
    // TPad *getEventViewerCanvas(UsefulAnitaEvent *evPtr,RawAnitaHeader *hdPtr, TPad *useCan=0);
-  TPad *getEventViewerCanvas(UsefulAnitaEvent *evPtr, RawAnitaHeader *hdPtr, Adu5Pat* pat, TPad *useCan=0);
+  TPad *getEventViewerCanvas(UsefulAnitaEvent *evPtr, RawAnitaHeader *hdPtr, Adu5Pat* pat, TPad *useCan=0, bool forceRedo = false);
    //!  The interferometry canvas getter.
    /*!
      Puts histograms from the Cross Correlator onto the display

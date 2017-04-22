@@ -184,7 +184,7 @@ void MagicDisplay::zeroPointers()
   fCanvasLayout=MagicDisplayCanvasLayoutOption::kPhiVerticalOnly;
   // fInterferometryMapMode=AnalysisReco::kGlobal;
   // fInterferometryZoomMode=AnalysisReco::kZoomedOut;
-  fFourierBufferSummaryOpt = Acclaim::FourierBuffer::Prob;
+  fFourierBufferSummaryOpt = Acclaim::FourierBuffer::None;
 
 
   butFiltering = 0;
@@ -590,6 +590,51 @@ Bool_t MagicDisplay::HandleKey(Event_t * event)
         startFilteringPanel();
         break;
 
+      case kKey_R:
+      case kKey_r: //r is for reconstruction
+	if(fCanvasLayout==MagicDisplayCanvasLayoutOption::kInterferometry){
+	  setFourierBufferSummaryOption(Acclaim::FourierBuffer::None);
+	}
+	break;
+	
+      case kKey_P:
+      case kKey_p: // p is for probability, although really this is some funky metric related to probability
+	if(fCanvasLayout==MagicDisplayCanvasLayoutOption::kInterferometry){
+	  setFourierBufferSummaryOption(Acclaim::FourierBuffer::Prob);
+	}
+	break;
+	
+      case kKey_C:
+      case kKey_c: // c is for chisquare
+	if(fCanvasLayout==MagicDisplayCanvasLayoutOption::kInterferometry){
+	  setFourierBufferSummaryOption(Acclaim::FourierBuffer::ReducedChisquare);
+	}
+	break;
+	
+      case kKey_A:
+      case kKey_a:  // a is for amplitude
+	if(fCanvasLayout==MagicDisplayCanvasLayoutOption::kInterferometry){
+	  setFourierBufferSummaryOption(Acclaim::FourierBuffer::RayleighAmplitude);
+	}
+	break;
+		
+      case kKey_L:
+      case kKey_l: // l is for load history
+	// for interferometry, load the history if there's a RayleighMonitor type filter
+	// if(fCanvasLayout==MagicDisplayCanvasLayoutOption::kInterferometry){
+	{	  
+	  FilterStrategy* fs = getStrategy();
+	  for(unsigned i=0; i < fs->nOperations(); i++){
+	    const Acclaim::Filters::RayleighMonitor* rmConst = dynamic_cast<const Acclaim::Filters::RayleighMonitor*>(fs->getOperation(i));
+	    if(rmConst){
+	      const Acclaim::FourierBuffer* fb = rmConst->getFourierBuffer();
+	      fb->setForceLoadHistory(true);
+	      refreshEventDisplay(true);
+	    }
+	  }
+	}
+	break;
+	
 
       case kKey_G:
       case kKey_g:          
@@ -683,7 +728,7 @@ Bool_t MagicDisplay::HandleKey(Event_t * event)
 }
 
 
-void MagicDisplay::refreshEventDisplay()
+void MagicDisplay::refreshEventDisplay(bool forceRedo)
 {
    if(!fMagicCanvas) {
      // fMainFrame = new TGMainFrame(gClient->GetRoot(),1200,800,kVerticalFrame);
@@ -753,12 +798,10 @@ void MagicDisplay::refreshEventDisplay()
 
 
    // fEventCanMaker->getEventViewerCanvas(fUsefulEventPtr,fHeadPtr,fMagicMainPad);
-   fEventCanMaker->getEventViewerCanvas(fUsefulEventPtr,fHeadPtr,fPatPtr, fMagicMainPad);
+   fEventCanMaker->getEventViewerCanvas(fUsefulEventPtr,fHeadPtr,fPatPtr, fMagicMainPad, forceRedo);
    fEventCanMaker->getEventInfoCanvas(fUsefulEventPtr,fHeadPtr,fMagicEventInfoPad);
 
-
-
-  fMagicCanvas->Update();
+   fMagicCanvas->Update();
 }
 
 
@@ -1103,26 +1146,21 @@ void MagicDisplay::swapWaveformButtonFunctionsAndTitles(MagicDisplayCanvasLayout
     fHilbertButton->Modified();
     fAverageFFTButton->Modified();
 
-    // Chisquare,
-    //   ReducedChisquare,
-    //   NDF,
-    //   RayleighAmplitude,
-    //   Prob
-    
-    fWaveformButton->SetTitle("Reduced #Chi^{2}");
-    fWaveformButton->SetMethod("MagicDisplay::Instance()->setFourierBufferSummaryOption(Acclaim::FourierBuffer::ReducedChisquare);");
+    fWaveformButton->SetTitle("Reco Summary");
+    fWaveformButton->SetMethod("MagicDisplay::Instance()->setFourierBufferSummaryOption(Acclaim::FourierBuffer::None);");
     fWaveformButton->SetTextSize(0.4);
 
-    fPowerButton->SetTitle("NDF");
-    fPowerButton->SetMethod("MagicDisplay::Instance()->setFourierBufferSummaryOption(Acclaim::FourierBuffer::NDF);");    
-    fPowerButton->SetTextSize(0.4);
 
-    fHilbertButton->SetTitle("RayleighAmplitude");
-    fHilbertButton->SetMethod("MagicDisplay::Instance()->setFourierBufferSummaryOption(Acclaim::FourierBuffer::RayleighAmplitude);");        
+    fPowerButton->SetTitle("Rayleigh Reduced #chi^{2}");
+    fPowerButton->SetMethod("MagicDisplay::Instance()->setFourierBufferSummaryOption(Acclaim::FourierBuffer::ReducedChisquare);");
+    fPowerButton->SetTextSize(0.4);
+    
+    fHilbertButton->SetTitle("Rayleigh Amplitude");
+    fHilbertButton->SetMethod("MagicDisplay::Instance()->setFourierBufferSummaryOption(Acclaim::FourierBuffer::RayleighAmplitude);");
     fHilbertButton->SetTextSize(0.4);
 
-    fAverageFFTButton->SetTitle("Prob");
-    fAverageFFTButton->SetMethod("MagicDisplay::Instance()->setFourierBufferSummaryOption(Acclaim::FourierBuffer::Prob);");    
+    fAverageFFTButton->SetTitle("Rayleigh Spectrum Probability");
+    fAverageFFTButton->SetMethod("MagicDisplay::Instance()->setFourierBufferSummaryOption(Acclaim::FourierBuffer::Prob);");
     fAverageFFTButton->SetTextSize(0.4);
   }
   else if (option == MagicDisplayCanvasLayoutOption::kUCorrelator)
