@@ -402,13 +402,13 @@ TPad *AnitaCanvasMaker::quickGetEventViewerCanvasForWebPlottter(UsefulAnitaEvent
 
 
 
-TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr, RawAnitaHeader *hdPtr, Adu5Pat* pat, TPad *useCan){
+TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr, RawAnitaHeader *hdPtr, Adu5Pat* pat, TPad *useCan, bool forceRedo){
   // std::cerr << __PRETTY_FUNCTION__ << std::endl;
 
   TPad *retCan=0;
   static UInt_t lastEventNumber=0;
 
-  if(evPtr->eventNumber!=lastEventNumber || fWaveformOption!=fLastWaveformFormat || MagicDisplay::Instance()->getStrategy() != lastStrategy) {
+  if(forceRedo || evPtr->eventNumber!=lastEventNumber || fWaveformOption!=fLastWaveformFormat || MagicDisplay::Instance()->getStrategy() != lastStrategy) {
 
     if(fEv){
       delete fEv;
@@ -600,7 +600,7 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr, RawAnitaHe
 
     AnitaEventSummary sum;
     // std::cerr << "before" << "\t" << fEv->eventNumber << "\t" << std::endl;
-    reco->process(fEv, NULL, &sum);
+    reco->process(fEv, pat, &sum);
     // std::cerr << "after" << "\t" << fEv->eventNumber << "\t" << std::endl;
   }
 
@@ -1378,17 +1378,22 @@ TPad *AnitaCanvasMaker::getInterferometryCanvas(RawAnitaHeader *hdPtr,TPad *useC
   plotPad->Clear();
 
   FilterStrategy* strat = MagicDisplay::Instance()->getStrategy();
+  Acclaim::FourierBuffer::SummaryOption_t opt = MagicDisplay::Instance()->getFourierBufferSummaryOption();
+  bool doRecoSummary = opt == Acclaim::FourierBuffer::None;
   bool foundRayleigh = false;
-  for(size_t i=0; i < strat->nOperations(); i++){
-    const FilterOperation* fo = strat->getOperation(i);
-    const Acclaim::Filters::RayleighMonitor* rm = dynamic_cast<const Acclaim::Filters::RayleighMonitor*>(fo);
-    if(rm){
-      rm->getFourierBuffer().drawSummary(plotPad);
-      foundRayleigh = true;
-      break;
+  if(!doRecoSummary){
+    for(size_t i=0; i < strat->nOperations(); i++){
+      const FilterOperation* fo = strat->getOperation(i);
+      const Acclaim::Filters::RayleighMonitor* rm = dynamic_cast<const Acclaim::Filters::RayleighMonitor*>(fo);
+      if(rm){
+	rm->getFourierBuffer()->drawSummary(plotPad, MagicDisplay::Instance()->getFourierBufferSummaryOption());
+	foundRayleigh = true;
+	break;
+      }
     }
   }
   if(!foundRayleigh){
+    MagicDisplay::Instance()->setFourierBufferSummaryOption(Acclaim::FourierBuffer::None);
     plotPad->Divide(2);      
     for(Int_t polInd=0; polInd<AnitaPol::kNotAPol; polInd++){
       TPad* subPad = (TPad*) plotPad->GetPad(polInd+1);
