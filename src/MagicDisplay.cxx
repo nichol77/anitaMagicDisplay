@@ -221,10 +221,12 @@ void MagicDisplay::initializeFilterStrategies(){
   {
     fgets(buf,128,f); 
     //replace \n with 0 
-
     while (char * pos = strchr(buf,'\n')) *pos = 0; 
+    //replace # with 0 
+    while (char * pos = strchr(buf,'#')) *pos = 0; 
 
-    filterStrats[buf] = UCorrelator::getStrategyWithKey(buf,fCurrentRun); 
+    if (strlen(buf))
+      filterStrats[buf] = UCorrelator::getStrategyWithKey(buf,fCurrentRun); 
   }
 
   FilterStrategy* justAlfa = new FilterStrategy();
