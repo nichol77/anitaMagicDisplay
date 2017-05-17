@@ -78,6 +78,7 @@
 
 #include "UCFilters.h"
 #include "BasicFilters.h"
+#include "AnalysisConfig.h"
 #include "SystemResponse.h" 
 #include "AnalysisReco.h"
 #include "AcclaimFilters.h"
@@ -197,7 +198,7 @@ void MagicDisplay::zeroPointers()
   UCorrelator::AnalysisConfig * cfg = new UCorrelator::AnalysisConfig; 
   cfg->nmaxima=3; 
   cfg->response_option = UCorrelator::AnalysisConfig::ResponseIndividualBRotter; 
-  cfg->deconvolution_method = new UCorrelator::AllPassDeconvolution; 
+  cfg->deconvolution_method = new AnitaResponse::AllPassDeconvolution; 
 
   fUCorr = new UCorrelator::Analyzer(cfg,true);
 
