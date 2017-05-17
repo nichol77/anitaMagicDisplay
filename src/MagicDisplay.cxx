@@ -317,7 +317,7 @@ MagicDisplay::MagicDisplay() : TGMainFrame(gClient->GetRoot(),1200,800,kVertical
   fCurrentRun = 1; 
   zeroPointers();
   prepareKeyboardShortcuts();  
-  fAnitaVersion=-1; 
+  fDataDirectory= AnitaDataset::ANITA_ROOT_DATA; 
   
 }
 
@@ -344,8 +344,7 @@ MagicDisplay::MagicDisplay(const char *baseDir, int run, WaveCalType::WaveCalTyp
   fCurrentRun=run;
   zeroPointers();
   prepareKeyboardShortcuts();
-  fAnitaVersion = -1; 
-  
+  fDataDirectory= AnitaDataset::ANITA_ROOT_DATA; 
   std::cout << "MagicDisplay::MagicDisplay(" << baseDir << " , " << run << ")" << std::endl;
   strncpy(fCurrentBaseDir,baseDir,179);
   fCalType=calType;
@@ -363,16 +362,18 @@ MagicDisplay::MagicDisplay(const char *baseDir, int run, WaveCalType::WaveCalTyp
   
 }
 
-MagicDisplay::MagicDisplay(int run, int anita_version, WaveCalType::WaveCalType_t calType) : TGMainFrame(gClient->GetRoot(),1200,800,kVerticalFrame)
+MagicDisplay::MagicDisplay(int run, AnitaDataset::DataDirectory dir, WaveCalType::WaveCalType_t calType) : TGMainFrame(gClient->GetRoot(),1200,800,kVerticalFrame)
 {
   //Offline constructor
   fCurrentRun=run;
   zeroPointers();
   prepareKeyboardShortcuts();
+  int anita_version = (int) dir; 
   if (anita_version > 0) AnitaVersion::set(anita_version); 
-  fAnitaVersion = anita_version; 
+  fDataDirectory = dir; 
+  
 
-  strncpy(fCurrentBaseDir, AnitaDataset::getDataDir(anita_version),179); 
+  strncpy(fCurrentBaseDir, AnitaDataset::getDataDir(dir),179); 
   fCalType=calType;
 
   //try to load wisdom
@@ -455,7 +456,7 @@ int MagicDisplay::loadDataset()
 {
 
 
-  fDataset = new AnitaDataset(fCurrentRun, false, fCalType,fAnitaVersion);
+  fDataset = new AnitaDataset(fCurrentRun, false, fCalType,fDataDirectory);
   if(fDataset->N() < 1){
      cout << "Couldn't find dataset! << \n";
      return -1;

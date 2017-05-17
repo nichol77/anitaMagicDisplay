@@ -90,10 +90,9 @@ class MagicDisplay : public TGMainFrame
   MagicDisplay(const char *baseDir, int run, WaveCalType::WaveCalType_t calType=WaveCalType::kDefault);
   /*
     \param run The run number to start with
-    \param anita_version Same as in AnitaDataset. -1 uses ANITA_ROOT_DATA, 0 uses ANITA_MC_DATA, n>0 USES ANITAn_ROOT_DATA and also does AnitaVersion::set(n) 
     \param calType The calibration option desired (see <a HREF="/uhen/anita/eventReader/">the event reader documentation for the different available calibration options</A>)
     */
-  MagicDisplay(int run, int anita_version = -1, WaveCalType::WaveCalType_t calType=WaveCalType::kDefault);
+  MagicDisplay(int run, AnitaDataset::DataDirectory datadir = AnitaDataset::ANITA_ROOT_DATA, WaveCalType::WaveCalType_t calType=WaveCalType::kDefault);
   MagicDisplay(); ///< Default constructor
   ~MagicDisplay(); ///< Destructor
 
@@ -421,7 +420,7 @@ class MagicDisplay : public TGMainFrame
 
   MagicControlPanel* fControlPanel;
   FilteringPanel* fFilteringPanel;  
-  int fAnitaVersion; 
+  AnitaDataset::DataDirectory fDataDirectory; 
 
   ClassDef(MagicDisplay,0); 
 
