@@ -1,21 +1,14 @@
 #include "AnitaConventions.h"
+#include "AnitaVersion.h" 
+#include "AnitaDataset.h" 
 
 
-void runMagicDisplayRun(int run);
-
-void runMagicDisplay(int run=1002) {
-  cout << "runMagicDisplay(" << run << ")\n";
-
-  gSystem->Load("libNet.so");
-
-  TChain *fred=0; //Will this work?
-  runMagicDisplayRun(run);
-}
 
 
-void runMagicDisplayRun(int run) {
 
-  MagicDisplay *magicPtr = new MagicDisplay(getenv("ANITA_ROOT_DATA"),run,WaveCalType::kDefault);
+void runMagicDisplay(int run,int anita=4) {
+
+  MagicDisplay *magicPtr = new MagicDisplay(run,(AnitaDataset::DataDirectory) anita,WaveCalType::kDefault);
 
   //magicPtr->startSurfDisplay();
   //  magicPtr->startAvgSurfDisplay();

@@ -607,7 +607,7 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr, RawAnitaHe
   if (fCanvasView==MagicDisplayCanvasLayoutOption::kUCorrelator)
   {
     AnitaEventSummary sum;
-    MagicDisplay::Instance()->getUCorr()->analyze(fEv,&sum);    
+    MagicDisplay::Instance()->getUCorr()->analyze(fEv,&sum, MagicDisplay::Instance()->fDataset->truth());    
   }
 
   

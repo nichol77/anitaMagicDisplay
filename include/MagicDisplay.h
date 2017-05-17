@@ -23,8 +23,7 @@
 #include "FilterStrategy.h"
 #include "FourierBuffer.h"
 
-//#include "AnitaDataset.h"
-#include "BlindDataset.h"
+#include "AnitaDataset.h"
 #include "TGFrame.h"
 
 // #include <RQ_OBJECT.h>
@@ -89,6 +88,11 @@ class MagicDisplay : public TGMainFrame
     \param calType The calibration option desired (see <a HREF="/uhen/anita/eventReader/">the event reader documentation for the different available calibration options</A>)
   */
   MagicDisplay(const char *baseDir, int run, WaveCalType::WaveCalType_t calType=WaveCalType::kDefault);
+  /*
+    \param run The run number to start with
+    \param calType The calibration option desired (see <a HREF="/uhen/anita/eventReader/">the event reader documentation for the different available calibration options</A>)
+    */
+  MagicDisplay(int run, AnitaDataset::DataDirectory datadir = AnitaDataset::ANITA_ROOT_DATA, WaveCalType::WaveCalType_t calType=WaveCalType::kDefault);
   MagicDisplay(); ///< Default constructor
   ~MagicDisplay(); ///< Destructor
 
@@ -221,8 +225,7 @@ class MagicDisplay : public TGMainFrame
   */
   static MagicDisplay*  Instance();
 
-  // AnitaDataset* fDataset; ///!< Replaces the need for MagicDisplay to track dataset itself
-  BlindDataset* fDataset; ///!< Replaces the need for MagicDisplay to track dataset itself
+  AnitaDataset* fDataset; ///!< Replaces the need for MagicDisplay to track dataset itself
   // TFile *fHeadFile; ///< A pointer to the current header file.
   // TFile *fEventFile; ///< A pointer to the current event file.
   // TFile *fTurfRateFile; ///< A pointer to the current TURF rate file.
@@ -417,6 +420,7 @@ class MagicDisplay : public TGMainFrame
 
   MagicControlPanel* fControlPanel;
   FilteringPanel* fFilteringPanel;  
+  AnitaDataset::DataDirectory fDataDirectory; 
 
   ClassDef(MagicDisplay,0); 
 
