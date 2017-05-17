@@ -86,8 +86,9 @@ class MagicDisplay : public TGMainFrame
     \param baseDir The directory that contains the runXXXX directories (that contain the ROOT files
     \param run The run number to start with
     \param calType The calibration option desired (see <a HREF="/uhen/anita/eventReader/">the event reader documentation for the different available calibration options</A>)
+    \param anita_version Same as in AnitaDataset. -1 uses ANITA_ROOT_DATA, 0 uses ANITA_MC_DATA, n>0 USES ANITAn_ROOT_DATA and also does AnitaVersion::set(n) 
   */
-  MagicDisplay(const char *baseDir, int run, WaveCalType::WaveCalType_t calType=WaveCalType::kDefault);
+  MagicDisplay(const char *baseDir, int run, WaveCalType::WaveCalType_t calType=WaveCalType::kDefault, int anita_version = -1);
   MagicDisplay(); ///< Default constructor
   ~MagicDisplay(); ///< Destructor
 
@@ -415,6 +416,7 @@ class MagicDisplay : public TGMainFrame
 
   MagicControlPanel* fControlPanel;
   FilteringPanel* fFilteringPanel;  
+  int fAnitaVersion; 
 
   ClassDef(MagicDisplay,0); 
 
