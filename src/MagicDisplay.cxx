@@ -369,8 +369,8 @@ MagicDisplay::MagicDisplay(int run, int anita_version, WaveCalType::WaveCalType_
   fCurrentRun=run;
   zeroPointers();
   prepareKeyboardShortcuts();
-  fAnitaVersion = -1; 
   if (anita_version > 0) AnitaVersion::set(anita_version); 
+  fAnitaVersion = anita_version; 
 
   strncpy(fCurrentBaseDir, AnitaDataset::getDataDir(anita_version),179); 
   fCalType=calType;
@@ -453,6 +453,7 @@ void MagicDisplay::closeCurrentRun()
 // int MagicDisplay::loadEventTree()
 int MagicDisplay::loadDataset()
 {
+
 
   fDataset = new AnitaDataset(fCurrentRun, false, fCalType,fAnitaVersion);
   if(fDataset->N() < 1){
