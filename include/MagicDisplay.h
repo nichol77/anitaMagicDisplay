@@ -23,8 +23,7 @@
 #include "FilterStrategy.h"
 #include "FourierBuffer.h"
 
-//#include "AnitaDataset.h"
-#include "BlindDataset.h"
+#include "AnitaDataset.h"
 #include "TGFrame.h"
 
 // #include <RQ_OBJECT.h>
@@ -221,8 +220,7 @@ class MagicDisplay : public TGMainFrame
   */
   static MagicDisplay*  Instance();
 
-  // AnitaDataset* fDataset; ///!< Replaces the need for MagicDisplay to track dataset itself
-  BlindDataset* fDataset; ///!< Replaces the need for MagicDisplay to track dataset itself
+  AnitaDataset* fDataset; ///!< Replaces the need for MagicDisplay to track dataset itself
   // TFile *fHeadFile; ///< A pointer to the current header file.
   // TFile *fEventFile; ///< A pointer to the current event file.
   // TFile *fTurfRateFile; ///< A pointer to the current TURF rate file.

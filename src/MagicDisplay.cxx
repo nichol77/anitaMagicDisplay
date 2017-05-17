@@ -430,8 +430,7 @@ void MagicDisplay::closeCurrentRun()
 int MagicDisplay::loadDataset()
 {
 
-  // fDataset = new AnitaDataset(fCurrentRun, false, fCalType);
-  fDataset = new BlindDataset(fCurrentRun, false, fCalType);
+  fDataset = new AnitaDataset(fCurrentRun, false, fCalType);
   if(fDataset->N() < 1){
      cout << "Couldn't find dataset! << \n";
      return -1;
