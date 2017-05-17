@@ -1,5 +1,6 @@
 #include "AnitaConventions.h"
 #include "AnitaVersion.h" 
+#include "AnitaDataset.h" 
 
 
 
@@ -7,7 +8,7 @@
 
 void runMagicDisplay(int run,int anita=4) {
 
-  MagicDisplay *magicPtr = new MagicDisplay(run,anita,WaveCalType::kDefault);
+  MagicDisplay *magicPtr = new MagicDisplay(run,(AnitaDataset::DataDirectory) anita,WaveCalType::kDefault);
 
   //magicPtr->startSurfDisplay();
   //  magicPtr->startAvgSurfDisplay();
