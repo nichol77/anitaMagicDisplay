@@ -230,18 +230,14 @@ void MagicDisplay::initializeFilterStrategies(){
       filterStrats[buf] = UCorrelator::getStrategyWithKey(buf); 
   }
 
-  FilterStrategy* justAlfa = new FilterStrategy();
-  filterStrats["JustAlfaFilter"] = justAlfa;
-  justAlfa->addOperation(new ALFAFilter);
-
-  FilterStrategy* fNoFilter = new FilterStrategy();
-  filterStrats["NoFilter"] = fNoFilter;
-
-
   Acclaim::Filters::appendFilterStrategies(filterStrats);
-
+  
+  
+  if(filterStrats.size()==0){ // saftey net so there's at least one...
+    filterStrats["None"] = new FilterStrategy();
+  }
   // it's important that this gets set here.
-  setFilterStrategy(filterStrats["JustAlfaFilter"]);  
+  setFilterStrategy(filterStrats.begin()->second);
   
 }
 
