@@ -87,12 +87,12 @@ class MagicDisplay : public TGMainFrame
     \param run The run number to start with
     \param calType The calibration option desired (see <a HREF="/uhen/anita/eventReader/">the event reader documentation for the different available calibration options</A>)
   */
-  MagicDisplay(const char *baseDir, int run, WaveCalType::WaveCalType_t calType=WaveCalType::kDefault);
+  MagicDisplay(const char *baseDir, int run, WaveCalType::WaveCalType_t calType=WaveCalType::kDefault, AnitaDataset::BlindingStrategy blinding=AnitaDataset::kDefault);
   /*
     \param run The run number to start with
     \param calType The calibration option desired (see <a HREF="/uhen/anita/eventReader/">the event reader documentation for the different available calibration options</A>)
     */
-  MagicDisplay(int run, AnitaDataset::DataDirectory datadir = AnitaDataset::ANITA_ROOT_DATA, WaveCalType::WaveCalType_t calType=WaveCalType::kDefault);
+  MagicDisplay(int run, AnitaDataset::DataDirectory datadir = AnitaDataset::ANITA_ROOT_DATA, WaveCalType::WaveCalType_t calType=WaveCalType::kDefault, AnitaDataset::BlindingStrategy blinding=AnitaDataset::kDefault);
   MagicDisplay(); ///< Default constructor
   ~MagicDisplay(); ///< Destructor
 
@@ -420,7 +420,9 @@ class MagicDisplay : public TGMainFrame
 
   MagicControlPanel* fControlPanel;
   FilteringPanel* fFilteringPanel;  
-  AnitaDataset::DataDirectory fDataDirectory; 
+  AnitaDataset::DataDirectory fDataDirectory;
+
+  AnitaDataset::BlindingStrategy fBlindingStrategy;
 
   ClassDef(MagicDisplay,0); 
 

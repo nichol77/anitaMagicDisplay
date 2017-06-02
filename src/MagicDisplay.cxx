@@ -335,17 +335,18 @@ MagicDisplay::~MagicDisplay()
 }
 
 
-MagicDisplay::MagicDisplay(const char *baseDir, int run, WaveCalType::WaveCalType_t calType) : TGMainFrame(gClient->GetRoot(),1200,800,kVerticalFrame)
+MagicDisplay::MagicDisplay(const char *baseDir, int run, WaveCalType::WaveCalType_t calType, AnitaDataset::BlindingStrategy blinding) : TGMainFrame(gClient->GetRoot(),1200,800,kVerticalFrame)
 {
   //Offline constructor
   fCurrentRun=run;
   zeroPointers();
   prepareKeyboardShortcuts();
-  fDataDirectory= AnitaDataset::ANITA_ROOT_DATA; 
+  fDataDirectory= AnitaDataset::ANITA_ROOT_DATA;
+  
   std::cout << "MagicDisplay::MagicDisplay(" << baseDir << " , " << run << ")" << std::endl;
   strncpy(fCurrentBaseDir,baseDir,179);
   fCalType=calType;
-
+  fBlindingStrategy = blinding;
 
   // AnitaDataset needs this, so set it
   setenv("ANITA_ROOT_DATA", baseDir,1);
@@ -359,7 +360,7 @@ MagicDisplay::MagicDisplay(const char *baseDir, int run, WaveCalType::WaveCalTyp
   
 }
 
-MagicDisplay::MagicDisplay(int run, AnitaDataset::DataDirectory dir, WaveCalType::WaveCalType_t calType) : TGMainFrame(gClient->GetRoot(),1200,800,kVerticalFrame)
+MagicDisplay::MagicDisplay(int run, AnitaDataset::DataDirectory dir, WaveCalType::WaveCalType_t calType, AnitaDataset::BlindingStrategy blinding) : TGMainFrame(gClient->GetRoot(),1200,800,kVerticalFrame)
 {
   //Offline constructor
   fCurrentRun=run;
@@ -372,7 +373,7 @@ MagicDisplay::MagicDisplay(int run, AnitaDataset::DataDirectory dir, WaveCalType
 
   strncpy(fCurrentBaseDir, AnitaDataset::getDataDir(dir),179); 
   fCalType=calType;
-
+  fBlindingStrategy = blinding;
   //try to load wisdom
   if (FILE * wf = fopen("magicwisdom.dat","r"))
   {
@@ -453,7 +454,7 @@ int MagicDisplay::loadDataset()
 {
 
 
-  fDataset = new AnitaDataset(fCurrentRun, false, fCalType,fDataDirectory);
+  fDataset = new AnitaDataset(fCurrentRun, false, fCalType,fDataDirectory, fBlindingStrategy);
   if(fDataset->N() < 1){
      cout << "Couldn't find dataset! << \n";
      return -1;
