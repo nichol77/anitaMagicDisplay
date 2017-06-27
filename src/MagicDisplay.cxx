@@ -231,14 +231,13 @@ void MagicDisplay::initializeFilterStrategies(){
       filterStrats[buf] = UCorrelator::getStrategyWithKey(buf); 
   }
 
+  FilterStrategy* fNone = new FilterStrategy();
+  filterStrats["None"] = fNone;
   Acclaim::Filters::appendFilterStrategies(filterStrats);
   
   
-  if(filterStrats.size()==0){ // saftey net so there's at least one...
-    filterStrats["None"] = new FilterStrategy();
-  }
   // it's important that this gets set here.
-  setFilterStrategy(filterStrats.begin()->second);
+  setFilterStrategy(fNone);
   
 }
 
