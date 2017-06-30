@@ -234,6 +234,15 @@ void MagicDisplay::initializeFilterStrategies(){
   FilterStrategy* fNone = new FilterStrategy();
   filterStrats["None"] = fNone;
   Acclaim::Filters::appendFilterStrategies(filterStrats);
+
+  FilterStrategy* fHybrid = new FilterStrategy(); 
+  if (AnitaVersion::get()==3) fHybrid->addOperation(new ALFASincFilter); 
+  fHybrid->addOperation(new HybridFilter); 
+  filterStrats["hybrid"] = fHybrid; 
+
+
+
+
   
   
   // it's important that this gets set here.
