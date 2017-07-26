@@ -109,7 +109,7 @@ class AnitaCanvasMaker
      /param hdPtr Pointer to the header of the event we want to draw
      /param useCan Optional pointer to a canvas to draw all the TPaveText's (if zero a canvas will be created).
    */
-   TPad *getEventInfoCanvas(UsefulAnitaEvent *evPtr,RawAnitaHeader *hdPtr, TPad *useCan=0);
+   TPad *getEventInfoCanvas(UsefulAnitaEvent *evPtr,RawAnitaHeader *hdPtr, Adu5Pat *pat, TPad *useCan=0);
   
    
    void setupPhiPadWithFrames(TPad *plotPad); ///< Worker function to setup the phi view canvas.

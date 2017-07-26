@@ -839,7 +839,7 @@ void MagicDisplay::refreshEventDisplay(bool forceRedo)
 
    // fEventCanMaker->getEventViewerCanvas(fUsefulEventPtr,fHeadPtr,fMagicMainPad);
    fEventCanMaker->getEventViewerCanvas(fUsefulEventPtr,fHeadPtr,fPatPtr, fMagicMainPad, forceRedo);
-   fEventCanMaker->getEventInfoCanvas(fUsefulEventPtr,fHeadPtr,fMagicEventInfoPad);
+   fEventCanMaker->getEventInfoCanvas(fUsefulEventPtr,fHeadPtr,fPatPtr,fMagicEventInfoPad);
 
    fMagicCanvas->Update();
 }

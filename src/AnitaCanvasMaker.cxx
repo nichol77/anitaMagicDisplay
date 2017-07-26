@@ -159,13 +159,14 @@ AnitaCanvasMaker*  AnitaCanvasMaker::Instance()
 }
 
 
-TPad *AnitaCanvasMaker::getEventInfoCanvas(UsefulAnitaEvent *evPtr, RawAnitaHeader *hdPtr, TPad *useCan)
+TPad *AnitaCanvasMaker::getEventInfoCanvas(UsefulAnitaEvent *evPtr, RawAnitaHeader *hdPtr, Adu5Pat *pat, TPad *useCan)
 {
    static UInt_t lastEventNumber=0;
    static TPaveText *leftPave=0;
    static TPaveText *midLeftPave=0;
    static TPaveText *midRightPave=0;
    static TPaveText *rightPave=0;
+   static TPaveText *farRightPave=0;
 
 
    AnitaGeomTool * fACMGeomTool=AnitaGeomTool::Instance();
@@ -182,7 +183,7 @@ TPad *AnitaCanvasMaker::getEventInfoCanvas(UsefulAnitaEvent *evPtr, RawAnitaHead
      fNewEvent=1;
      topPad->Clear();
      topPad->SetTopMargin(0.05);
-     topPad->Divide(4,1);
+     topPad->Divide(5,1);
      topPad->cd(1);
      if(leftPave) delete leftPave;
      leftPave = new TPaveText(0,0,1,0.9);
@@ -279,9 +280,30 @@ TPad *AnitaCanvasMaker::getEventInfoCanvas(UsefulAnitaEvent *evPtr, RawAnitaHead
      sprintf(textLabel,"Peak Theta: %3.1f",(hdPtr->getPeakThetaDeg()));
      rightPave->AddText(textLabel);
      rightPave->Draw();
+
+
+     topPad->cd(5);
+     if(farRightPave) delete farRightPave;
+     farRightPave = new TPaveText(0,0,1,0.95);
+     farRightPave->SetBorderSize(0);
+     farRightPave->SetTextAlign(13);
+
+     sprintf(textLabel,"Heading %3.1f",pat->heading);
+     farRightPave->AddText(textLabel);
+
+     sprintf(textLabel,"Latitude %3.1f",pat->latitude);
+     farRightPave->AddText(textLabel);
+
+     sprintf(textLabel,"Longitude %3.1f",pat->longitude);
+     farRightPave->AddText(textLabel);
+
+     sprintf(textLabel,"Altitude %3.1f",pat->altitude);
+     farRightPave->AddText(textLabel);
+
+     farRightPave->Draw();
+
      topPad->Update();
      topPad->Modified();
-
 
 
      lastEventNumber=hdPtr->eventNumber;
