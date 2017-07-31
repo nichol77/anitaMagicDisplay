@@ -121,3 +121,7 @@ if( ${ROOT_VERSION} VERSION_GREATER "5.99.99")
 endif()
 install (FILES antarcticaIceMap.png DESTINATION ${ANITA_UTIL_MAP_DIR} )
 install (FILES anitageom.root DESTINATION ${ANITA_UTIL_MAP_DIR} )
+
+install (FILES macros/runMagicDisplay.C DESTINATION ${UTIL_BIN_DIR})
+install (FILES macros/runMagicDisplayEv.C DESTINATION ${UTIL_BIN_DIR})
+install (FILES macros/runToEvA3.txt DESTINATION ${UTIL_BIN_DIR})
