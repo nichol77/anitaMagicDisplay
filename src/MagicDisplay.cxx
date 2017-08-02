@@ -218,12 +218,16 @@ void MagicDisplay::initializeFilterStrategies(){
 
   clearFilterStrategies(); 
   /** Todo make this somewhere other than current dir */
-  /** How about the bin directory where runMagicDisplay.C lives! */
-  char* installDir = getenv("ANITA_UTIL_INSTALL_DIR");
-  stringstream ucFilterFile;
-  ucFilterFile.str("");
-  ucFilterFile << installDir << "/bin/ucfilters.cfg";
-  FILE * f = fopen(ucFilterFile.str().c_str(),"r"); 
+  FILE * f = fopen("ucfilters.cfg","r"); 
+
+  if (!f) 
+  {
+    char* installDir = getenv("ANITA_UTIL_INSTALL_DIR");
+    stringstream ucFilterFile;
+    ucFilterFile.str("");
+    ucFilterFile << installDir << "/bin/ucfilters.cfg";
+    f = fopen(ucFilterFile.str().c_str(),"r"); 
+  }
 
   char buf[128]; 
   while(f && !feof(f))
