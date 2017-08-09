@@ -40,7 +40,9 @@ int evToRun(int ev) {
 
 void runMagicDisplayEv(int ev) {
 
-  cout << "Using AnitaVersion " << AnitaVersion::get() << endl;
+  int anita = AnitaVersion::get();
+
+  cout << "Using AnitaVersion " << anita << endl;
 
   int run = evToRun(ev);
   if (run == -1) {
@@ -50,15 +52,7 @@ void runMagicDisplayEv(int ev) {
 
   cout << "Event number " << ev << " is in run " << run << endl;
 
-  stringstream dirName;
-  if (run>10000) {
-    dirName << "/Volumes/ANITA3Data/antarctica14/root";
-  }
-  else {
-    dirName << "/Volumes/ANITA3Data/root";
-  }
-
-  MagicDisplay *magicPtr = new MagicDisplay(dirName.str().c_str(),run,WaveCalType::kDefault);
+  MagicDisplay *magicPtr = new MagicDisplay(run,(AnitaDataset::DataDirectory) anita, WaveCalType::kDefault);
 
   magicPtr->startEventDisplay();
 
