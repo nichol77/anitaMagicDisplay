@@ -6,7 +6,7 @@
 
 
 
-void runMagicDisplay(int run,int anita=4) {
+void runMagicDisplay(int run,int anita=AnitaVersion::get()) {
 
   MagicDisplay *magicPtr = new MagicDisplay(run,(AnitaDataset::DataDirectory) anita,WaveCalType::kDefault);
 

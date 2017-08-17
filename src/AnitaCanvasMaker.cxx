@@ -184,6 +184,7 @@ TPad *AnitaCanvasMaker::getEventInfoCanvas(UsefulAnitaEvent *evPtr, RawAnitaHead
      topPad->Clear();
      topPad->SetTopMargin(0.05);
      topPad->Divide(5,1);
+
      topPad->cd(1);
      if(leftPave) delete leftPave;
      leftPave = new TPaveText(0,0,1,0.9);
@@ -191,6 +192,9 @@ TPad *AnitaCanvasMaker::getEventInfoCanvas(UsefulAnitaEvent *evPtr, RawAnitaHead
      leftPave->SetBorderSize(0);
      leftPave->SetFillColor(0);
      leftPave->SetTextAlign(13);
+     sprintf(textLabel,"ANITA %d",AnitaVersion::get());
+     TText *flightText = leftPave->AddText(textLabel);
+     flightText->SetTextColor(50);
      sprintf(textLabel,"Run:    %d",hdPtr->run);
      TText *runText = leftPave->AddText(textLabel);
      runText->SetTextColor(50);
