@@ -9,5 +9,7 @@
   gSystem->Load("${ANITA_UTIL_INSTALL_DIR}/lib/libAnitaMagicDisplay.so" ); 
 
 
+  gStyle->SetNumberContours(255);
+  gStyle->SetPalette(kTemperatureMap);
 
 }
