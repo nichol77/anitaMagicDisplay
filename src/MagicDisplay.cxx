@@ -199,7 +199,7 @@ void MagicDisplay::zeroPointers()
   
   UCorrelator::AnalysisConfig * cfg = new UCorrelator::AnalysisConfig; 
   cfg->nmaxima=3; 
-  cfg->response_option = UCorrelator::AnalysisConfig::ResponseTUFF; 
+  cfg->response_option = UCorrelator::AnalysisConfig::ResponseIndividualBRotter; 
   cfg->deconvolution_method = new AnitaResponse::AllPassDeconvolution; 
   fUCorr = new UCorrelator::Analyzer(cfg,true);
 
