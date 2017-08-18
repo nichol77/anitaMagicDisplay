@@ -18,8 +18,19 @@ int evToRun(int ev) {
     }
 
   }
+  if (AnitaVersion::get() == 4) {
+    name.str("");
+    name << installDir << "/bin/runToEvA4.txt";
+    cout << "Using: " << name.str() << " as translation file" << endl;
+    runToEv.open(name.str().c_str());
+    if (!runToEv.is_open()) {
+      cout << "I couldn't open that file though sorry!" << endl;
+      return -1;
+    }
+
+  }
   else {
-    cout << "I only have a runToEv list for Anita3 right now sorry :(" << endl;
+    cout << "I only have a runToEv list for Anita3 & 4 right now sorry :(" << endl;
     return -1;
   }
 
