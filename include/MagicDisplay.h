@@ -305,7 +305,7 @@ class MagicDisplay : public TGMainFrame
   
 
 	void loadPlaylist(const char* playlist);
-	std::vector<std::vector<long>> fPlaylist;
+	std::vector<std::vector<long> > fPlaylist;
 	int fPlaylistEntry;
 	int evToRun(int ev);
 	UInt_t getPlaylistRun() { return fPlaylist[fPlaylistEntry][0]; }
