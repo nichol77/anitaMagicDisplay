@@ -93,6 +93,10 @@ class MagicDisplay : public TGMainFrame
     \param calType The calibration option desired (see <a HREF="/uhen/anita/eventReader/">the event reader documentation for the different available calibration options</A>)
     */
   MagicDisplay(int run, AnitaDataset::DataDirectory datadir = AnitaDataset::ANITA_ROOT_DATA, WaveCalType::WaveCalType_t calType=WaveCalType::kDefault, AnitaDataset::BlindingStrategy blinding=AnitaDataset::kDefault);
+	/*! 
+		Playlist constructor.  Playlist format should be a text file consisting of lines of either: eventNumber or run eventNumber
+		*/
+  MagicDisplay(const char* playlist, AnitaDataset::DataDirectory datadir = AnitaDataset::ANITA_ROOT_DATA, WaveCalType::WaveCalType_t calType=WaveCalType::kDefault, AnitaDataset::BlindingStrategy blinding=AnitaDataset::kDefault);
   MagicDisplay(); ///< Default constructor
   ~MagicDisplay(); ///< Destructor
 
@@ -299,6 +303,13 @@ class MagicDisplay : public TGMainFrame
   int doKeyboardShortcut(Event_t* event);
   void prepareKeyboardShortcuts();
   
+
+	void loadPlaylist(const char* playlist);
+	std::vector<std::vector<long> > fPlaylist;
+	int fPlaylistEntry;
+	int evToRun(int ev);
+	UInt_t getPlaylistRun() { return fPlaylist[fPlaylistEntry][0]; }
+	Long64_t getPlaylistEvent() { return fPlaylist[fPlaylistEntry][1]; }
 
   void zeroPointers();
   MagicDisplayFormatOption::MagicDisplayFormatOption_t fWaveformFormat; ///< The format for displaying waveforms.
