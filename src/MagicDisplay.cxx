@@ -2787,7 +2787,7 @@ int MagicDisplay::evToRun(int ev) {
 
 void MagicDisplay::loadPlaylist(const char* playlist)
 {
-	std::vector<std::vector<long>> runEv;
+	std::vector<std::vector<long> > runEv;
 	int rN;
 	int evN;
 	ifstream pl(playlist);
