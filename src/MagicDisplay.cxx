@@ -2744,87 +2744,48 @@ Acclaim::AnalysisReco& MagicDisplay::getAnalysisReco(){
   return fEventCanMaker->getAnalysisReco();
 }
 
-int MagicDisplay::evToRun(int ev) {
 
-  char* installDir = getenv("ANITA_UTIL_INSTALL_DIR");
-
-  stringstream name;
-  ifstream runToEv;
-  if (AnitaVersion::get() == 3) {
-    name.str("");
-    name << installDir << "/bin/runToEvA3.txt";
-    runToEv.open(name.str().c_str());
-    if (!runToEv.is_open()) {
-      return -1;
-    }
-
-  }
-  if (AnitaVersion::get() == 4) {
-    name.str("");
-    name << installDir << "/bin/runToEvA4.txt";
-    runToEv.open(name.str().c_str());
-    if (!runToEv.is_open()) {
-      return -1;
-    }
-
-  }
-  else {
-    return -1;
-  }
-
-  int run, evLow,evHigh;
-  int runOut = -1;
-  while (runToEv >> run >> evLow >> evHigh)
-    if (ev >= evLow && ev <= evHigh) {
-      runOut = run;
-    }
-
-  runToEv.close();
-  
-  return runOut;
-
-}
 
 void MagicDisplay::loadPlaylist(const char* playlist)
 {
-	std::vector<std::vector<long> > runEv;
-	int rN;
-	int evN;
-	ifstream pl(playlist);
-	pl >> evN;
-	if(evN < 400)
-	{
-		rN = evN;
-		pl >> evN;
-		vector<long> Row;
-		Row.push_back(rN);
-		Row.push_back(evN);
-		runEv.push_back(Row);
-		while(pl >> rN >> evN)
-		{
-			vector<long> newRow;
-			newRow.push_back(rN);
-			newRow.push_back(evN);
-			runEv.push_back(newRow);
-		}
-	}
-	else
-	{
-		rN = evToRun(evN);
-		if(rN == -1) fprintf(stderr, "Something is wrong with your playlist\n");
-		vector<long> Row;
-		Row.push_back(rN);
-		Row.push_back(evN);
-		runEv.push_back(Row);
-		while(pl >> evN)
-		{
-			rN = evToRun(evN);
-			if(rN == -1) fprintf(stderr, "Something is wrong with your playlist\n");
-			vector<long> newRow;
-			newRow.push_back(rN);
-			newRow.push_back(evN);
-			runEv.push_back(newRow);
-		}
-	}
-	fPlaylist = runEv;
+  std::vector<std::vector<long> > runEv;
+  int rN;
+  int evN;
+  ifstream pl(playlist);
+  pl >> evN;
+  if(evN < 400)
+  {
+    rN = evN;
+    pl >> evN;
+    vector<long> Row;
+    Row.push_back(rN);
+    Row.push_back(evN);
+    runEv.push_back(Row);
+    while(pl >> rN >> evN)
+    {
+      vector<long> newRow;
+      newRow.push_back(rN);
+      newRow.push_back(evN);
+      runEv.push_back(newRow);
+    }
+  }
+  else
+  {
+    rN = AnitaDataset::getRunContainingEventNumber(evN);
+    if(rN == -1) fprintf(stderr, "Something is wrong with your playlist\n");
+    vector<long> Row;
+    Row.push_back(rN);
+    Row.push_back(evN);
+    runEv.push_back(Row);
+    while(pl >> evN)
+    {
+      rN = AnitaDataset::getRunContainingEventNumber(evN);
+      if(rN == -1) fprintf(stderr, "Something is wrong with your playlist\n");
+      vector<long> newRow;
+      newRow.push_back(rN);
+      newRow.push_back(evN);
+      runEv.push_back(newRow);
+    }
+  }
+  fPlaylist = runEv;
 }
