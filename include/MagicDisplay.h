@@ -303,13 +303,12 @@ class MagicDisplay : public TGMainFrame
   int doKeyboardShortcut(Event_t* event);
   void prepareKeyboardShortcuts();
   
+  void loadPlaylist(const char* playlist);
+  std::vector<std::vector<long> > fPlaylist;
+  int fPlaylistEntry;
 
-	void loadPlaylist(const char* playlist);
-	std::vector<std::vector<long> > fPlaylist;
-	int fPlaylistEntry;
-	int evToRun(int ev);
-	UInt_t getPlaylistRun() { return fPlaylist[fPlaylistEntry][0]; }
-	Long64_t getPlaylistEvent() { return fPlaylist[fPlaylistEntry][1]; }
+  UInt_t getPlaylistRun() { return fPlaylist[fPlaylistEntry][0]; }
+  Long64_t getPlaylistEvent() { return fPlaylist[fPlaylistEntry][1]; }
 
   void zeroPointers();
   MagicDisplayFormatOption::MagicDisplayFormatOption_t fWaveformFormat; ///< The format for displaying waveforms.
