@@ -9,7 +9,7 @@ int evToRun(int ev) {
   ifstream runToEv;
   if (AnitaVersion::get() == 3) {
     name.str("");
-    name << installDir << "/bin/runToEvA3.txt";
+    name << installDir << "/share/anitaCalib/runToEvA3.txt";
     cout << "Using: " << name.str() << " as translation file" << endl;
     runToEv.open(name.str().c_str());
     if (!runToEv.is_open()) {
@@ -18,9 +18,9 @@ int evToRun(int ev) {
     }
 
   }
-  if (AnitaVersion::get() == 4) {
+  else if (AnitaVersion::get() == 4) {
     name.str("");
-    name << installDir << "/bin/runToEvA4.txt";
+    name << installDir << "/share/anitaCalib/runToEvA4.txt";
     cout << "Using: " << name.str() << " as translation file" << endl;
     runToEv.open(name.str().c_str());
     if (!runToEv.is_open()) {
