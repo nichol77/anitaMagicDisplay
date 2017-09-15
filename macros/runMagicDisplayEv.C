@@ -63,7 +63,8 @@ void runMagicDisplayEv(int ev) {
 
   cout << "Event number " << ev << " is in run " << run << endl;
 
-  MagicDisplay *magicPtr = new MagicDisplay(run,(AnitaDataset::DataDirectory) anita, WaveCalType::kDefault);
+  MagicDisplay *magicPtr = new MagicDisplay(run,(AnitaDataset::DataDirectory) anita, WaveCalType::kDefault,
+					    AnitaDataset::BlindingStrategy::kRandomizePolarity);
 
   magicPtr->startEventDisplay();
 
