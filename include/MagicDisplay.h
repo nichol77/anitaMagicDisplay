@@ -288,6 +288,7 @@ class MagicDisplay : public TGMainFrame
 
   UCorrelator::Analyzer * getUCorr() { return fUCorr; }
   FilterStrategy * getStrategy() { return fStrategy; }
+  const FilteredAnitaEvent * getFilteredEvent() { return fFilteredEventPtr; }
   // FilterStrategy * getNoFilterStrategy();
   // FilterStrategy * getDefaultFilterStrategy();
 
@@ -346,6 +347,7 @@ class MagicDisplay : public TGMainFrame
    PrettyAnitaHk *fHkPtr; ///< Pointer to the pretty hk.
    RawAnitaEvent *fRawEventPtr; ///< Pointer to the raw event.
    CalibratedAnitaEvent *fCalEventPtr; ///< Pointer to the raw event.
+   FilteredAnitaEvent* fFilteredEventPtr; ///< Pointer to the FilteredAnitaEvent
    UsefulAnitaEvent *fUsefulEventPtr; ///< Pointer to the calibrated event.
    TurfRate *fTurfPtr; ///< Pointer to the TURF rate.
    SurfHk *fSurfPtr; ///< Pointer to the SURF hk.

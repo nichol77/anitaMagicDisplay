@@ -51,7 +51,6 @@ AnitaCanvasMaker*  AnitaCanvasMaker::fgInstance = 0;
 Acclaim::AnalysisReco* AnitaCanvasMaker::reco = 0;
 
 // These classes are such a mess anyway, I might as well leave these here...
-FilteredAnitaEvent* fEv = NULL;
 FilterStrategy* lastStrategy = NULL;
 
 
@@ -159,7 +158,7 @@ AnitaCanvasMaker*  AnitaCanvasMaker::Instance()
 }
 
 
-TPad *AnitaCanvasMaker::getEventInfoCanvas(UsefulAnitaEvent *evPtr, RawAnitaHeader *hdPtr, Adu5Pat *pat, TPad *useCan)
+TPad *AnitaCanvasMaker::getEventInfoCanvas(const UsefulAnitaEvent *evPtr, const RawAnitaHeader *hdPtr, const Adu5Pat *pat, TPad *useCan)
 {
    static UInt_t lastEventNumber=0;
    static TPaveText *leftPave=0;
@@ -317,7 +316,7 @@ TPad *AnitaCanvasMaker::getEventInfoCanvas(UsefulAnitaEvent *evPtr, RawAnitaHead
 }
 
 
-TPad *AnitaCanvasMaker::quickGetEventViewerCanvasForWebPlottter(UsefulAnitaEvent *evPtr,RawAnitaHeader *hdPtr, TPad *useCan)
+TPad *AnitaCanvasMaker::quickGetEventViewerCanvasForWebPlottter(const UsefulAnitaEvent *evPtr,const RawAnitaHeader *hdPtr, TPad *useCan)
 {
   TPad *retCan=0;
 
@@ -428,19 +427,23 @@ TPad *AnitaCanvasMaker::quickGetEventViewerCanvasForWebPlottter(UsefulAnitaEvent
 
 
 
-TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr, RawAnitaHeader *hdPtr, Adu5Pat* pat, TPad *useCan, bool forceRedo){
+TPad *AnitaCanvasMaker::getEventViewerCanvas(FilteredAnitaEvent* fEv, TPad *useCan, bool forceRedo){
   // std::cerr << __PRETTY_FUNCTION__ << std::endl;
+
+  const UsefulAnitaEvent* evPtr = fEv->getUsefulAnitaEvent();
+  // const Adu5Pat* pat = fEv->getGPS();
+  const RawAnitaHeader* hdPtr = fEv->getHeader();
 
   TPad *retCan=0;
   static UInt_t lastEventNumber=0;
 
   if(forceRedo || evPtr->eventNumber!=lastEventNumber || fWaveformOption!=fLastWaveformFormat || MagicDisplay::Instance()->getStrategy() != lastStrategy) {
 
-    if(fEv){
-      delete fEv;
-      fEv = NULL;
-    }
-    fEv = new FilteredAnitaEvent(evPtr, MagicDisplay::Instance()->getStrategy(), pat, hdPtr);
+    // if(fEv){
+    //   delete fEv;
+    //   fEv = NULL;
+    // }
+    // fEv = new FilteredAnitaEvent(evPtr, MagicDisplay::Instance()->getStrategy(), pat, hdPtr);
     
     lastEventNumber=evPtr->eventNumber;
     lastStrategy = MagicDisplay::Instance()->getStrategy();
@@ -618,22 +621,24 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr, RawAnitaHe
 
   }
 
+  TruthAnitaEvent* truth = MagicDisplay::Instance()->fDataset->truth();
   if(fCanvasView==MagicDisplayCanvasLayoutOption::kInterferometry){
 
     if(!reco){
-      reco=new Acclaim::AnalysisReco();
+      reco = new Acclaim::AnalysisReco();
     }
 
     AnitaEventSummary sum;
     // std::cerr << "before" << "\t" << fEv->eventNumber << "\t" << std::endl;
-    reco->process(fEv, pat, &sum);
+    reco->process(fEv, &sum, NULL, truth);
+    // std::cerr << fEv << "\t" << pat << "\t" << &sum << "\t" << truth << std::endl;
     // std::cerr << "after" << "\t" << fEv->eventNumber << "\t" << std::endl;
   }
 
   if (fCanvasView==MagicDisplayCanvasLayoutOption::kUCorrelator)
   {
     AnitaEventSummary sum;
-    MagicDisplay::Instance()->getUCorr()->analyze(fEv,&sum, MagicDisplay::Instance()->fDataset->truth());    
+    MagicDisplay::Instance()->getUCorr()->analyze(fEv,&sum, truth);
   }
 
   
@@ -664,7 +669,7 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(UsefulAnitaEvent *evPtr, RawAnitaHe
 
 
 
-TPad *AnitaCanvasMaker::getHorizontalCanvas(RawAnitaHeader *hdPtr,
+TPad *AnitaCanvasMaker::getHorizontalCanvas(const RawAnitaHeader *hdPtr,
 					    TPad *useCan)
 
 {
@@ -804,7 +809,7 @@ TPad *AnitaCanvasMaker::getHorizontalCanvas(RawAnitaHeader *hdPtr,
 
 }
 
-TPad *AnitaCanvasMaker::getVerticalCanvas(RawAnitaHeader *hdPtr,
+TPad *AnitaCanvasMaker::getVerticalCanvas(const RawAnitaHeader *hdPtr,
 					  TPad *useCan)
 {
   //  gStyle->SetTitleH(0.1);
@@ -942,7 +947,7 @@ TPad *AnitaCanvasMaker::getVerticalCanvas(RawAnitaHeader *hdPtr,
 }
 
 
-TPad *AnitaCanvasMaker::getVerticalCanvasForWebPlotter(RawAnitaHeader *hdPtr,
+TPad *AnitaCanvasMaker::getVerticalCanvasForWebPlotter(const RawAnitaHeader *hdPtr,
 						       TPad *useCan)
 {
   //  gStyle->SetTitleH(0.1);
@@ -1062,7 +1067,7 @@ TPad *AnitaCanvasMaker::getVerticalCanvasForWebPlotter(RawAnitaHeader *hdPtr,
 }
 
 
-TPad *AnitaCanvasMaker::getCombinedCanvasForWebPlotter(RawAnitaHeader *hdPtr,
+TPad *AnitaCanvasMaker::getCombinedCanvasForWebPlotter(const RawAnitaHeader *hdPtr,
 						       TPad *useCan)
 {
   //  gStyle->SetTitleH(0.1);
@@ -1211,7 +1216,7 @@ TPad *AnitaCanvasMaker::getCombinedCanvasForWebPlotter(RawAnitaHeader *hdPtr,
 
 }
 
-TPad *AnitaCanvasMaker::getSurfChanCanvas(RawAnitaHeader *hdPtr,TPad *useCan)
+TPad *AnitaCanvasMaker::getSurfChanCanvas(const RawAnitaHeader *hdPtr,TPad *useCan)
 {
    //  gStyle->SetTitleH(0.1);
   gStyle->SetOptTitle(0);
@@ -1330,7 +1335,7 @@ TPad *AnitaCanvasMaker::getSurfChanCanvas(RawAnitaHeader *hdPtr,TPad *useCan)
 
 }
 
-TPad * AnitaCanvasMaker::getUCorrelatorCanvas(RawAnitaHeader *hdPtr, TPad *useCan)
+TPad * AnitaCanvasMaker::getUCorrelatorCanvas(const RawAnitaHeader *hdPtr, TPad *useCan)
 {
 
   gStyle->SetOptTitle(1);
@@ -1369,7 +1374,7 @@ TPad * AnitaCanvasMaker::getUCorrelatorCanvas(RawAnitaHeader *hdPtr, TPad *useCa
 
 }
 
-TPad *AnitaCanvasMaker::getInterferometryCanvas(RawAnitaHeader *hdPtr,TPad *useCan)
+TPad *AnitaCanvasMaker::getInterferometryCanvas(const RawAnitaHeader *hdPtr,TPad *useCan)
 {
   // std::cerr << __PRETTY_FUNCTION__ << std::endl;
    //  gStyle->SetTitleH(0.1);
@@ -1442,7 +1447,7 @@ TPad *AnitaCanvasMaker::getInterferometryCanvas(RawAnitaHeader *hdPtr,TPad *useC
 
 
 
-TPad *AnitaCanvasMaker::getPayloadCanvas(RawAnitaHeader *hdPtr,TPad *useCan)
+TPad *AnitaCanvasMaker::getPayloadCanvas(const RawAnitaHeader *hdPtr,TPad *useCan)
 {
    //  gStyle->SetTitleH(0.1);
   gStyle->SetOptTitle(0);
@@ -1641,7 +1646,7 @@ TPad *AnitaCanvasMaker::getPayloadCanvas(RawAnitaHeader *hdPtr,TPad *useCan)
 
 
 
-TPad *AnitaCanvasMaker::getCombinedCanvas(RawAnitaHeader *hdPtr,
+TPad *AnitaCanvasMaker::getCombinedCanvas(const RawAnitaHeader *hdPtr,
 					  TPad *useCan)
 {
   gStyle->SetOptTitle(0);
