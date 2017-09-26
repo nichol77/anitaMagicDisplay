@@ -20,6 +20,7 @@
 
 class UsefulAnitaEvent;
 class RawAnitaHeader;
+class FilteredAnitaEvent;
 class TPad;
 class TFile;
 class TGeoManager;
@@ -79,7 +80,7 @@ class AnitaCanvasMaker
      /param useCan Optional pointer to a canvas to draw the squiggly ines in (if zero a canvas will be created).
    */
    // TPad *getEventViewerCanvas(UsefulAnitaEvent *evPtr,RawAnitaHeader *hdPtr, TPad *useCan=0);
-  TPad *getEventViewerCanvas(UsefulAnitaEvent *evPtr, RawAnitaHeader *hdPtr, Adu5Pat* pat, TPad *useCan=0, bool forceRedo = false);
+  TPad *getEventViewerCanvas(FilteredAnitaEvent* fEv, TPad *useCan=0, bool forceRedo = false);
    //!  The interferometry canvas getter.
    /*!
      Puts histograms from the Cross Correlator onto the display
@@ -87,8 +88,8 @@ class AnitaCanvasMaker
      /param hdPtr Pointer to the header of the event we want to draw
      /param useCan Optional pointer to a canvas to draw in (if zero a canvas will be created).
    */
-  TPad *getInterferometryCanvas(RawAnitaHeader *hdPtr,TPad *useCan=NULL);
-  TPad *getUCorrelatorCanvas(RawAnitaHeader *hdPtr,TPad *useCan=NULL);
+  TPad *getInterferometryCanvas(const RawAnitaHeader *hdPtr,TPad *useCan=NULL);
+  TPad *getUCorrelatorCanvas(const RawAnitaHeader *hdPtr,TPad *useCan=NULL);
 
 
   //!  The main event view canvas getter used by QnDWBOM.
@@ -98,7 +99,7 @@ class AnitaCanvasMaker
      /param hdPtr Pointer to the header of the event we want to draw
      /param useCan Optional pointer to a canvas to draw the squiggly ines in (if zero a canvas will be created).
    */
-   TPad *quickGetEventViewerCanvasForWebPlottter(UsefulAnitaEvent *evPtr,RawAnitaHeader *hdPtr, TPad *useCan=0);
+   TPad *quickGetEventViewerCanvasForWebPlottter(const UsefulAnitaEvent *evPtr, const RawAnitaHeader *hdPtr, TPad *useCan=0);
    
   
   
@@ -109,7 +110,7 @@ class AnitaCanvasMaker
      /param hdPtr Pointer to the header of the event we want to draw
      /param useCan Optional pointer to a canvas to draw all the TPaveText's (if zero a canvas will be created).
    */
-   TPad *getEventInfoCanvas(UsefulAnitaEvent *evPtr,RawAnitaHeader *hdPtr, Adu5Pat *pat, TPad *useCan=0);
+   TPad *getEventInfoCanvas(const UsefulAnitaEvent *evPtr, const RawAnitaHeader *hdPtr, const Adu5Pat *pat, TPad *useCan=0);
   
    
    void setupPhiPadWithFrames(TPad *plotPad); ///< Worker function to setup the phi view canvas.
@@ -168,43 +169,43 @@ class AnitaCanvasMaker
      /param hdPtr Pointer to the header of the event we want to draw.
      /param useCan Optional pointer to a canvas to draw the squiggly ines in (if zero a canvas will be created).
    */
-   TPad *getHorizontalCanvas(RawAnitaHeader *hdPtr, TPad *useCan=0);
+   TPad *getHorizontalCanvas(const RawAnitaHeader *hdPtr, TPad *useCan=0);
    //!  A worker function to draw the vertical canvas -- shouldn't be called directly.
    /*!
      /param hdPtr Pointer to the header of the event we want to draw.
      /param useCan Optional pointer to a canvas to draw the squiggly ines in (if zero a canvas will be created).
    */
-   TPad *getVerticalCanvas(RawAnitaHeader *hdPtr, TPad *useCan=0);
+   TPad *getVerticalCanvas(const RawAnitaHeader *hdPtr, TPad *useCan=0);
    //!  A worker function to draw the combined canvas -- shouldn't be called directly.
    /*!
      /param hdPtr Pointer to the header of the event we want to draw.
      /param useCan Optional pointer to a canvas to draw the squiggly ines in (if zero a canvas will be created).
    */
-   TPad *getCombinedCanvas(RawAnitaHeader *hdPtr, TPad *useCan=0);
+   TPad *getCombinedCanvas(const RawAnitaHeader *hdPtr, TPad *useCan=0);
    //!  A worker function to draw the SURF canvas -- shouldn't be called directly.
    /*!
      /param hdPtr Pointer to the header of the event we want to draw.
      /param useCan Optional pointer to a canvas to draw the squiggly ines in (if zero a canvas will be created).
    */
-   TPad *getSurfChanCanvas(RawAnitaHeader *hdPtr, TPad *useCan=0);
+   TPad *getSurfChanCanvas(const RawAnitaHeader *hdPtr, TPad *useCan=0);
    //!  A worker function to draw the vertical canvas for QnDWBOM -- shouldn't be called directly.
    /*!
      /param hdPtr Pointer to the header of the event we want to draw.
      /param useCan Optional pointer to a canvas to draw the squiggly ines in (if zero a canvas will be created).
    */
-   TPad *getVerticalCanvasForWebPlotter(RawAnitaHeader *hdPtr, TPad *useCan=0);  //!  A worker function to draw the vertical canvas for QnDWBOM -- shouldn't be called directly.
+   TPad *getVerticalCanvasForWebPlotter(const RawAnitaHeader *hdPtr, TPad *useCan=0);  //!  A worker function to draw the vertical canvas for QnDWBOM -- shouldn't be called directly.
    /*!
      /param hdPtr Pointer to the header of the event we want to draw.
      /param useCan Optional pointer to a canvas to draw the squiggly ines in (if zero a canvas will be created).
    */
-   TPad *getCombinedCanvasForWebPlotter(RawAnitaHeader *hdPtr, TPad *useCan=0);
+   TPad *getCombinedCanvasForWebPlotter(const RawAnitaHeader *hdPtr, TPad *useCan=0);
 
    //!  A worker function to draw the Payload view canvas -- shouldn't be called directly.
    /*!
      /param hdPtr Pointer to the header of the event we want to draw.
      /param useCan Optional pointer to a canvas to draw the squiggly ines in (if zero a canvas will be created).
    */
-   TPad *getPayloadCanvas(RawAnitaHeader *hdPtr, TPad *useCan=0);
+   TPad *getPayloadCanvas(const RawAnitaHeader *hdPtr, TPad *useCan=0);
    void loadPayloadViewSutff(); ///<Loads the anita geometry
 };
 

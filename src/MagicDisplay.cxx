@@ -78,6 +78,7 @@
 #include "TCut.h"
 #include "TGMsgBox.h" 
 
+#include "FilteredAnitaEvent.h"
 #include "UCFilters.h"
 #include "BasicFilters.h"
 #include "AnalysisConfig.h"
@@ -119,6 +120,7 @@ void MagicDisplay::zeroPointers()
   fAvgSurfPtr=0;
   fSumTurfPtr=0;
   fUsefulEventPtr=0;
+  fFilteredEventPtr=0;
   // fTurfRateTree=0;
   fTurfPtr=0;
   fSurfPtr=0;
@@ -246,17 +248,25 @@ void MagicDisplay::initializeFilterStrategies(){
 
   FilterStrategy* fNone = new FilterStrategy();
   filterStrats["None"] = fNone;
-  Acclaim::Filters::appendFilterStrategies(filterStrats);
 
-  FilterStrategy* fHybrid = new FilterStrategy(); 
-  if (AnitaVersion::get()==3) fHybrid->addOperation(new ALFASincFilter); 
-  fHybrid->addOperation(new HybridFilter); 
-  filterStrats["hybrid"] = fHybrid; 
+  Acclaim::Filters::generateFilterStrategies();
 
+  FilterStrategy* fHybrid = new FilterStrategy();
+  if (AnitaVersion::get()==3) fHybrid->addOperation(new ALFASincFilter);
+  fHybrid->addOperation(new HybridFilter);
+  filterStrats["hybrid"] = fHybrid;
 
+  FilterStrategy* fSS = new FilterStrategy();
+  UCorrelator::fillStrategyWithKey(fSS, Acclaim::Filters::getCosminsFavouriteSineSubName());
+  filterStrats[Acclaim::Filters::getCosminsFavouriteSineSubName()] = fSS;
 
-
-  
+  // FilterStrategy* fSSPBW = new FilterStrategy();
+  // UCorrelator::fillStrategyWithKey(fSSPBW, Acclaim::Filters::getCosminsFavouriteSineSubName());
+  // FilterStrategy* stupidNotchStrat = Acclaim::Filters::findDefaultStrategy("BrickWallSatellites");
+  // for(unsigned i=0; i < stupidNotchStrat->nOperations(); i++){
+  //   fSSPBW->addOperation((FilterOperation*)stupidNotchStrat->getOperation(i));
+  // }
+  // filterStrats["SineSubPlusBrickWall"] = fSSPBW;
   
   // it's important that this gets set here.
   setFilterStrategy(fNone);
@@ -407,8 +417,8 @@ MagicDisplay::MagicDisplay(int run, AnitaDataset::DataDirectory dir, WaveCalType
 MagicDisplay::MagicDisplay(const char* playlist, AnitaDataset::DataDirectory dir, WaveCalType::WaveCalType_t calType, AnitaDataset::BlindingStrategy blinding) : TGMainFrame(gClient->GetRoot(),1200,800,kVerticalFrame)
 {
   //Offline constructor
-	loadPlaylist(playlist);
-	fPlaylistEntry = 0;
+  loadPlaylist(playlist);
+  fPlaylistEntry = 0;
   fCurrentRun=getPlaylistRun();
   zeroPointers();
   prepareKeyboardShortcuts();
@@ -481,7 +491,13 @@ int MagicDisplay::getEventEntry()
   if(fEventEntry >= 0){
     fHeadPtr = fDataset->header();
     fUsefulEventPtr = fDataset->useful();
-    fPatPtr = fDataset->gps();    
+    fPatPtr = fDataset->gps();
+
+    if(fFilteredEventPtr){
+      delete fFilteredEventPtr;
+      fFilteredEventPtr = NULL;
+    }
+    fFilteredEventPtr = new FilteredAnitaEvent(fUsefulEventPtr, getStrategy(), fPatPtr, fHeadPtr);
   }
   else{
     retVal = -1;
@@ -876,7 +892,8 @@ void MagicDisplay::refreshEventDisplay(bool forceRedo)
 
 
    // fEventCanMaker->getEventViewerCanvas(fUsefulEventPtr,fHeadPtr,fMagicMainPad);
-   fEventCanMaker->getEventViewerCanvas(fUsefulEventPtr,fHeadPtr,fPatPtr, fMagicMainPad, forceRedo);
+   // fEventCanMaker->getEventViewerCanvas(fUsefulEventPtr,fHeadPtr,fPatPtr, fMagicMainPad, forceRedo);
+   fEventCanMaker->getEventViewerCanvas(fFilteredEventPtr, fMagicMainPad, forceRedo);
    fEventCanMaker->getEventInfoCanvas(fUsefulEventPtr,fHeadPtr,fPatPtr,fMagicEventInfoPad);
 
    fMagicCanvas->Update();
@@ -929,18 +946,18 @@ void MagicDisplay::applyCut(const char *cutString)
 
 int MagicDisplay::displayNextEvent(int nskip){
 
-	if(!fPlaylist.empty())
-	{
-		fPlaylistEntry++;
-		if(fPlaylistEntry > fPlaylist.size() - 1)
-		{
-			fprintf(stderr, "reached end of playlist, looping around\n");
-			fPlaylistEntry = 0;
-		}
-		int retVal = displayThisEvent(getPlaylistEvent(), getPlaylistRun());
+  if(!fPlaylist.empty())
+  {
+    fPlaylistEntry++;
+    if(fPlaylistEntry > (int)fPlaylist.size() - 1)
+    {
+      fprintf(stderr, "reached end of playlist, looping around\n");
+      fPlaylistEntry = 0;
+    }
+    int retVal = displayThisEvent(getPlaylistEvent(), getPlaylistRun());
   
-		return retVal;
-	}
+    return retVal;
+  }
 
   if(fApplyEventCut==0){
     for (int i = 0; i < nskip; i++) fDataset->next();  //TODO skip properly 
@@ -996,20 +1013,20 @@ int MagicDisplay::displayLastEvent(){
 
 int MagicDisplay::displayPreviousEvent(int nskip){
 	
-	if(!fPlaylist.empty())
-	{
-		fPlaylistEntry--;
-		if(fPlaylistEntry < 0)
-		{
-			fprintf(stderr, "reached end of playlist, looping around\n");
-			fPlaylistEntry = fPlaylist.size() - 1;
-		}
-		int retVal = displayThisEvent(getPlaylistEvent(), getPlaylistRun());
+  if(!fPlaylist.empty())
+  {
+    fPlaylistEntry--;
+    if(fPlaylistEntry < 0)
+    {
+      fprintf(stderr, "reached end of playlist, looping around\n");
+      fPlaylistEntry = fPlaylist.size() - 1;
+    }
+    int retVal = displayThisEvent(getPlaylistEvent(), getPlaylistRun());
   
-		return retVal;
-	}
+    return retVal;
+  }
   
-	if(fApplyEventCut==0){
+  if(fApplyEventCut==0){
     for (int i = 0; i < nskip; i++) fDataset->previous();  //TODO skip properly 
     fEventEntry = fDataset->previous();
   }

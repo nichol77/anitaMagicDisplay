@@ -8,6 +8,8 @@
 
 void runMagicDisplayPlaylist(const char* playlist = "hc2adirect.txt", int anita=AnitaVersion::get()) {
 
+  AnitaVersion::set(anita);
+
   MagicDisplay *magicPtr = new MagicDisplay(playlist,(AnitaDataset::DataDirectory) anita,WaveCalType::kDefault);
 
   //magicPtr->startSurfDisplay();
