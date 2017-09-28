@@ -889,11 +889,21 @@ void MagicDisplay::refreshEventDisplay(bool forceRedo)
 
    // fEventCanMaker->getEventViewerCanvas(fUsefulEventPtr,fHeadPtr,fMagicMainPad);
    // fEventCanMaker->getEventViewerCanvas(fUsefulEventPtr,fHeadPtr,fPatPtr, fMagicMainPad, forceRedo);
+
+   // if we have a filtered event...
    if(fFilteredEventPtr){
-     delete fFilteredEventPtr;
-     fFilteredEventPtr = NULL;
+     // and either the strategy or event number has changed, then delete it
+     if(fFilteredEventPtr->getStrategy() != getStrategy() ||
+        fHeadPtr->eventNumber != fFilteredEventPtr->getHeader()->eventNumber)
+     {
+       delete fFilteredEventPtr;
+       fFilteredEventPtr = NULL;
+     }
    }
-   fFilteredEventPtr = new FilteredAnitaEvent(fUsefulEventPtr, getStrategy(), fPatPtr, fHeadPtr);
+   // std::cerr << "here\t" << fFilteredEventPtr << "\t" << fUsefulEventPtr << "\t" << getStrategy() << "\t" << fPatPtr << "\t" << fHeadPtr << std::endl;
+   if(!fFilteredEventPtr){
+     fFilteredEventPtr = new FilteredAnitaEvent(fUsefulEventPtr, getStrategy(), fPatPtr, fHeadPtr);
+   }
 
    fEventCanMaker->getEventViewerCanvas(fFilteredEventPtr, fMagicMainPad, forceRedo);
    fEventCanMaker->getEventInfoCanvas(fUsefulEventPtr,fHeadPtr,fPatPtr,fMagicEventInfoPad);
