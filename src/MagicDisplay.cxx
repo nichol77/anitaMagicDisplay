@@ -249,12 +249,11 @@ void MagicDisplay::initializeFilterStrategies(){
   FilterStrategy* fNone = new FilterStrategy();
   filterStrats["None"] = fNone;
 
-  Acclaim::Filters::generateFilterStrategies();
-
-  FilterStrategy* fHybrid = new FilterStrategy();
-  if (AnitaVersion::get()==3) fHybrid->addOperation(new ALFASincFilter);
-  fHybrid->addOperation(new HybridFilter);
-  filterStrats["hybrid"] = fHybrid;
+  // Acclaim::Filters::generateFilterStrategies();
+  // FilterStrategy* fHybrid = new FilterStrategy();
+  // if (AnitaVersion::get()==3) fHybrid->addOperation(new ALFASincFilter);
+  // fHybrid->addOperation(new HybridFilter);
+  // filterStrats["hybrid"] = fHybrid;
 
   FilterStrategy* fSS = new FilterStrategy();
   UCorrelator::fillStrategyWithKey(fSS, Acclaim::Filters::getCosminsFavouriteSineSubName());
@@ -300,6 +299,7 @@ void MagicDisplay::clearFilterStrategies()
 
 void MagicDisplay::setFilterStrategy(FilterStrategy * s)
 {
+  // FilterStrategy* lastStrat = fStrategy;
   fStrategy = s;
 
   if(fFilteringPanel){
@@ -326,8 +326,10 @@ void MagicDisplay::setFilterStrategy(FilterStrategy * s)
     }
     butFiltering->Modified(); // force update
     butFiltering->Update(); // force update    
-    
-    this->refreshEventDisplay();
+
+    // if(lastStrat!=fStrategy){
+      this->refreshEventDisplay(true);
+    // }
   }
 
 
@@ -492,12 +494,6 @@ int MagicDisplay::getEventEntry()
     fHeadPtr = fDataset->header();
     fUsefulEventPtr = fDataset->useful();
     fPatPtr = fDataset->gps();
-
-    if(fFilteredEventPtr){
-      delete fFilteredEventPtr;
-      fFilteredEventPtr = NULL;
-    }
-    fFilteredEventPtr = new FilteredAnitaEvent(fUsefulEventPtr, getStrategy(), fPatPtr, fHeadPtr);
   }
   else{
     retVal = -1;
@@ -893,6 +889,12 @@ void MagicDisplay::refreshEventDisplay(bool forceRedo)
 
    // fEventCanMaker->getEventViewerCanvas(fUsefulEventPtr,fHeadPtr,fMagicMainPad);
    // fEventCanMaker->getEventViewerCanvas(fUsefulEventPtr,fHeadPtr,fPatPtr, fMagicMainPad, forceRedo);
+   if(fFilteredEventPtr){
+     delete fFilteredEventPtr;
+     fFilteredEventPtr = NULL;
+   }
+   fFilteredEventPtr = new FilteredAnitaEvent(fUsefulEventPtr, getStrategy(), fPatPtr, fHeadPtr);
+
    fEventCanMaker->getEventViewerCanvas(fFilteredEventPtr, fMagicMainPad, forceRedo);
    fEventCanMaker->getEventInfoCanvas(fUsefulEventPtr,fHeadPtr,fPatPtr,fMagicEventInfoPad);
 
