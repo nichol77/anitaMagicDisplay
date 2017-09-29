@@ -121,6 +121,7 @@ void MagicDisplay::zeroPointers()
   fSumTurfPtr=0;
   fUsefulEventPtr=0;
   fFilteredEventPtr=0;
+  fLastFilteredEventNumber = 0;
   // fTurfRateTree=0;
   fTurfPtr=0;
   fSurfPtr=0;
@@ -893,8 +894,10 @@ void MagicDisplay::refreshEventDisplay(bool forceRedo)
    // if we have a filtered event...
    if(fFilteredEventPtr){
      // and either the strategy or event number has changed, then delete it
+     // std::cerr << fFilteredEventPtr->getStrategy()  << "\t" << getStrategy() << std::endl;
+     // std::cerr << fHeadPtr->eventNumber << "\t" << fLastFilteredEventNumber << std::endl;
      if(fFilteredEventPtr->getStrategy() != getStrategy() ||
-        fHeadPtr->eventNumber != fFilteredEventPtr->getHeader()->eventNumber)
+        fHeadPtr->eventNumber != fLastFilteredEventNumber)
      {
        delete fFilteredEventPtr;
        fFilteredEventPtr = NULL;
@@ -903,6 +906,8 @@ void MagicDisplay::refreshEventDisplay(bool forceRedo)
    // std::cerr << "here\t" << fFilteredEventPtr << "\t" << fUsefulEventPtr << "\t" << getStrategy() << "\t" << fPatPtr << "\t" << fHeadPtr << std::endl;
    if(!fFilteredEventPtr){
      fFilteredEventPtr = new FilteredAnitaEvent(fUsefulEventPtr, getStrategy(), fPatPtr, fHeadPtr);
+     fLastFilteredEventNumber = fHeadPtr->eventNumber;
+     // std::cerr << "new filtered event " << std::endl;
    }
 
    fEventCanMaker->getEventViewerCanvas(fFilteredEventPtr, fMagicMainPad, forceRedo);
