@@ -348,6 +348,7 @@ class MagicDisplay : public TGMainFrame
    RawAnitaEvent *fRawEventPtr; ///< Pointer to the raw event.
    CalibratedAnitaEvent *fCalEventPtr; ///< Pointer to the raw event.
    FilteredAnitaEvent* fFilteredEventPtr; ///< Pointer to the FilteredAnitaEvent
+   UInt_t fLastFilteredEventNumber; ///< Event number of FilteredAnitaEvent (and RawAnitaEvent/UsefulAnitaEvent)
    UsefulAnitaEvent *fUsefulEventPtr; ///< Pointer to the calibrated event.
    TurfRate *fTurfPtr; ///< Pointer to the TURF rate.
    SurfHk *fSurfPtr; ///< Pointer to the SURF hk.
