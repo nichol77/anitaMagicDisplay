@@ -626,6 +626,9 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(FilteredAnitaEvent* fEv, TPad *useC
 
     if(!reco){
       reco = new Acclaim::AnalysisReco();
+      TString magicDisplayConfigFile = TString::Format("%s/share/Acclaim/AcclaimMagicDisplay.conf", getenv("ANITA_UTIL_INSTALL_DIR"));
+      Acclaim::AnalysisSettings s(magicDisplayConfigFile);
+      s.apply(reco);
     }
 
     AnitaEventSummary sum;
