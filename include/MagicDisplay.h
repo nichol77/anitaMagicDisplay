@@ -123,7 +123,7 @@ class MagicDisplay : public TGMainFrame
     \param runNumber The run which contains the desired event
     \return Zero on success
   */
-  int displayThisEvent(UInt_t eventNumber, UInt_t runNumber);
+  int displayThisEvent(UInt_t eventNumber, Int_t run=-1); ///!< Display a particular event, uses AnitaDataset to find run if -1 is passed (default)
   int displayNextEvent(int nskip = 0); ///< Displays the next event in the file, normally called by pressing the "Next" button. If nskip > 0, will skip so many events.
   int displayFirstEvent(); ///< Displays the first event in the file, normally called by pressing the "First" button.
   int displayLastEvent(); ///< Displays the last event in the file, normally called by pressing the "Last" button.
