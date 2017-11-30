@@ -6,8 +6,7 @@
   gSystem->Load("${ANITA_UTIL_INSTALL_DIR}/lib/libAnitaCorrelator.so") && gSystem->Load("$ANITA_UTIL_INSTALL_DIR/lib/libAnitaCorrelator.dylib"); 
   gSystem->Load("${ANITA_UTIL_INSTALL_DIR}/lib/libAnitaAnalysis.so") && gSystem->Load("$ANITA_UTIL_INSTALL_DIR/lib/libAnitaAnalysis.dylib"); 
   gSystem->Load("${ANITA_UTIL_INSTALL_DIR}/lib/libUCorrelator.so") && gSystem->Load("$ANITA_UTIL_INSTALL_DIR/lib/libUCorrelator.dylib"); 
-//  gSystem->Load("build/libUCorrelator.so"); 
-
+  gSystem->Load("${ANITA_UTIL_INSTALL_DIR}/lib/libAnitaMagicDisplay.so") && gSystem->Load("$ANITA_UTIL_INSTALL_DIR/lib/libAnitaMagicDisplay.dylib"); 
 
 //  const Int_t NRGBs = 5;
 //  const Int_t NCont = 255;
