@@ -1060,14 +1060,18 @@ int MagicDisplay::displayPreviousEvent(int nskip){
 
 
 
-int MagicDisplay::displayThisEvent(UInt_t eventNumber, UInt_t runNumber){
+int MagicDisplay::displayThisEvent(UInt_t eventNumber, Int_t run){
 
-  std::cout << "displayThisEvent: " << eventNumber << "\t" << runNumber << std::endl;
+  if(run < 0){
+    run = AnitaDataset::getRunContainingEventNumber(eventNumber);
+  }
 
-  if(fCurrentRun != runNumber) {
-    std::cout << "\t" << fCurrentRun << "\t" << runNumber << std::endl;
+  std::cout << "displayThisEvent: " << eventNumber << "\t" << run << std::endl;
+
+  if(fCurrentRun != (UInt_t)run) {
+    std::cout << "\t" << fCurrentRun << "\t" << run << std::endl;
     closeCurrentRun();
-    fCurrentRun=runNumber;
+    fCurrentRun=run;
     // loadEventTree();
     loadDataset();
   }
