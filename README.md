@@ -1,4 +1,6 @@
-# Marvellous Anita Graphical Interface & Classy Display (Magic Display)
+# anitaMagicDisplay 
+# # Marvellous Anita Graphical Interface & Classy Display (Magic Display)
+
 May 2008 -- Ryan Nichol <r.nichol@ucl.ac.uk>
 
 ## Introduction
