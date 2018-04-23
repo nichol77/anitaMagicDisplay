@@ -294,6 +294,8 @@ class MagicDisplay : public TGMainFrame
 
   std::map<TString, FilterStrategy*>& getFilterStrats(){return filterStrats;}  
 
+  const TPad * getMainPad() const { return fMagicMainPad; } 
+
  protected:
   static MagicDisplay *fgInstance;  ///< The pointer to the current MagicDisplay
    // protect against multiple instances
