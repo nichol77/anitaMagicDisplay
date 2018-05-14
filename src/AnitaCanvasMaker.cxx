@@ -136,8 +136,7 @@ AnitaCanvasMaker::AnitaCanvasMaker(WaveCalType::WaveCalType_t calType)
   }
 
   //RJN chnge to try and speed up web plotter
-  reco=NULL;
-  //  reco=new AnalysisReco();
+  reco = NULL;
 }
 
 AnitaCanvasMaker::~AnitaCanvasMaker()
@@ -625,10 +624,7 @@ TPad *AnitaCanvasMaker::getEventViewerCanvas(FilteredAnitaEvent* fEv, TPad *useC
   if(fCanvasView==MagicDisplayCanvasLayoutOption::kInterferometry){
 
     if(!reco){
-      reco = new Acclaim::AnalysisReco();
-      TString magicDisplayConfigFile = TString::Format("%s/share/Acclaim/AcclaimMagicDisplay.conf", getenv("ANITA_UTIL_INSTALL_DIR"));
-      Acclaim::AnalysisSettings s(magicDisplayConfigFile);
-      s.apply(reco);
+      reco = &getAnalysisReco();
     }
 
     AnitaEventSummary sum;
@@ -1224,7 +1220,6 @@ TPad *AnitaCanvasMaker::getSurfChanCanvas(const RawAnitaHeader *hdPtr,TPad *useC
    //  gStyle->SetTitleH(0.1);
   gStyle->SetOptTitle(0);
 
-  AnitaGeomTool * fACMGeomTool=AnitaGeomTool::Instance();
   char textLabel[180];
   char padName[180];
   TPad *canSurf=0;
@@ -1384,7 +1379,6 @@ TPad *AnitaCanvasMaker::getInterferometryCanvas(const RawAnitaHeader *hdPtr,TPad
   gStyle->SetOptTitle(1);
 
   char textLabel[180];
-  char padName[180];
   TPad *canSurf=0;
   TPad *plotPad=0;
   if(!useCan) {
@@ -1411,29 +1405,29 @@ TPad *AnitaCanvasMaker::getInterferometryCanvas(const RawAnitaHeader *hdPtr,TPad
   plotPad->cd();
   plotPad->Clear();
 
-  FilterStrategy* strat = MagicDisplay::Instance()->getStrategy();
-  Acclaim::FourierBuffer::SummaryOption_t opt = MagicDisplay::Instance()->getFourierBufferSummaryOption();
-  bool doRecoSummary = opt == Acclaim::FourierBuffer::None;
-  bool foundRayleigh = false;
-  if(!doRecoSummary){
-    for(size_t i=0; i < strat->nOperations(); i++){
-      const FilterOperation* fo = strat->getOperation(i);
-      const Acclaim::Filters::RayleighMonitor* rm = dynamic_cast<const Acclaim::Filters::RayleighMonitor*>(fo);
-      if(rm){
-	rm->getFourierBuffer()->drawSummary(plotPad, MagicDisplay::Instance()->getFourierBufferSummaryOption());
-	foundRayleigh = true;
-	break;
-      }
-    }
+  // FilterStrategy* strat = MagicDisplay::Instance()->getStrategy();
+  // Acclaim::FourierBuffer::SummaryOption_t opt = MagicDisplay::Instance()->getFourierBufferSummaryOption();
+  // bool doRecoSummary = opt == Acclaim::FourierBuffer::None;
+  // bool foundRayleigh = false;
+  // if(!doRecoSummary){
+  //   for(size_t i=0; i < strat->nOperations(); i++){
+  //     const FilterOperation* fo = strat->getOperation(i);
+  //     const Acclaim::Filters::RayleighMonitor* rm = dynamic_cast<const Acclaim::Filters::RayleighMonitor*>(fo);
+  //     if(rm){
+  // 	rm->getFourierBuffer()->drawSummary(plotPad, MagicDisplay::Instance()->getFourierBufferSummaryOption());
+  // 	foundRayleigh = true;
+  // 	break;
+  //     }
+  //   }
+  // }
+  // if(!foundRayleigh){
+  //   MagicDisplay::Instance()->setFourierBufferSummaryOption(Acclaim::FourierBuffer::None);
+  plotPad->Divide(2);      
+  for(Int_t polInd=0; polInd<AnitaPol::kNotAPol; polInd++){
+    TPad* subPad = (TPad*) plotPad->GetPad(polInd+1);
+    reco->drawSummary(subPad, AnitaPol::AnitaPol_t(polInd));
   }
-  if(!foundRayleigh){
-    MagicDisplay::Instance()->setFourierBufferSummaryOption(Acclaim::FourierBuffer::None);
-    plotPad->Divide(2);      
-    for(Int_t polInd=0; polInd<AnitaPol::kNotAPol; polInd++){
-      TPad* subPad = (TPad*) plotPad->GetPad(polInd+1);
-      reco->drawSummary(subPad, AnitaPol::AnitaPol_t(polInd));
-    }
-  }
+  // }
   
   // plotPad->Update();
 
@@ -2321,6 +2315,9 @@ void AnitaCanvasMaker::loadPayloadViewSutff()
 Acclaim::AnalysisReco& AnitaCanvasMaker::getAnalysisReco(){
   if(reco==NULL){
     reco = new Acclaim::AnalysisReco();
+    TString magicDisplayConfigFile = TString::Format("%s/share/Acclaim/AcclaimMagicDisplay.conf", getenv("ANITA_UTIL_INSTALL_DIR"));
+    Acclaim::AnalysisSettings s(magicDisplayConfigFile); // set the default the MagicDisplay config for ACCLAIM analysis software
+    s.apply(reco);    
   }
   return (*reco);
 }

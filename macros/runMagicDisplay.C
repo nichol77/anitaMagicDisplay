@@ -8,7 +8,8 @@
 
 void runMagicDisplay(int run,int anita=AnitaVersion::get()) {
 
-  MagicDisplay *magicPtr = new MagicDisplay(run,(AnitaDataset::DataDirectory) anita,WaveCalType::kDefault);
+  // MagicDisplay *magicPtr = new MagicDisplay(run,(AnitaDataset::DataDirectory) anita,WaveCalType::kDefault, (AnitaDataset::BlindingStrategy)5);
+  MagicDisplay *magicPtr = new MagicDisplay(run,(AnitaDataset::DataDirectory) anita,WaveCalType::kDefault, (AnitaDataset::BlindingStrategy)0);  
 
   //magicPtr->startSurfDisplay();
   //  magicPtr->startAvgSurfDisplay();

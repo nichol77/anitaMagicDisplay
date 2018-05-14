@@ -209,17 +209,8 @@ class MagicDisplay : public TGMainFrame
   void stopGpsPlaying(); ///< Stops GPS Play mode
   void setGpsView(MagicDisplayGpsDisplay::MagicDisplayGpsDisplay_t theDisplay);
 
-
+  void dumpWaveformsForPeter();
   
-  void setFourierBufferSummaryOption(Acclaim::FourierBuffer::SummaryOption_t opt){ // set the fledgling FourierBuffer display
-
-    if(fCanvasLayout==MagicDisplayCanvasLayoutOption::kInterferometry && fFourierBufferSummaryOpt!=opt){
-      fFourierBufferSummaryOpt = opt;
-      refreshEventDisplay();
-    }
-    
-  }
-  Acclaim::FourierBuffer::SummaryOption_t getFourierBufferSummaryOption() const { return fFourierBufferSummaryOpt;}
 
   //! Returns a pointer to the active MagicDisplay. This is very useful if you want to access the TTree's directly or if you want to explicitly call one of the methods.
   /*!
@@ -314,7 +305,6 @@ class MagicDisplay : public TGMainFrame
   void zeroPointers();
   MagicDisplayFormatOption::MagicDisplayFormatOption_t fWaveformFormat; ///< The format for displaying waveforms.
   MagicDisplayCanvasLayoutOption::MagicDisplayCanvasLayoutOption_t fCanvasLayout; ///< The format for the canvas layout
-  Acclaim::FourierBuffer::SummaryOption_t fFourierBufferSummaryOpt;
   
    // TGMainFrame *fMainFrame; ///< The magic display frame, we need this to do fancy connecting
   AnitaEmbeddedCanvas* fMagicEmbedded; ///< The embedded canvas object (which embeds the main canvas)
@@ -368,55 +358,55 @@ class MagicDisplay : public TGMainFrame
   Adu5Sat *fAdu5BSatPtr; ///< Pointer to the ADU5 satellite data.
   Adu5Vtg *fAdu5BVtgPtr; ///< Pointer to the ADU5 velocity data.
 
-   TButton *fVertButton; ///< The vertical polarisation button.
-   TButton *fHorizButton; ///< The horizontal polarisation button.
-   TButton *fBothButton; ///< The both polarisations button.
-   TButton *fSurfButton; ///< The SURF view button.
-   TButton *fPayloadButton; ///< The payload view button.
-   TButton *fInterferometryButton; ///< The Interferometry view button.
-   TButton *fUCorrelatorButton; ///< The UCorrelator view button
-   TButton *butFiltering; ///< The filtering option panel button
+  TButton *fVertButton; ///< The vertical polarisation button.
+  TButton *fHorizButton; ///< The horizontal polarisation button.
+  TButton *fBothButton; ///< The both polarisations button.
+  TButton *fSurfButton; ///< The SURF view button.
+  TButton *fPayloadButton; ///< The payload view button.
+  TButton *fInterferometryButton; ///< The Interferometry view button.
+  TButton *fUCorrelatorButton; ///< The UCorrelator view button
+  TButton *butFiltering; ///< The filtering option panel button
 
-   TButton *fWaveformButton; ///< The waveform view button.
-   TButton *fPowerButton; ///< The FFT view button.
-   TButton *fHilbertButton; ///< The Hilbert envelope view button.
-   TButton *fAverageFFTButton; ///< The average FFT button.
-   TButton *fTimeEntryButton; ///< The button that toggles between events and times
-
-
-   TButton *fTurfYScaleButton; ///< The TURF rate Y scale button.
-   TButton *fSurfSurfViewButton; ///< The SURF hk SURF view button.
-   TButton *fSurfPhiViewButton; ///< The SURF hk phi view button.
-   TButton *fSurfTimeViewButton; ///< The SURF hk phi view button.
-   TButton *fSurfAdcViewButton; ///< The SURF RF power ADC view button.
-   TButton *fSurfKelvinViewButton; ///< The SURF RF power kelvin view button.
-   TButton *fSurfMeasuredKelvinViewButton; ///< The SURF RF power kelvin view button.
-   TButton *fSurfLogButton; ///< The Surf log/linear button
-
-   TButton *fSumTurfYScaleButton; ///< The summed TURF rate Y scale button.
-   TButton *fAvgSurfSurfViewButton; ///< The averaged SURF hk SURF view button.
-   TButton *fAvgSurfPhiViewButton; ///< The averaged SURF hk phi view button.
-   TButton *fAvgSurfAdcViewButton; ///< The averaged SURF RF power ADC view button.
-   TButton *fAvgSurfKelvinViewButton; ///< The averaged SURF RF power kelvin view button.
-   TButton *fAvgSurfMeasuredKelvinViewButton; ///< The averaged SURF RF power kelvin view button.
-   TButton *fAvgSurfLogButton; ///< The averaged SURF log/linear button
+  TButton *fWaveformButton; ///< The waveform view button.
+  TButton *fPowerButton; ///< The FFT view button.
+  TButton *fHilbertButton; ///< The Hilbert envelope view button.
+  TButton *fAverageFFTButton; ///< The average FFT button.
+  TButton *fTimeEntryButton; ///< The button that toggles between events and times
 
 
-   TButton *fGpsSatViewButton; ///< The GPS satellite view button.
-   TButton *fGpsMapViewButton; ///< The GPS map view button.
+  TButton *fTurfYScaleButton; ///< The TURF rate Y scale button.
+  TButton *fSurfSurfViewButton; ///< The SURF hk SURF view button.
+  TButton *fSurfPhiViewButton; ///< The SURF hk phi view button.
+  TButton *fSurfTimeViewButton; ///< The SURF hk phi view button.
+  TButton *fSurfAdcViewButton; ///< The SURF RF power ADC view button.
+  TButton *fSurfKelvinViewButton; ///< The SURF RF power kelvin view button.
+  TButton *fSurfMeasuredKelvinViewButton; ///< The SURF RF power kelvin view button.
+  TButton *fSurfLogButton; ///< The Surf log/linear button
 
-   Int_t fInEventPlayMode; ///< Flag that indicates playback mode
-   Int_t fEventPlaySleepMs; ///< Length of sleep between events in playback mode.
-   Int_t fOrderByEventNumber; ///< Order by event number
-   Int_t fApplyEventCut; ///< Apply an event cut
-   TEventList *fCutEventList; ///<The cut eventlist
+  TButton *fSumTurfYScaleButton; ///< The summed TURF rate Y scale button.
+  TButton *fAvgSurfSurfViewButton; ///< The averaged SURF hk SURF view button.
+  TButton *fAvgSurfPhiViewButton; ///< The averaged SURF hk phi view button.
+  TButton *fAvgSurfAdcViewButton; ///< The averaged SURF RF power ADC view button.
+  TButton *fAvgSurfKelvinViewButton; ///< The averaged SURF RF power kelvin view button.
+  TButton *fAvgSurfMeasuredKelvinViewButton; ///< The averaged SURF RF power kelvin view button.
+  TButton *fAvgSurfLogButton; ///< The averaged SURF log/linear button
 
 
-   Int_t fInSurfPlayMode; ///< Flag that indicates surfhk play mode
-   Int_t fInAvgSurfPlayMode; ///< Flag that indicates surfhk play mode
-   Int_t fInGpsPlayMode; ///< Flag that indicates GPS play mode.
+  TButton *fGpsSatViewButton; ///< The GPS satellite view button.
+  TButton *fGpsMapViewButton; ///< The GPS map view button.
 
-   WaveCalType::WaveCalType_t fCalType; ///< The waveform calibration type.
+  Int_t fInEventPlayMode; ///< Flag that indicates playback mode
+  Int_t fEventPlaySleepMs; ///< Length of sleep between events in playback mode.
+  Int_t fOrderByEventNumber; ///< Order by event number
+  Int_t fApplyEventCut; ///< Apply an event cut
+  TEventList *fCutEventList; ///<The cut eventlist
+
+
+  Int_t fInSurfPlayMode; ///< Flag that indicates surfhk play mode
+  Int_t fInAvgSurfPlayMode; ///< Flag that indicates surfhk play mode
+  Int_t fInGpsPlayMode; ///< Flag that indicates GPS play mode.
+
+  WaveCalType::WaveCalType_t fCalType; ///< The waveform calibration type.
 
   // AnalysisReco::mapMode_t fInterferometryMapMode;
   // AnalysisReco::zoomMode_t fInterferometryZoomMode;

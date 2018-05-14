@@ -6,11 +6,12 @@
 
 
 
-void runMagicDisplayPlaylist(const char* playlist = "hc2adirect.txt", int anita=AnitaVersion::get()) {
+void runMagicDisplayPlaylist(const char* playlist = "hc2adirect.txt", int anita=AnitaVersion::get(), int blinding = AnitaDataset::kNoBlinding) {
 
   AnitaVersion::set(anita);
 
-  MagicDisplay *magicPtr = new MagicDisplay(playlist,(AnitaDataset::DataDirectory) anita,WaveCalType::kDefault);
+  MagicDisplay *magicPtr = new MagicDisplay(playlist,(AnitaDataset::DataDirectory) anita,WaveCalType::kDefault, (AnitaDataset::BlindingStrategy) blinding);
+
 
   //magicPtr->startSurfDisplay();
   //  magicPtr->startAvgSurfDisplay();

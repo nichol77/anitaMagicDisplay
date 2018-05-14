@@ -188,9 +188,6 @@ void MagicDisplay::zeroPointers()
 
   fWaveformFormat=MagicDisplayFormatOption::kWaveform;
   fCanvasLayout=MagicDisplayCanvasLayoutOption::kPhiVerticalOnly;
-  // fInterferometryMapMode=AnalysisReco::kGlobal;
-  // fInterferometryZoomMode=AnalysisReco::kZoomedOut;
-  fFourierBufferSummaryOpt = Acclaim::FourierBuffer::None;
 
 
   butFiltering = 0;
@@ -433,7 +430,7 @@ MagicDisplay::MagicDisplay(const char* playlist, AnitaDataset::DataDirectory dir
   strncpy(fCurrentBaseDir, AnitaDataset::getDataDir(dir),179); 
   fCalType=calType;
   fBlindingStrategy = blinding;
-	fEventEntry=getPlaylistEvent();
+  fEventEntry=getPlaylistEvent();
 
   //try to load wisdom
   if (FILE * wf = fopen("magicwisdom.dat","r"))
@@ -470,15 +467,16 @@ void MagicDisplay::startEventDisplay()
 {
 
   fEventCanMaker=new AnitaCanvasMaker(this->fCalType);
-	if(!fPlaylist.empty())
-	{
-		loadDataset();
-		displayThisEvent(getPlaylistEvent(), getPlaylistRun());
-	} else {	
-		int retVal=this->getEventEntry();
-		if(retVal==0)
-			  this->refreshEventDisplay();
-	}	
+  if(!fPlaylist.empty()){
+    loadDataset();
+    displayThisEvent(getPlaylistEvent(), getPlaylistRun());
+  }
+  else {
+    int retVal=this->getEventEntry();
+    if(retVal==0){
+      this->refreshEventDisplay();
+    }
+  }
 }
 
 int MagicDisplay::getEventEntry()
@@ -681,31 +679,15 @@ Bool_t MagicDisplay::HandleKey(Event_t * event)
         startFilteringPanel();
         break;
 
-      case kKey_R:
-      case kKey_r: //r is for reconstruction
+      case kKey_T:
+    case kKey_t: // toggle time/freq domain representation
 	if(fCanvasLayout==MagicDisplayCanvasLayoutOption::kInterferometry){
-	  setFourierBufferSummaryOption(Acclaim::FourierBuffer::None);
-	}
-	break;
-	
-      case kKey_P:
-      case kKey_p: // p is for probability, although really this is some funky metric related to probability
-	if(fCanvasLayout==MagicDisplayCanvasLayoutOption::kInterferometry){
-	  setFourierBufferSummaryOption(Acclaim::FourierBuffer::Prob);
-	}
-	break;
-	
-      case kKey_C:
-      case kKey_c: // c is for chisquare
-	if(fCanvasLayout==MagicDisplayCanvasLayoutOption::kInterferometry){
-	  setFourierBufferSummaryOption(Acclaim::FourierBuffer::ReducedChisquare);
-	}
-	break;
-	
-      case kKey_A:
-      case kKey_a:  // a is for amplitude
-	if(fCanvasLayout==MagicDisplayCanvasLayoutOption::kInterferometry){
-	  setFourierBufferSummaryOption(Acclaim::FourierBuffer::RayleighAmplitude);
+	  if(getAnalysisReco().GetEnumDrawDomain()==Acclaim::AnalysisReco::kTimeDomain){
+	    getAnalysisReco().SetDrawDomain(Acclaim::AnalysisReco::kFreqDomain);
+	  }
+	  else{
+	    getAnalysisReco().SetDrawDomain(Acclaim::AnalysisReco::kFreqDomain);
+	  }
 	}
 	break;
 		
@@ -740,53 +722,59 @@ Bool_t MagicDisplay::HandleKey(Event_t * event)
         }
         break;
         
-      case kKey_W:
-      case kKey_w:
-        fMagicCanvas->SaveAs(TString::Format("run%d_ev%d_a%d_%s_%s_%s.png",
-                                             getCurrentRun(), getCurrentEvent(), AnitaVersion::get(), 
-                                             MagicDisplayCanvasLayoutOption::toString(fCanvasLayout), 
-                                             MagicDisplayFormatOption::toString(fWaveformFormat),
-                                             butFiltering->GetTitle()
-                ));
+    case kKey_W:
+    case kKey_w:
+      fMagicCanvas->SaveAs(TString::Format("run%d_ev%d_a%d_%s_%s_%s.png",
+					   getCurrentRun(), getCurrentEvent(), AnitaVersion::get(), 
+					   MagicDisplayCanvasLayoutOption::toString(fCanvasLayout), 
+					   MagicDisplayFormatOption::toString(fWaveformFormat),
+					   butFiltering->GetTitle()));
+      break;
+
+    case kKey_D:
+    case kKey_d:
+      {
+	dumpWaveformsForPeter();
+      }
       break; 
 
-      case kKey_Period: 
-        if (last_direction == 1) displayNextEvent(last_nskip); 
-        if (last_direction ==-1) displayPreviousEvent(last_nskip); 
-        break; 
+    case kKey_Period: 
+      if (last_direction == 1) displayNextEvent(last_nskip); 
+      if (last_direction ==-1) displayPreviousEvent(last_nskip); 
+      break; 
 
-      case kKey_NumberSign:
-        FFTtools::saveWisdom("magicwisdom.dat"); 
+    case kKey_NumberSign:
+      FFTtools::saveWisdom("magicwisdom.dat"); 
 
-        break;
+      break;
 
-      case kKey_Question:
-        new TGMsgBox(gClient->GetRoot(),0,"MagicDisplay key bindings", 
-            "Key bindings are case-insensitive. Also,this is a modal dialog so you must dismiss it!\n\n"
-            "[left]/j: previous\n"
-            "[right]/k: next\n"
-            "[space]: start/stop play\n"
-            "[bksp] play reverse\n"
-            "v: show vpol\n"
-            "h: show hpol\n"
-            "x: show both pols\n"
-            "s: show surf\n"
-            "i: show interferometry\n"
-            "u: show UCorrelator\n"
-            "[tab]:cycle filter\n"
-            "f: show filter panel\n"
-            "g: goto event\n"
-            "w: save canvas image to currentdir\n"
-            "[0-9]*: vi-like numerical modifier for jkg\n"
-            "n: find neutrinos (not implemented yet)\n"
-            ".: repeat last movement command\n"
-            "#: save wisdom to currentdir\n" 
-            "?: show keybindings"
-            ,0, kMBDismiss,0, kVerticalFrame, kTextLeft | kTextTop); 
+    case kKey_Question:
+      new TGMsgBox(gClient->GetRoot(),0,"MagicDisplay key bindings", 
+		   "Key bindings are case-insensitive. Also, this is a modal dialog so you must dismiss it!\n\n"
+		   "[left]/j: previous\n"
+		   "[right]/k: next\n"
+		   "[space]: start/stop play\n"
+		   "[bksp] play reverse\n"
+		   "v: show vpol\n"
+		   "h: show hpol\n"
+		   "x: show both pols\n"
+		   "s: show surf\n"
+		   "i: show interferometry\n"
+		   "u: show UCorrelator\n"
+		   "[tab]:cycle filter\n"
+		   "f: show filter panel\n"
+		   "g: goto event\n"
+		   "w: save canvas image to currentdir\n"
+		   "[0-9]*: vi-like numerical modifier for jkg\n"
+		   "n: find neutrinos (not implemented yet)\n"
+		   ".: repeat last movement command\n"
+		   "#: save wisdom to currentdir\n" 
+		   "?: show keybindings"
+		   ,0, kMBDismiss,0, kVerticalFrame, kTextLeft | kTextTop); 
 
               
-      default:
-        break;
+    default:
+      break;
     }
 
     //consume the number 
@@ -915,6 +903,10 @@ void MagicDisplay::refreshEventDisplay(bool forceRedo)
 
    fMagicCanvas->Update();
 }
+
+
+
+
 
 
 void MagicDisplay::setNextFilter(){
@@ -1276,33 +1268,66 @@ void MagicDisplay::drawEventButtons() {
 
 void MagicDisplay::swapWaveformButtonFunctionsAndTitles(MagicDisplayCanvasLayoutOption::MagicDisplayCanvasLayoutOption_t option){
 
+  fWaveformButton->SetFillColor(kGray);
+  fPowerButton->SetFillColor(kGray);
+  fHilbertButton->SetFillColor(kGray);
+  fAverageFFTButton->SetFillColor(kGray);
+  
   if(option==MagicDisplayCanvasLayoutOption::kInterferometry){
 
+    const TString magicPtr = "MagicDisplay* x = MagicDisplay::Instance();";
+    const TString refreshButtons = "x->swapWaveformButtonFunctionsAndTitles(MagicDisplayCanvasLayoutOption::kInterferometry);";
+    const TString refreshDisplay = "x->refreshEventDisplay();";
+
+    const int deltaColor = 2;
     // do nothing, unset all buttons
-    fWaveformButton->SetFillColor(kGray);
-    fPowerButton->SetFillColor(kGray);
-    fHilbertButton->SetFillColor(kGray);
-    fAverageFFTButton->SetFillColor(kGray);
+    Int_t buttonColor = kGray + (getAnalysisReco().GetEnumDrawDomain()==Acclaim::AnalysisReco::kTimeDomain ? deltaColor : 0);
+    fWaveformButton->SetFillColor(buttonColor);
+
+    buttonColor = kGray + (getAnalysisReco().GetEnumDrawDomain()==Acclaim::AnalysisReco::kFreqDomain ? deltaColor : 0);    
+    fPowerButton->SetFillColor(buttonColor);
+
+
+    buttonColor = kGray + (getAnalysisReco().GetDebug() > 0 ? deltaColor : 0);    
+    fAverageFFTButton->SetFillColor(buttonColor);
+
     fWaveformButton->Modified();
     fPowerButton->Modified();
     fHilbertButton->Modified();
     fAverageFFTButton->Modified();
 
-    fWaveformButton->SetTitle("Reco Summary");
-    fWaveformButton->SetMethod("MagicDisplay::Instance()->setFourierBufferSummaryOption(Acclaim::FourierBuffer::None);");
+    fWaveformButton->SetTitle("Time domain");
+    fWaveformButton->SetMethod("{" + magicPtr + "x->getAnalysisReco().SetDrawDomain(Acclaim::AnalysisReco::kTimeDomain);" + refreshButtons + refreshDisplay + "}");
     fWaveformButton->SetTextSize(0.4);
 
-
-    fPowerButton->SetTitle("Rayleigh Reduced #chi^{2}");
-    fPowerButton->SetMethod("MagicDisplay::Instance()->setFourierBufferSummaryOption(Acclaim::FourierBuffer::ReducedChisquare);");
+    fPowerButton->SetTitle("Freq domain");
+    fPowerButton->SetMethod("{" + magicPtr + "x->getAnalysisReco().SetDrawDomain(Acclaim::AnalysisReco::kFreqDomain);" + refreshButtons + refreshDisplay + "}");    
     fPowerButton->SetTextSize(0.4);
-    
-    fHilbertButton->SetTitle("Rayleigh Amplitude");
-    fHilbertButton->SetMethod("MagicDisplay::Instance()->setFourierBufferSummaryOption(Acclaim::FourierBuffer::RayleighAmplitude);");
+
+    TString methodForCrossPol;
+    if(getAnalysisReco().GetDrawXPol()==0 && getAnalysisReco().GetDrawXPolDedispersed()==0){
+      methodForCrossPol = "x->getAnalysisReco().SetDrawXPol(1);";
+      fHilbertButton->SetFillColor(kGray);
+    }
+    else if(getAnalysisReco().GetDrawXPol() > 0 && getAnalysisReco().GetDrawXPolDedispersed()==0){
+      methodForCrossPol = "x->getAnalysisReco().SetDrawXPolDedispersed(1); x->getAnalysisReco().SetDrawXPol(0);";
+      fHilbertButton->SetFillColor(kGray+1);
+    }
+    else if(getAnalysisReco().GetDrawXPol() == 0 && getAnalysisReco().GetDrawXPolDedispersed() > 0){
+      methodForCrossPol = "x->getAnalysisReco().SetDrawXPol(1);";
+      fHilbertButton->SetFillColor(kGray+2);
+    }
+    else{ // they're both on...,
+      methodForCrossPol = "x->getAnalysisReco().SetDrawXPol(0); x->getAnalysisReco().SetDrawXPolDedispersed(0);";
+      fHilbertButton->SetFillColor(kGray+3);
+    }
+
+    fHilbertButton->SetTitle("Cross-pol");
+    fHilbertButton->SetMethod("{" + magicPtr + methodForCrossPol + refreshButtons + refreshDisplay + "}");
     fHilbertButton->SetTextSize(0.4);
 
-    fAverageFFTButton->SetTitle("Rayleigh Spectrum Probability");
-    fAverageFFTButton->SetMethod("MagicDisplay::Instance()->setFourierBufferSummaryOption(Acclaim::FourierBuffer::Prob);");
+    fAverageFFTButton->SetTitle("Debug");
+    fAverageFFTButton->SetMethod("{" + magicPtr + "x->getAnalysisReco().SetDebug(1-x->getAnalysisReco().GetDebug());" + refreshButtons + refreshDisplay + "}");
     fAverageFFTButton->SetTextSize(0.4);
   }
   else if (option == MagicDisplayCanvasLayoutOption::kUCorrelator)
@@ -2826,4 +2851,37 @@ void MagicDisplay::loadPlaylist(const char* playlist)
     }
   }
   fPlaylist = runEv;
+}
+
+
+
+
+
+void MagicDisplay::dumpWaveformsForPeter(){
+
+  if(fFilteredEventPtr){
+
+    TString fileName = TString::Format("run%d_ev%d_a%d_%s_%s_%s.txt",
+				       getCurrentRun(), getCurrentEvent(), AnitaVersion::get(), 
+				       MagicDisplayCanvasLayoutOption::toString(fCanvasLayout), 
+				       MagicDisplayFormatOption::toString(fWaveformFormat),
+				       butFiltering->GetTitle());
+
+    std::ofstream dump(fileName);
+
+    for(int pol=0; pol < AnitaPol::kNotAPol; pol++){
+      for(int ant=0; ant < NUM_SEAVEYS; ant++){
+	const AnalysisWaveform* wf = fFilteredEventPtr->getFilteredGraph(ant, AnitaPol::AnitaPol_t(pol));
+	const TGraphAligned* gr = wf->even();
+	for(int i=0; i < gr->GetN(); i++){
+	  dump << gr->GetX()[i] << ", " << gr->GetY()[i];
+	}
+	
+	
+      }
+    }
+  
+    
+  
+  }  
 }
