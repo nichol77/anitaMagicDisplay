@@ -680,14 +680,21 @@ Bool_t MagicDisplay::HandleKey(Event_t * event)
         break;
 
       case kKey_T:
-    case kKey_t: // toggle time/freq domain representation
+    case kKey_t: // toggle time/freq/stokes domain representation
 	if(fCanvasLayout==MagicDisplayCanvasLayoutOption::kInterferometry){
-	  if(getAnalysisReco().GetEnumDrawDomain()==Acclaim::AnalysisReco::kTimeDomain){
+	  switch(Acclaim::AnalysisReco::DrawDomain d = getAnalysisReco().GetEnumDrawDomain()){
+	  case Acclaim::AnalysisReco::kTimeDomain:
 	    getAnalysisReco().SetDrawDomain(Acclaim::AnalysisReco::kFreqDomain);
+	    break;
+	  case Acclaim::AnalysisReco::kFreqDomain:
+	    getAnalysisReco().SetDrawDomain(Acclaim::AnalysisReco::kStokesParams);
+	    break;
+	  case Acclaim::AnalysisReco::kStokesParams:
+	    getAnalysisReco().SetDrawDomain(Acclaim::AnalysisReco::kTimeDomain);
+	    break;
 	  }
-	  else{
-	    getAnalysisReco().SetDrawDomain(Acclaim::AnalysisReco::kFreqDomain);
-	  }
+	  swapWaveformButtonFunctionsAndTitles(MagicDisplayCanvasLayoutOption::kInterferometry);
+	  refreshEventDisplay();
 	}
 	break;
 		
@@ -1284,12 +1291,11 @@ void MagicDisplay::swapWaveformButtonFunctionsAndTitles(MagicDisplayCanvasLayout
     Int_t buttonColor = kGray + (getAnalysisReco().GetEnumDrawDomain()==Acclaim::AnalysisReco::kTimeDomain ? deltaColor : 0);
     fWaveformButton->SetFillColor(buttonColor);
 
-    buttonColor = kGray + (getAnalysisReco().GetEnumDrawDomain()==Acclaim::AnalysisReco::kFreqDomain ? deltaColor : 0);    
+    buttonColor = kGray + (getAnalysisReco().GetEnumDrawDomain()==Acclaim::AnalysisReco::kFreqDomain ? deltaColor : 0);
     fPowerButton->SetFillColor(buttonColor);
 
-
-    buttonColor = kGray + (getAnalysisReco().GetDebug() > 0 ? deltaColor : 0);    
-    fAverageFFTButton->SetFillColor(buttonColor);
+    buttonColor = kGray + (getAnalysisReco().GetEnumDrawDomain()==Acclaim::AnalysisReco::kStokesParams ? deltaColor : 0);
+    fHilbertButton->SetFillColor(buttonColor);
 
     fWaveformButton->Modified();
     fPowerButton->Modified();
@@ -1304,30 +1310,30 @@ void MagicDisplay::swapWaveformButtonFunctionsAndTitles(MagicDisplayCanvasLayout
     fPowerButton->SetMethod("{" + magicPtr + "x->getAnalysisReco().SetDrawDomain(Acclaim::AnalysisReco::kFreqDomain);" + refreshButtons + refreshDisplay + "}");    
     fPowerButton->SetTextSize(0.4);
 
+    fHilbertButton->SetTitle("Stokes");
+    fHilbertButton->SetMethod("{" + magicPtr + "x->getAnalysisReco().SetDrawDomain(Acclaim::AnalysisReco::kStokesParams);" + refreshButtons + refreshDisplay + "}");
+    fHilbertButton->SetTextSize(0.4);
+
     TString methodForCrossPol;
     if(getAnalysisReco().GetDrawXPol()==0 && getAnalysisReco().GetDrawXPolDedispersed()==0){
       methodForCrossPol = "x->getAnalysisReco().SetDrawXPol(1);";
-      fHilbertButton->SetFillColor(kGray);
+      fAverageFFTButton->SetFillColor(kGray);
     }
     else if(getAnalysisReco().GetDrawXPol() > 0 && getAnalysisReco().GetDrawXPolDedispersed()==0){
       methodForCrossPol = "x->getAnalysisReco().SetDrawXPolDedispersed(1); x->getAnalysisReco().SetDrawXPol(0);";
-      fHilbertButton->SetFillColor(kGray+1);
+      fAverageFFTButton->SetFillColor(kGray+1);
     }
     else if(getAnalysisReco().GetDrawXPol() == 0 && getAnalysisReco().GetDrawXPolDedispersed() > 0){
       methodForCrossPol = "x->getAnalysisReco().SetDrawXPol(1);";
-      fHilbertButton->SetFillColor(kGray+2);
+      fAverageFFTButton->SetFillColor(kGray+2);
     }
     else{ // they're both on...,
       methodForCrossPol = "x->getAnalysisReco().SetDrawXPol(0); x->getAnalysisReco().SetDrawXPolDedispersed(0);";
-      fHilbertButton->SetFillColor(kGray+3);
+      fAverageFFTButton->SetFillColor(kGray+3);
     }
-
-    fHilbertButton->SetTitle("Cross-pol");
-    fHilbertButton->SetMethod("{" + magicPtr + methodForCrossPol + refreshButtons + refreshDisplay + "}");
-    fHilbertButton->SetTextSize(0.4);
-
-    fAverageFFTButton->SetTitle("Debug");
-    fAverageFFTButton->SetMethod("{" + magicPtr + "x->getAnalysisReco().SetDebug(1-x->getAnalysisReco().GetDebug());" + refreshButtons + refreshDisplay + "}");
+    
+    fAverageFFTButton->SetTitle("Cross-pol");
+    fAverageFFTButton->SetMethod("{" + magicPtr + methodForCrossPol + refreshButtons + refreshDisplay + "}");
     fAverageFFTButton->SetTextSize(0.4);
   }
   else if (option == MagicDisplayCanvasLayoutOption::kUCorrelator)
