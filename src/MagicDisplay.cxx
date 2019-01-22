@@ -2825,7 +2825,7 @@ void MagicDisplay::loadPlaylist(const char* playlist)
   
   // Simulated events
   //as iceMC generates random eventNumbers, simulated data event numbers aren't linked to actual event numbers, so ignore evN restrictions
-  Bool_t simulatedData = true; // must be set to false for non-simulated data
+  Bool_t simulatedData = false; // must be set to false for non-simulated data
   if(simulatedData == true)
     {
       std::cout << "Using simulated data! Turn off the simulatedData variable if you are working with real data." << std::endl;
