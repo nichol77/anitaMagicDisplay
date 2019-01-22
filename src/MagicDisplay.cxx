@@ -2822,39 +2822,65 @@ void MagicDisplay::loadPlaylist(const char* playlist)
   int evN;
   ifstream pl(playlist);
   pl >> evN;
-  if(evN < 400)
-  {
-    rN = evN;
-    pl >> evN;
-    vector<long> Row;
-    Row.push_back(rN);
-    Row.push_back(evN);
-    runEv.push_back(Row);
-    while(pl >> rN >> evN)
+  
+  // Simulated events
+  //as iceMC generates random eventNumbers, simulated data event numbers aren't linked to actual event numbers, so ignore evN restrictions
+  Bool_t simulatedData = true; // must be set to false for non-simulated data
+  if(simulatedData == true)
     {
-      vector<long> newRow;
-      newRow.push_back(rN);
-      newRow.push_back(evN);
-      runEv.push_back(newRow);
+      std::cout << "Using simulated data! Turn off the simulatedData variable if you are working with real data." << std::endl;
+      rN = evN;
+      pl >> evN;
+      std::vector<long> Row;
+      Row.push_back(rN);
+      Row.push_back(evN);
+      runEv.push_back(Row);
+      while(pl >> rN >> evN)
+	{
+	  std::vector<long> newRow;
+	  newRow.push_back(rN);
+	  newRow.push_back(evN);
+	  runEv.push_back(newRow);
+	}
+
     }
-  }
+
   else
-  {
-    rN = AnitaDataset::getRunContainingEventNumber(evN);
-    if(rN == -1) fprintf(stderr, "Something is wrong with your playlist\n");
-    vector<long> Row;
-    Row.push_back(rN);
-    Row.push_back(evN);
-    runEv.push_back(Row);
-    while(pl >> evN)
-    {
-      rN = AnitaDataset::getRunContainingEventNumber(evN);
-      if(rN == -1) fprintf(stderr, "Something is wrong with your playlist\n");
-      vector<long> newRow;
-      newRow.push_back(rN);
-      newRow.push_back(evN);
-      runEv.push_back(newRow);
-    }
+  {  
+    if(evN < 400)
+      {
+	rN = evN;
+	pl >> evN;
+	vector<long> Row;
+	Row.push_back(rN);
+	Row.push_back(evN);
+	runEv.push_back(Row);
+	while(pl >> rN >> evN)
+	  {
+	    vector<long> newRow;
+	    newRow.push_back(rN);
+	    newRow.push_back(evN);
+	    runEv.push_back(newRow);
+	  }
+      }
+    else
+      {
+	rN = AnitaDataset::getRunContainingEventNumber(evN);
+	if(rN == -1) fprintf(stderr, "Something is wrong with your playlist\n");
+	vector<long> Row;
+	Row.push_back(rN);
+	Row.push_back(evN);
+	runEv.push_back(Row);
+	while(pl >> evN)
+	  {
+	    rN = AnitaDataset::getRunContainingEventNumber(evN);
+	    if(rN == -1) fprintf(stderr, "Something is wrong with your playlist\n");
+	    vector<long> newRow;
+	    newRow.push_back(rN);
+	    newRow.push_back(evN);
+	    runEv.push_back(newRow);
+	  }
+      }
   }
   fPlaylist = runEv;
 }
