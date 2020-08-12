@@ -32,6 +32,7 @@
 #include "TTimeStamp.h"
 #include "TApplication.h"
 #include "KeySymbols.h"
+#include "TVirtualX.h"
 
 ClassImp(MagicControlPanel) ;
 

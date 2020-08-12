@@ -76,7 +76,8 @@
 #include <TGClient.h>
 #include "TRootEmbeddedCanvas.h"
 #include "TCut.h"
-#include "TGMsgBox.h" 
+#include "TGMsgBox.h"
+#include "TVirtualX.h"
 
 #include "FilteredAnitaEvent.h"
 #include "UCFilters.h"

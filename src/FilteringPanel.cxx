@@ -2,6 +2,7 @@
 #include "MagicDisplay.h"
 #include "FilterOperation.h"
 #include "KeySymbols.h"
+#include "TVirtualX.h"
 
 ClassImp(FilteringPanel)
 
